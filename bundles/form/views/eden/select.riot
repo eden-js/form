@@ -1,6 +1,6 @@
 <eden-select>
-  <select class="selectpicker form-control" name={ props.name } multiple={ props.multiple }>
-    <slot />
+  <select class="selectpicker w-100" name={ props.name } multiple={ props.multiple }>
+    <option each={ (item, i) in props.data } value={ item.value } selected={ item.selected }>{ item.name }</option>
   </select>
 
   <script>
@@ -29,6 +29,12 @@
         // check frontend
         if (!this.eden.frontend || this.initialized) return;
 
+        // initialized
+        this.initialized = true;
+
+        // set jQuery
+        window.jQuery = window.$;
+
         // require logic
         require('bootstrap-select/js/bootstrap-select.js');
 
@@ -38,14 +44,14 @@
         });
 
         // ajax
-        if (props.url) {
+        if (this.props.url) {
           // require ajax
           require('ajax-bootstrap-select/dist/js/ajax-bootstrap-select.min.js');
 
           // add ajax logic
           jQuery(this.$('select')).ajaxSelectPicker({
             ajax : {
-              url  : props.url,
+              url  : this.props.url,
               type : 'GET',
               data : () => {
                 // create params
@@ -59,12 +65,12 @@
               dataType : 'json',
             },
             locale : {
-              emptyTitle : props.label
+              emptyTitle : this.props.label
             },
             emptyRequest : true,
           }).on('change', (e) => {
             // on change
-            if (props.onChange) props.onChange(e);
+            if (this.props.onChange) this.props.onChange(e);
           });
         }
       }

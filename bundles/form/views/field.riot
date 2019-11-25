@@ -32,62 +32,64 @@
     </div>
   </div>
 
-  <div class="eden-blocks-backdrop" if={ showing } onclick={ (e) => ohHideSidebar(e) } />
-
-  <div class={ classes({ 'eden-blocks-sidebar' : true, 'eden-blocks-sidebar-show' : sidebar.update  }) } ref="update" if={ showing && !props.preview }>
-    <div class="card">
-      <div class="card-header">
-        <h5 class="m-0">
-          Update Field
-        </h5>
-      </div>
-      <div class="card-body h-50">
-      
-        <div class="form-group">
-          <label>
-            Name
-          </label>
-          <input class="form-control" ref="name" value={ props.field.name } onchange={ (e) => onName(e) } />
+  <div ref="update" class="modal fade" if={ sidebar.update && !props.preview }>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="m-0">
+            Update Field
+          </h5>
         </div>
+        <div class="modal-body">
+        
+          <div class="form-group">
+            <label>
+              Name
+            </label>
+            <input class="form-control" ref="name" value={ get('field.name', '') } onchange={ (e) => onName(e) } />
+          </div>
 
-        <slot name="modal" />
-      
-      </div>
-      
-      <div class="card-header border-top">
+          <slot name="modal" />
         
-        <nav class="nav nav-tabs card-header-tabs">
-          <a each={ (tab, i) in this.tabs } class={ classes({ 'nav-item nav-link' : true, 'active' : isTab(tab) }) } href="#" onclick={ (e) => onTab(e, tab) }>{ tab }</a>
-        </nav>
+        </div>
         
-      </div>
-      <div class="card-body">
+        <div class="modal-header border-top">
+          
+          <nav class="nav nav-tabs">
+            <a each={ (t, i) in this.tabs } class={ classes({ 'nav-item nav-link' : true, 'active' : isTab(t) }) } href="#" onclick={ (e) => onTab(e, t) }>{ t }</a>
+          </nav>
+          
+        </div>
+        <div class="modal-body">
 
-        <div is={ `field-tab-${tab.toLowerCase()}` } field={ props.field } data={ props.data } is-input={ props.isInput } is-multiple={ props.isMultiple } on-save={ props.onSave } i18n={ props.i18n || props.language } />
-        
-      </div>
-      <div class="card-footer">
-        <button class={ classes({ 'btn btn-secondary float-right' : true, 'disabled' : removing }) } onclick={ hide } disabled={ removing }>
-          Close
-        </button>
+          <div is={ `field-tab-${tab.toLowerCase()}` } field={ props.field } data={ props.data } is-input={ props.isInput } is-multiple={ props.isMultiple } on-save={ props.onSave } i18n={ props.i18n || props.language } />
+          
+        </div>
+        <div class="modal-footer">
+          <button class={ classes({ 'btn btn-secondary float-right' : true, 'disabled' : loading('update') }) } onclick={ (e) => onHideSidebar(e) } disabled={ loading('update') }>
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class={ classes({ 'eden-blocks-sidebar' : true, 'eden-blocks-sidebar-show' : sidebar.remove }) } if={ showing && !props.preview }>
-    <div class="card">
-      <div class="card-header">
-        <h5 class="m-0">
-          Remove Field
-        </h5>
-      </div>
-      <div class="card-body">
-        Are you sure you want to remove this field?
-      </div>
-      <div class="card-footer">
-        <button class={ classes({ 'btn btn-danger' : true, 'disabled' : removing }) } onclick={ (e) => onRemove(e) } disabled={ removing }>
-          { removing ? 'Removing...' : 'Remove' }
-        </button>
+  <div ref="remove" class="modal fade" if={ sidebar.remove && !props.preview }>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="m-0">
+            Remove Field
+          </h5>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to remove this field?
+        </div>
+        <div class="modal-footer">
+          <button class={ classes({ 'btn btn-danger' : true, 'disabled' : loading('remove') }) } onclick={ (e) => onRemove(e) } disabled={ loading('remove') }>
+            { loading('remove') ? 'Removing...' : 'Remove' }
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -110,6 +112,10 @@
         this.tabs = props.tabs || ['Display', 'Validation', 'Visibility', 'Events'];
         this.sidebar = {};
         this.updating = {};
+
+        // bind
+        this.isTab = this.isTab.bind(this);
+        this.onTab = this.onTab.bind(this);
           
         // set tab
         this.tab = this.tabs[0];
@@ -142,16 +148,15 @@
         e.preventDefault();
         e.stopPropagation();
 
-        // set class
-        this.showing = true;
-
         // update view
-        this.update();
         this.sidebar.update = true;
         this.sidebar.remove = false;
 
         // update view
         this.update();
+
+        // show modal
+        $(this.$('[ref="update"]')).modal('show');
       }
 
       /**
@@ -164,16 +169,15 @@
         e.preventDefault();
         e.stopPropagation();
 
-        // set class
-        this.showing = true;
-
         // update view
-        this.update();
         this.sidebar.update = false;
         this.sidebar.remove = true;
 
         // update view
         this.update();
+
+        // show modal
+        $(this.$('[ref="remove"]')).modal('show');
       }
 
       /**
@@ -181,21 +185,21 @@
        *
        * @param  {Event} e
        */
-      ohHideSidebar(e) {
+      onHideSidebar(e) {
         // prevent default
         e.preventDefault();
         e.stopPropagation();
 
-        // set class
-        this.showing = false;
+        // show modal
+        $(this.$('.modal')).on('hidden.bs.modal', () => {
+          // set class
+          this.showing = false;
+          this.sidebar.update = false;
+          this.sidebar.remove = false;
 
-        // update view
-        this.update();
-        this.sidebar.update = false;
-        this.sidebar.remove = false;
-
-        // update view
-        this.update();
+          // update view
+          this.update();
+        }).modal('hide');
       }
 
       /**
@@ -204,20 +208,21 @@
        * @param  {Event} e
        */
       async onRemove (e) {
-        // set refreshing
-        this.removing = true;
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
 
-        // update view
-        this.update();
+        // set refreshing
+        this.loading('remove', true);
+
+        // show modal
+        $(this.$('[ref="remove"]')).modal('hide');
 
         // run opts
         if (this.props.onRemove) await this.props.onRemove(this.props.field, this.props.data, this.props.placement);
 
         // set refreshing
-        this.removing = false;
-
-        // update view
-        this.update();
+        this.loading('remove', false);
       }
 
       /**

@@ -1,13 +1,13 @@
 <field-address>
-  <field ref={ ref('field') } is-input={ true } class="field-container-inner" value={ value } field={ props.field } get-fields={ props.getFields } get-element={ props.getElement } on-change={ (e) => onChange(e) }>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
       <div class={ props.field.group || 'form-group' }>
         <label for={ `${props.field.uuid}-geo` }>
           { props.field.label }
           <i if={ !props.field.label }>Set Label</i>
         </label>
-        <input type="hidden" name={ `${props.field.uuid}[address]` } value={ JSON.stringify(props.value) } />
-        <input type="text" name={ `${props.field.uuid}[geo]` } required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ `${props.field.uuid}-geo` } value={ get('value.formatted') || '' } on-change={ props.onChange }>
+        <input type="hidden" name={ `${props.field.uuid}[address]` } value={ JSON.stringify(value) } />
+        <input type="text" name={ `${props.field.uuid}[geo]` } required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ `${props.field.uuid}-geo` } value={ get('value.formatted') || '' } on-change={ onChange }>
       </div>
     </div>
   </field>
@@ -17,7 +17,7 @@
     import Base from '../js/base';
 
     // export default
-    export default class AddressField extends Base {
+    export default class FieldAddress extends Base {
       /**
        * on before mount
        */
@@ -27,6 +27,22 @@
     
         // set initial value
         this.value = this.props.data.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
       }
 
       /**

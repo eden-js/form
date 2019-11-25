@@ -9,7 +9,7 @@
           
           <ul class="nav nav-tabs card-header-tabs">
             <li class="nav-item" each={ (tab, i) in getTabs() }>
-              <button class={ classes({'nav-link' : true, 'active' : isTab(tab)}) } onclick={ onTab }>
+              <button class={ classes({ 'nav-link' : true, 'active' : isTab(tab) }) } onclick={ (e) => onTab(e, tab) }>
                 { eden.get('i18n.t')(`cms.category.${tab}`) }
               </button>
             </li>
@@ -22,7 +22,7 @@
           </div>
           
           <ul class="list-group">
-            <li each={ (field, i) in getFields(tab) } class={ classes({'field-sidebar-item list-group-item list-group-item-action flex-column align-items-start' : true, 'active' : isActive(field)}) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
+            <li each={ (field, i) in getFields() } class={ classes({ 'field-sidebar-item list-group-item list-group-item-action flex-column align-items-start' : true, 'active' : isActive(field) }) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
               <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
                   { field.opts.title }
@@ -57,7 +57,7 @@
         super.onBeforeMount(...arguments);
 
         // set showing
-        this.tab = 'default';
+        this.tab = this.tab || 'default';
         this.state = {
           showing : false,
         };
@@ -65,6 +65,10 @@
         // bind methods
         this.hide = this.hide.bind(this);
         this.show = this.show.bind(this);
+
+        // bind
+        this.onTab = this.onTab.bind(this);
+        this.getFields = this.getFields.bind(this);
       }
 
       /**
@@ -98,13 +102,13 @@
       *
       * @param  {Event} e
       */
-      onTab (e) {
+      onTab (e, tab) {
         // prevent default
         e.preventDefault();
         e.stopPropagation();
         
         // activate block
-        this.tab = e.item.tab;
+        this.tab = tab;
         
         // update view
         this.update();
@@ -117,7 +121,7 @@
       */
       onSearch(e) {
         // check search
-        this.search = this.refs.search.value;
+        this.search = this.$('[ref="search"]').value;
         
         // update view
         this.update();
@@ -145,7 +149,10 @@
       *
       * @return {*}
       */
-      getFields (category = 'default') {
+      getFields () {
+        // category
+        const category = this.tab || 'default';
+
         // return sorted fields
         let rtn = (this.props.fields || []).sort((a, b) => {
           // Return sort

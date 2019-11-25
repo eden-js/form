@@ -5,8 +5,11 @@
       <span class="eden-dropzone-label" if={ !props.preview }>
         { form.get('title') || form.get('placement') }
       </span>
-      
-      <div each={ (el, i) in getFields() } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
+
+      <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
+      <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
+      <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
+
     </div>
   </div>
 
@@ -49,8 +52,11 @@
         };
 
         // get fields
+        this.getField = this.getField.bind(this);
         this.getFields = this.getFields.bind(this);
+        this.onSaveField = this.onSaveField.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
+        this.onRemoveField = this.onRemoveField.bind(this);
       }
 
       /**
@@ -66,13 +72,20 @@
         if (!this.eden.frontend) return;
         
         // check has change
-        if (this.hasChange()) {
+        if (this.hasChange() && !this.updating) {
+          // check placement
+          if (this.placement !== this.props.placement) {
+            // updating
+            this.updating = true;
+            this.update();
+          }
+
           // on mounted
-          this.onMounted();
+          this.onMounted(...arguments);
         }
 
         // set containers
-        this.dragula.containers = [...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .list-group'))];
+        if (this.dragula) this.dragula.containers = [...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .list-group'))];
       }
 
       /**
@@ -80,18 +93,21 @@
        *
        * @param {Object} props
        */
-      onMounted(props) {
+      onMounted() {
         // super on before mount
         super.onMounted(...arguments);
 
         // check frontend
         if (!this.eden.frontend) return;
 
+        // props
+        const props = this.props;
+
         // set form
         this.form = props.form ? (props.model ? props.model : this.model('form', props.form)) : this.model('form', {});
 
         // init dragula
-        if (!this.dragula && this.eden.get('user.acl.validate')('admin')) this.initDragula();
+        if (!this.dragula && !props.preview) this.initDragula();
 
         // set default positions
         if (props.positions && !(this.form.get('positions') || []).length && !this.form.get('id')) {
@@ -108,6 +124,10 @@
           // set position
           this.type    = props.type;
           this.preview = !!props.preview;
+
+          // placement
+          this.updating  = false;
+          this.placement = props.placement;
 
           // force update
           this.update();
@@ -180,7 +200,7 @@
        * @param  {Event}  e
        * @param  {Object} field
        */
-      async onSaveField (field, data, form, preventUpdate) {
+      async onSaveField (field, data = {}, form, preventUpdate) {
         // clone
         let fieldClone = Object.assign({}, field);
 
@@ -288,6 +308,7 @@
         const dotProp = require('dot-prop-immutable');
 
         // set loading
+        this.updating = true;
         field.removing = true;
 
         // update view
@@ -313,11 +334,17 @@
         let positions = (this.form.get('positions') || []).map(this.filter.fix).filter((field) => field);
 
         // set moving on field
-        positions = dotProp.set(positions, form + '.removing', true);
+        positions = dotProp.set(positions, `${form}.removing`, true);
 
         // get positions
         this.form.set('positions', positions.map(this.filter.place).filter((field) => field));
         this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
+
+        // set loading
+        this.updating = false;
+
+        // update view
+        this.update();
 
         // save form
         await this.saveForm();
@@ -333,14 +360,41 @@
         const maxTop = jQuery(window).height() / 2;
         const maxLeft = jQuery(window).width() - jQuery('.eden-blocks-sidebar').width();
 
+        // out
+        const out = { x : 0, y : 0 };
+
+        // type
+        if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+          const touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+          out.x = touch.pageX;
+          out.y = touch.pageY;
+        } else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type == 'mouseout' || e.type == 'mouseenter' || e.type == 'mouseleave') {
+          out.x = e.pageX;
+          out.y = e.pageY;
+        }
+
         // showing
-        if (e.pageX > maxLeft && e.pageY > maxTop && !this.refs.sidebar.state.showing) {
+        if (out.x > maxLeft && !this.refs.sidebar.state.showing && this.dragging) {
           // show
           this.refs.sidebar.show();
-        } else if (e.pageX < maxLeft && this.refs.sidebar.state.showing) {
+        } else if (out.x < maxLeft && this.refs.sidebar.state.showing && this.dragging) {
           // hide
           this.refs.sidebar.hide();
         }
+      }
+
+      /**
+       * on add block
+       *
+       * @param {Event} e
+       */
+      onAddBlock (e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
+        // show sidebar
+        this.refs.sidebar.show();
       }
 
       /**
@@ -478,8 +532,12 @@
 
         // do dragula
         this.dragula = dragula([...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .list-group'))], {
-          'moves' : (el, container, handle) => {
+          moves : (el, container, handle) => {
             return container.className.includes('list-group') || ((jQuery(el).is('[data-field]') || jQuery(el).closest('[data-field]').length) && (jQuery(handle).is('.move') || jQuery(handle).closest('.move').length) && (jQuery(handle).is('.move') ? jQuery(handle) : jQuery(handle).closest('.move')).attr('for') === jQuery(el).attr('data-field'));
+          },
+          copy : (el, container) => {
+            // check container class
+            return jQuery(container).closest('.eden-blocks-sidebar').length;
           }
         }).on('drop', async (el, target, source, sibling) => {
           // get parent
@@ -490,14 +548,33 @@
           const placement = el.getAttribute('placement') || null;
           const position = target.getAttribute('data-placement');
 
+          // get positions
+          let positions = (this.form.get('positions') || []).map(this.filter.fix).filter((field) => field);
+
+          // check position
+          if (jQuery(target).closest('.eden-blocks-sidebar').length) {
+            // check
+            if (placement && !position) {
+              // set get from
+              let getFrom = el.getAttribute('placement') || null;
+              let gotField = getFrom ? dotProp.get(positions, getFrom) : null;
+              
+              // check got field
+              if (gotField) {
+                // remove el
+                jQuery(el).remove();
+
+                // on remove
+                return this.onRemoveField(gotField, {}, getFrom);
+              }
+            }
+          }
+
           // check target
           if (!target || !source || !el || (target && !target.className.includes('eden-dropzone'))) return;
 
           // get fields of target
           let fields = [];
-
-          // get positions
-          let positions = (this.form.get('positions') || []).map(this.filter.fix).filter((field) => field);
 
           // set moving on field
           if (placement) positions = dotProp.set(positions, placement + '.moving', true);
@@ -539,7 +616,7 @@
           this.update();
 
           // set form
-          if (position.length) {
+          if ((position || '').length) {
             // get
             if (!dotProp.get(positions, position)) {
               positions = dotProp.set(positions, position, []);
@@ -569,10 +646,10 @@
           this.saveForm();
         }).on('drag', (el, source) => {
           // add is dragging
-          
+          this.dragging = true;
         }).on('dragend', () => {
           // remove is dragging
-          
+          this.dragging = false;
         }).on('over', function (el, container) {
           // add class
           
@@ -582,7 +659,7 @@
         });
         
         // add listener
-        jQuery('body').on('mousemove', this.onMouseMoved);
+        jQuery('body').on('mousemove touchmove', this.onMouseMoved);
       }
 
       /**
@@ -599,6 +676,12 @@
 
         // check matched preview
         if (!!this.props.preview !== !!this.preview) {
+          // preview does not match
+          return true;
+        }
+
+        // check matched preview
+        if (this.props.placement !== this.placement) {
           // preview does not match
           return true;
         }
