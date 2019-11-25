@@ -1,6 +1,6 @@
 {
   "name": "@edenjs/form",
-  "version": "1.3.13",
+  "version": "2.0.0",
   "description": "",
   "main": "edenconfig.js",
   "scripts": {
