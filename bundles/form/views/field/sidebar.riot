@@ -3,17 +3,19 @@
     <div class={ classes({'eden-blocks-sidebar' : true, 'eden-blocks-sidebar-show' : get('showing')}) }>
       <div class="card">
         <div class="card-header">
-          <h5>
-            Select Field
-          </h5>
-          
-          <ul class="nav nav-tabs card-header-tabs">
-            <li class="nav-item" each={ (tab, i) in getTabs() }>
-              <button class={ classes({ 'nav-link' : true, 'active' : isTab(tab) }) } onclick={ (e) => onTab(e, tab) }>
-                { eden.get('i18n.t')(`cms.category.${tab}`) }
-              </button>
-            </li>
-          </ul>
+          <div class="w-100">
+            <h5>
+              Select Field
+            </h5>
+            
+            <ul class="nav nav-tabs card-header-tabs w-100">
+              <li class="nav-item" each={ (tab, i) in getTabs() }>
+                <button class={ classes({ 'nav-link' : true, 'active' : isTab(tab) }) } onclick={ (e) => onTab(e, tab) }>
+                  { eden.get('i18n.t')(`cms.category.${tab}`) }
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div class="card-body">
@@ -68,6 +70,7 @@
 
         // bind
         this.onTab = this.onTab.bind(this);
+        this.isTab = this.isTab.bind(this);
         this.getFields = this.getFields.bind(this);
       }
 

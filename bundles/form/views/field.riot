@@ -12,13 +12,13 @@
           <div class="w-100">
             <div class="btn-group float-right"> 
               <slot name="buttons" />
-              <button class="btn btn-sm btn-secondary" onclick={ (e) => onUpdateSidebar(e) }>
+              <button class="btn btn-sm btn-primary" onclick={ (e) => onUpdateSidebar(e) }>
                 <i class="fa fa-pencil-alt" />
               </button>
-              <button class="btn btn-sm btn-secondary" onclick={ (e) => onRemoveSidebar(e) } if={ !props.field.force }>
+              <button class="btn btn-sm btn-primary" onclick={ (e) => onRemoveSidebar(e) } if={ !props.field.force }>
                 <i class={ classes({ 'fa fa-times' : true, 'fa-spin' : removing || props.field.removing }) } />
               </button>
-              <span class="btn btn-sm btn-secondary move" for={ props.field.uuid }>
+              <span class="btn btn-sm btn-primary move" for={ props.field.uuid }>
                 <i class="fa fa-arrows-alt" />
               </span>
             </div>

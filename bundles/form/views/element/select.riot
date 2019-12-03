@@ -1,0 +1,27 @@
+<element-select>
+  <span>
+    { getValue() }
+  </span>
+  
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class ElementSelect extends Base {
+
+      /**
+      * gets value
+      *
+      * @return {*}
+      */
+      getValue() {
+        // get value
+        const values = (Array.isArray(this.props.data.value) ? this.props.data.value : [this.props.data.value]).filter(i => i);
+        
+        // return labels
+        return values.map(v => (this.props.field.options.find(val => val.value === v) || {}).label).join(', ');
+      }
+    }
+  </script>
+</element-select>

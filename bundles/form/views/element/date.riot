@@ -1,0 +1,34 @@
+<element-date>
+  <span>
+    <span if={ props.data.value }>{ getDate(props.data.value) }</span>
+    <i if={ !props.data.value }>N/A</i>
+  </span>
+
+  <script>
+    // require moment
+    import moment from 'moment';
+    import Base from '../js/base';
+
+    // export default
+    export default class ElementDate extends Base {
+    
+      /**
+      * get date
+      *
+      * @param  {Date} date
+      *
+      * @return {*}
+      */
+      getDate(date) {
+        // return date
+        if (this.props.field.fromNow) {
+          // set from
+          return moment(date).fromNow();
+        }
+        
+        // return moment format
+        return moment(date).format(this.props.field.format || 'LLL');
+      }
+    }
+  </script>
+</element-date>

@@ -1,0 +1,27 @@
+<element-text>
+  <span>
+    <span if={ get('data.value') }>
+      { getValue() }
+    </span>
+    <i if={ !get('data.value') }>N/A</i>
+  </span>
+  
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class ElementText extends Base {
+
+      /**
+      * gets value
+      *
+      * @return {*}
+      */
+      getValue() {
+        // get value
+        return typeof (this.props.data.value || '')[this.eden.get('i18n.lng')] !== 'undefined' ? (this.props.data.value || '')[this.eden.get('i18n.lng')] : this.props.data.value;
+      }
+    }
+  </script>
+</element-text>

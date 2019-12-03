@@ -1,0 +1,14 @@
+<element-number>
+  <span>
+    <span if={ get('data.value') }>{ get('data.value').toLocaleString() }</span>
+    <i if={ !get('data.value') }>N/A</i>
+  </span>
+
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class ElementNumber extends Base {}
+  </script>
+</element-number>

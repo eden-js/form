@@ -1,0 +1,120 @@
+<field-encrypt>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <validate type="password" group-class={ props.field.group || 'form-group' } name={ props.field.uuid } label={ props.field.label || 'Set Label' } data-value={ get(`data.value`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+    </div>
+    
+    <div slot="validation">
+      <div class="form-group">
+        <label>
+          Min Length
+        </label>
+        <input class="form-control" type="number" ref="min-length" value={ get('field.validateLength.min', 0) } onchange={ (e) => onMinLength(e) } />
+      </div>
+      <div class="form-group">
+        <label>
+          Max Length
+        </label>
+        <input class="form-control" type="number" ref="min-length" value={ get('field.validateLength.min', 1000) } onchange={ (e) => onMaxLength(e) } />
+      </div>
+    </div>
+  </field>
+
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldEncrypt extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.data.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.props.data.value = this.val();
+      }
+
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+          // return non accumulated value
+          return this.$('input').value;
+      }
+
+      /**
+      * on class
+
+      * @param  {Event} e
+      */
+      async onMinLength (e) {
+        // set props
+        const props = this.props;
+
+        // check validate length
+        if (!props.field.validateLength) props.field.validateLength = {};
+
+        // set class
+        props.field.validateLength.min = e.target.value.length ? parseInt(e.target.value) : null;
+
+        // run opts
+        if (props.onSave) await props.onSave(props.field, props.data, props.placement, true);
+      }
+
+      /**
+      * on class
+
+      * @param  {Event} e
+      */
+      async onMaxLength (e) {
+        // set props
+        const props = this.props;
+
+        // check validate length
+        if (!props.field.validateLength) props.field.validateLength = {};
+
+        // set class
+        props.field.validateLength.max = e.target.value.length ? parseInt(e.target.value) : null;
+
+        // run opts
+        if (props.onSave) await props.onSave(props.field, props.data, props.placement, true);
+      }
+    }
+
+  </script>
+</field-encrypt>

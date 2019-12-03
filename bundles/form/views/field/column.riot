@@ -1,0 +1,69 @@
+<field-column>
+  <div class="row">
+    <div class="col">
+      <div is={ `field-${props.column.meta.field.tag}` } field={ getField() } data={ getData() } preview={ true } class="field-column" ref={ ref('field') } />
+    </div>
+    <div class="col-2 pl-0">
+      <button class={ classes({ 'btn btn-block btn-success' : true, 'disabled' : loading()  }) } onclick={ (e) => onSave(e) }>
+        <i class={ `fa ${loading() ? 'fa-spinner fa-spin' : 'fa-check'}` } />
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldColumn extends Base {
+
+      /**
+       * on save
+       *
+       * @param  {Event} e
+       *
+       * @return {*}
+       */
+      onSave(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // set loading
+        this.loading('save', true);
+        
+        // update view
+        this.update();
+        
+        // save
+        if (this.props.onSave) this.props.onSave(this.props.row, this.props.column, this.refs.field.val());
+      }
+      
+      /**
+       * get data
+       *
+       * @return {*}
+       */
+      getField() {
+        // return object assign
+        return Object.assign({}, this.props.column.meta.field, {
+
+        });
+      }
+      
+      /**
+       * get data
+       *
+       * @return {*}
+       */
+      getData() {
+        // return object assign
+        return Object.assign({}, this.props.column.meta.data, {
+          label : null,
+          value : this.props.dataValue
+        });
+      }
+
+    }
+  </script>
+</field-column>

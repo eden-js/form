@@ -1,0 +1,155 @@
+<field-radio>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <validate type="radio" ref={ ref('radio') } options={ props.field.options } group-class={ props.field.group || 'form-group' } multiple={ props.field.multiple } name={ props.field.uuid } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+    </div>
+
+    <div slot="modal">
+      <div each={ (option, i) in props.field.options } class="form-group">
+        <label>
+          Option #{ i + 1 }
+        </label>
+        <div class="input-group">
+          <input type="text" name="option[{ i }]" value={ option.value } class="form-control" onchange={ (e) => onOptionName(e, option) } />
+          <div class="input-group-append" onclick={ (e) => onRemoveOption(e, i) }>
+            <button class="btn btn-danger">
+              <i class="fa fa-times" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-success mr-3" onclick={ (e) => onOption(e) }>
+        Add Option
+      </button>
+      <button class="btn btn-success" onclick={ (e) => onOptionSave(e) }>
+        Save Options
+      </button>
+    </div>
+  </field>
+
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldRadio extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.data.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // return non accumulated value
+        return jQuery('input', this.root).val();
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.props.data.value = this.refs.field.refs.radio.val();
+      }
+
+      /**
+      * on option
+      *
+      * @param {Event} e
+      */
+      onOption(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // add option
+        if (!this.props.field.options) this.props.field.options = [];
+
+        // add option
+        this.props.field.options.push({
+          label : '',
+          value : '',
+        });
+
+        // update view
+        this.update();
+      }
+
+      /**
+      * on option name
+      *
+      * @param {Event} e
+      */
+      onOptionName(e, item) {
+        // set value
+        item.option.label = e.target.value;
+        item.option.value = e.target.value;
+      }
+
+      /**
+      * on option save
+      *
+      * @param  {Event}  e
+      * @return {Promise}
+      */
+      async onOptionSave(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+      }
+
+      /**
+      * on option
+      *
+      * @param {Event} e
+      */
+      onRemoveOption(e, i) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // remove option
+        this.props.field.options.splice(i, 1);
+
+        // update view
+        this.update();
+      }
+    }
+
+  </script>
+</field-radio>

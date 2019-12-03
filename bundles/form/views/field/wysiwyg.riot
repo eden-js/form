@@ -1,0 +1,82 @@
+<field-wysiwyg>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <div if={ get('field.i18n') } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lang') !== lng }>
+        <editor name={ `${props.field.uuid}[${lng}]` } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+      </div>
+      <editor if={ !get('field.i18n') } name={ props.field.uuid } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+    </div>
+  </field>
+  
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldWysiwyg extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.data.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.props.data.value = this.val();
+      }
+    
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // get val
+        if (this.props.field.i18n) {
+          // reduce value
+          return this.eden.get('i18n.lngs', []).reduce((accum, language) => {
+            // add to accum
+            accum[language] = jQuery(`[name="${this.props.field.uuid}[${language}]"]`, this.root).val();
+            
+            // return accum
+            return accum;
+          }, {});
+        } else {
+          // return non accumulated value
+          return jQuery('textarea', this.root).val();
+        }
+      }
+    }
+    
+  </script>
+</field-wysiwyg>

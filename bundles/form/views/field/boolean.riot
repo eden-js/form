@@ -1,0 +1,68 @@
+<field-boolean>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <validate type="boolean" group-class={ props.field.group || 'form-group' } name={ props.field.uuid } label={ props.field.label || 'Set Label' } data-value={ props.data.value } required={ props.field.required } on-change={ onChange } />
+    </div>
+    
+  </field>
+  
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldBoolean extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.data.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.props.data.value = this.val();
+      }
+    
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // get val
+        return jQuery('input', this.root).val() === 'true';
+      }
+    }
+    
+  </script>
+</field-boolean>

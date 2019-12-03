@@ -1,0 +1,105 @@
+<field-container>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <span class="eden-dropzone-label" if={ !props.preview }>
+        Container #{ props.placement }
+      </span>
+      
+      <div class={ `${props.field.container || 'container'} ${!preview ? 'eden-dropzone' : ''} ${classes({ 'empty' : !getFields(props.field.children).length })}` } data-placement={ props.placement + '.children' }>
+        <div if={ !getFields(props.field.children).length } class="py-5 text-center">Add Elements</div>
+        <div each={ (child, a) in getFields(props.field.children) } no-reorder class={ child.class } is={ getElement(child) } preview={ props.preview } data-field={ child.uuid } data={ getField(child) } field={ child } helper={ props.helper } get-field={ props.getField } on-add-field={ props.onAddField } on-save={ props.onSave } on-remove={ props.onRemove } on-refresh={ props.onRefresh } i={ a } placement={ `${props.placement}.children.${a}` } />
+      </div>
+      
+      <span class="eden-dropzone-label eden-dropzone-label-end" if={ !props.preview }>
+        Container #{ props.placement } End
+      </span>
+    </div>
+    
+    <div slot="modal">
+      <div class="form-group">
+        <label>
+          Container Class
+        </label>
+        <input class="form-control" ref="container" value={ props.field.container || 'container' } onchange={ (e) => onContainerClass(e) } />
+      </div>
+    </div>
+  </field>
+  
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldContainer extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+    
+        // set value
+        if (!this.props.field.children) this.props.field.children = [];
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+          'getField' : this.props.getField,
+        };
+      }
+      
+      /**
+      * get fields
+      *
+      * @param  {Array} fields
+      *
+      * @return {Array}
+      */
+      getFields (fields) {
+        // return filtered fields
+        return (fields || []).filter((child) => child);
+      }
+    
+      /**
+      * get element
+      *
+      * @param  {Object} child
+      *
+      * @return {*}
+      */
+      getElement (child) {
+        // return get child
+        return (this.props.getField(child) || {}).tag ? 'field-' + (this.props.getField(child) || {}).tag : 'eden-loading';
+      }
+
+      /**
+      * on class
+
+      * @param  {Event} e
+      */
+      async onContainerClass (e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set class
+        this.props.field.container = e.target.value.length ? e.target.value : null;
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+      }
+    }
+    
+  </script>
+</field-container>

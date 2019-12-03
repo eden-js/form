@@ -1,0 +1,46 @@
+<field-i18n>
+  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    { eden.get('i18n.lng') }
+  </button>
+  <div class="dropdown-menu dropdown-menu-right">
+    <button class="dropdown-item" each={ (language, i) in eden.get('i18n.lngs', []) } onclick={ (e) => onLanguage(e, language) }>
+      { language }
+    </button>
+  </div>
+  
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldI18n extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+    
+        // set initial value
+        this.value = this.props.data.value;
+      }
+    
+      /**
+      * on language
+      *
+      * @param  {Event} e
+      *
+      * @return {*}
+      */
+      onLanguage(e, language) {
+        // stop propagation
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // set language
+        eden.get('i18n.lang')(language);
+      }
+    }
+    
+  </script>
+</field-i18n>

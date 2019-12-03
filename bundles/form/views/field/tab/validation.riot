@@ -1,0 +1,53 @@
+<field-tab-validation>
+  <div class="field-settings">
+    <div if={ props.isInput }>
+      <div class="form-group">
+        <label>
+          Required
+        </label>
+        <select class="form-control" onchange={ (e) => onRequired(e) }>
+          <option value="true" selected={ props.field.required }>Yes</option>
+          <option value="false" selected={ !props.field.required }>No</option>
+        </select>
+      </div>
+    
+      <yield from="validate" />
+    </div>
+  </div>
+  
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldTabValidation extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+      }
+
+      /**
+       * on allow multiple
+       *
+       * @param  {Event}  e
+       *
+       * @return {Promise}
+       */
+      async onRequired (e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set class
+        opts.field.required = jQuery(e.target).val() === 'true';
+
+        // run opts
+        if (opts.onSave) await opts.onSave(opts.field, opts.data, opts.placement, true);
+      }
+    }
+  
+  </script>
+</field-tab-validation>

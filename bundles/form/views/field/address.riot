@@ -91,7 +91,7 @@
         const index = input.getAttribute('data-index');
 
         // build geocomplete
-        jQuery(input).geocomplete().on('geocode:result', (e, result) => {
+        $(input).geocomplete().on('geocode:result', (e, result) => {
           // set values
           this.value = {
             'id'  : result.id,

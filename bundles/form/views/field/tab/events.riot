@@ -1,0 +1,50 @@
+<field-tab-events>
+  <div class="field-settings">
+    <div if={ props.isInput }>
+      <div class="form-group">
+        <label>
+          On Change
+        </label>
+        <input class="form-control" ref="change" value={ props.field.change || '' } onchange={ (e) => onChange(e) } />
+      </div>
+    
+      <yield from="validate" />
+    </div>
+  </div>
+  
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldTabEvents extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+      }
+
+      /**
+       * on allow multiple
+       *
+       * @param  {Event}  e
+       *
+       * @return {Promise}
+       */
+      async onChange (e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set class
+        this.props.field.change = e.target.value;
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement, true);
+      }
+    }
+  
+  </script>
+</field-tab-events>

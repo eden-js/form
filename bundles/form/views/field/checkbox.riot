@@ -1,0 +1,161 @@
+<field-checkbox>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <span if={ !get('field.options', []).length }>
+        Add Options
+      </span>
+      <label if={ props.field.label }>
+        { props.field.label }
+      </label>
+      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || 'form-group' } name={ `${props.field.uuid}[${option.label}]` } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get(`value.${option.label}`) === option.value } />
+    </div>
+
+    <div slot="modal">
+      <div each={ (option, i) in field.options } class="form-group">
+        <label>
+          Checkbox #{ i + 1 }
+        </label>
+        <div class="input-group">
+          <input type="text" name="option[{ i }]" value={ option.value } class="form-control" onchange={ (e) => onOptionName(e, option) } />
+          <div class="input-group-append" onclick={ (e) => onRemoveOption(e, i) }>
+            <button class="btn btn-danger">
+              <i class="fa fa-times" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-success mr-3" onclick={ (e) => onOption(e) }>
+        Add Checkbox
+      </button>
+      <button class="btn btn-success" onclick={ (e) => onOptionSave(e) }>
+        Save Checkboxes
+      </button>
+    </div>
+  </field>
+
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldCheckbox extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.data.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // return non accumulated value
+        return jQuery(this.$('input')).val();
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.props.data.value = this.val();
+      }
+
+      /**
+      * on option
+      *
+      * @param {Event} e
+      */
+      onOption(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // add option
+        if (!this.props.field.options) this.props.field.options = [];
+
+        // add option
+        this.props.field.options.push({
+          label : '',
+          value : '',
+        });
+
+        // update view
+        this.update();
+      }
+
+      /**
+       * on option name
+       *
+       * @param {Event} e
+       */
+      onOptionName(e, option) {
+        // set value
+        option.label = e.target.value;
+        option.value = e.target.value;
+      }
+
+      /**
+       * on option save
+       *
+       * @param  {Event}  e
+       * @return {Promise}
+       */
+      async onOptionSave(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+      }
+
+      /**
+       * on option
+       *
+       * @param {Event} e
+       */
+      onRemoveOption(e, i) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // remove option
+        this.props.field.options.splice(i, 1);
+
+        // update view
+        this.update();
+      }
+    }
+
+  </script>
+</field-checkbox>
