@@ -1,7 +1,5 @@
 <eden-select>
-  <select class="selectpicker w-100" name={ props.name } multiple={ props.multiple }>
-    <option each={ (item, i) in props.data } value={ item.value } selected={ item.selected }>{ item.name }</option>
-  </select>
+  <select class="selectpicker w-100" name={ props.name } multiple={ props.multiple } />
 
   <script>
     // import base
@@ -20,12 +18,14 @@
         // set initialized
         this.initialized = false;
 
+        // set data
+        this.data = props.data || [];
       }
 
       /**
        * on mounted
        */
-      onMounted(props) {
+      async onMounted(props) {
         // check frontend
         if (!this.eden.frontend || this.initialized) return;
 
@@ -35,12 +35,65 @@
         // set jQuery
         window.jQuery = window.$;
 
+        // url
+        if (this.props.url) {
+          // await fetch
+          const res = await fetch(this.props.url);
+          let data = await res.json();
+
+          // merge in selected
+          const selected = (this.data || []).find((item) => item.selected);
+
+          // selected
+          if (selected) {
+            // find
+            data = data.filter((item) => item.value !== selected.value);
+
+            // add selected
+            data.push(selected);
+          }
+
+          // set data
+          this.data = data;
+          await this.update();
+        }
+
+        // append
+        if (this.data && this.data.length) {
+          // set data
+          let data = this.data;
+
+          // check sort
+          if (!this.props.noSort) {
+            // sort
+            data = this.data.sort((a, b) => {
+              // return
+              return (a.name || a.text || '').localeCompare(b.name || b.text || '');
+            });
+          }
+
+          // for each
+          data.forEach((item) => {
+            // append
+            jQuery(this.$('select')).append(`<option value="${item.value}"${item.selected ? ` selected` : ''}>${item.name || item.text}</option>`);
+          });
+        }
+
+        // check placeholder
+        if (this.props.placeholder) {
+          // prepend
+          jQuery(this.$('select')).prepend(`<option value=""${this.data.find((i) => i.selected) ? '' : ' selected'}>${this.props.placeholder}</option>`);
+        }
+
         // require logic
         require('bootstrap-select/js/bootstrap-select.js');
 
         // do select 2
         jQuery(this.$('select')).selectpicker({
           liveSearch : true
+        }).on('change', (e) => {
+          // on change
+          if (this.props.onChange) this.props.onChange(e);
         });
 
         // ajax
@@ -67,11 +120,13 @@
             locale : {
               emptyTitle : this.props.label
             },
+            minLength    : 0,
+            clearOnEmpty : false,
             emptyRequest : true,
-          }).on('change', (e) => {
-            // on change
-            if (this.props.onChange) this.props.onChange(e);
-          });
+          })
+
+          // trigger change
+          jQuery(this.$('.bs-searchbox .form-control')).trigger('keyup');
         }
       }
 

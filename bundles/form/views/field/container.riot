@@ -7,7 +7,7 @@
       
       <div class={ `${props.field.container || 'container'} ${!preview ? 'eden-dropzone' : ''} ${classes({ 'empty' : !getFields(props.field.children).length })}` } data-placement={ props.placement + '.children' }>
         <div if={ !getFields(props.field.children).length } class="py-5 text-center">Add Elements</div>
-        <div each={ (child, a) in getFields(props.field.children) } no-reorder class={ child.class } is={ getElement(child) } preview={ props.preview } data-field={ child.uuid } data={ getField(child) } field={ child } helper={ props.helper } get-field={ props.getField } on-add-field={ props.onAddField } on-save={ props.onSave } on-remove={ props.onRemove } on-refresh={ props.onRefresh } i={ a } placement={ `${props.placement}.children.${a}` } />
+        <div each={ (child, a) in getFields(props.field.children) } no-reorder class={ child.class } is={ getElement(child) } preview={ props.preview } data-field={ child.uuid } data={ props.getField(child) } field={ child } helper={ props.helper } get-field={ props.getField } on-add-field={ props.onAddField } on-save={ props.onSave } on-remove={ props.onRemove } on-refresh={ props.onRefresh } i={ a } placement={ `${props.placement}.children.${a}` } />
       </div>
       
       <span class="eden-dropzone-label eden-dropzone-label-end" if={ !props.preview }>

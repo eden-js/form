@@ -66,14 +66,14 @@
           // reduce value
           return this.eden.get('i18n.lngs', []).reduce((accum, language) => {
             // add to accum
-            accum[language] = jQuery(`[name="${this.props.field.uuid}[${language}]"]`, this.root).val();
+            accum[language] = $(`[name="${this.props.field.uuid}[${language}]"]`, this.root).val();
             
             // return accum
             return accum;
           }, {});
         } else {
           // return non accumulated value
-          return jQuery('textarea', this.root).val();
+          return $('textarea', this.root).val();
         }
       }
     }

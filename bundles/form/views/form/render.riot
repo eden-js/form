@@ -6,7 +6,7 @@
     
     <slot name="append" />
   </form>
-  <div if={ !props.action } class="form-render-fields" data-form={ props.placement } ref="fields" data-is="eden-fields" fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
+  <div if={ !props.action } is="eden-fields" class="form-render-fields" data-form={ props.placement } ref={ ref('fields') } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
 
   <script>
     // import base

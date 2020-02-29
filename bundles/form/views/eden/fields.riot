@@ -1,7 +1,7 @@
 <eden-fields>
   <div class="eden-fields eden-blocks">
 
-    <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } ref="form" data-placement="" if={ !updating }>
+    <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } data-placement="" if={ !updating }>
       <span class="eden-dropzone-label" if={ !props.preview }>
         { form.get('title') || form.get('placement') }
       </span>

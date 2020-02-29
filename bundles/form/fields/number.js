@@ -30,7 +30,7 @@ class NumberField {
    */
   submit(req, field, value) {
     // return value
-    return value;
+    return parseFloat(value);
   }
 
   /**
