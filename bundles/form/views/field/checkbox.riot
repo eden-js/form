@@ -11,7 +11,7 @@
     </div>
 
     <div slot="modal">
-      <div each={ (option, i) in field.options } class="form-group">
+      <div each={ (option, i) in props.field.options } class="form-group">
         <label>
           Checkbox #{ i + 1 }
         </label>
