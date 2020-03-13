@@ -1,6 +1,7 @@
 
 // require dependencies
 const Helper = require('helper');
+const escapeRegex = require('escape-string-regexp');
 
 // require models
 const Form = model('form');
@@ -60,7 +61,15 @@ class FormHelper extends Helper {
     // return not registered
     if (!registered) return;
 
-    // create column
+    // add config field
+    grid.filter(field.name || field.uuid, Object.assign({
+      type  : 'text',
+      title : field.label,
+      query : (param) => {
+        // Another where
+        grid.match(field.name || field.uuid, new RegExp(escapeRegex(param.toString().toLowerCase()), 'i'));
+      },
+    }, opts));
     grid.column(field.name || field.uuid, Object.assign({
       tag  : 'element-column',
       sort : true,

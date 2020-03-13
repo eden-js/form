@@ -85,7 +85,7 @@ class FormController extends Controller {
     }, async () => { }, async () => { });
 
     // register default field types
-    ['address', 'boolean', 'checkbox', 'encrypt', 'date', 'file', 'email', 'image', 'phone', 'number', 'radio', 'select', 'text', 'textarea', 'wysiwyg'].sort().forEach((field) => {
+    ['address', 'boolean', 'money', 'checkbox', 'encrypt', 'date', 'file', 'email', 'image', 'phone', 'number', 'radio', 'select', 'text', 'textarea', 'wysiwyg'].sort().forEach((field) => {
       // require field
       // eslint-disable-next-line import/no-dynamic-require
       const FieldClass = require(`form/fields/${field}`);
