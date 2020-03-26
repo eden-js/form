@@ -1,5 +1,5 @@
 <form-render>
-  <form ref="form" if={ props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } class={ getClass() }>
+  <form if={ props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } class={ getClass() }>
     <slot name="prepend" />
     
     <div class="form-render-fields" data-form={ props.placement } ref={ ref('fields') } is="eden-fields" fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
@@ -111,14 +111,14 @@
         // check json
         if (!isJSON) {
           // submit form
-          return jQuery(this.$('[ref="form"]')).submit();
+          return eden.router.submit(this.$('form'));
         } else {
           // Get url
-          let url = this.props.action || this.$('[ref="form"]').getAttribute('action') || window.location.href.split(this.eden.get('config').domain)[1];
+          let url = this.props.action || this.$('form').getAttribute('action') || window.location.href.split(this.eden.get('config').domain)[1];
 
           // Set request
           const opts = {
-            method  : this.props.method || this.$('[ref="form"]').getAttribute('method') || 'POST',
+            method  : this.props.method || this.$('form').getAttribute('method') || 'POST',
             headers : {
               Accept : 'application/json',
             },
@@ -129,10 +129,10 @@
           // Set body
           if (this.props.method.toUpperCase() === 'POST') {
             // Set to body
-            opts.body = new FormData(this.$('[ref="form"]'));
+            opts.body = new FormData(this.$('form'));
           } else {
             // Add to url
-            url += `?${jQuery(this.$('[ref="form"]')).serialize()}`;
+            url += `?${jQuery(this.$('form')).serialize()}`;
           }
 
           // Run fetch
