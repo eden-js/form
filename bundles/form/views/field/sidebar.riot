@@ -23,16 +23,16 @@
             <input class="form-control" placeholder="search" type="Search" onkeyup={ (e) => onSearch(e) } onchange={ (e) => onSearch(e) } ref="search" />
           </div>
           
-          <ul class="list-group">
-            <li each={ (field, i) in getFields() } class={ classes({ 'field-sidebar-item list-group-item list-group-item-action flex-column align-items-start' : true, 'active' : isActive(field) }) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
+          <div class="draggable">
+            <div each={ (field, i) in getFields() } class={ classes({ 'card card-body mb-2' : true, 'active' : isActive(field) }) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
               <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
                   { field.opts.title }
                 </h5>
               </div>
               <p class="m-0">{ field.opts.description }</p>
-            </li>
-          </ul>
+            </div>
+          </div>
           
         </div>
         <div class="card-footer">

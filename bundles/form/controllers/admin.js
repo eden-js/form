@@ -40,37 +40,6 @@ class FormAdminControler extends Controller {
   }
 
   /**
-   * socket listen action
-   *
-   * @param  {String} id
-   * @param  {Object} opts
-   *
-   * @call   model.listen.form
-   * @return {Async}
-   */
-  async listenAction(id, uuid, opts) {
-    // join room
-    opts.socket.join(`form.${id}`);
-
-    // add to room
-    return await modelHelper.listen(opts.sessionID, await Form.findById(id), uuid);
-  }
-
-  /**
-   * socket listen action
-   *
-   * @param  {String} id
-   * @param  {Object} opts
-   *
-   * @call   model.deafen.form
-   * @return {Async}
-   */
-  async liveDeafenAction(id, uuid, opts) {
-    // add to room
-    return await modelHelper.deafen(opts.sessionID, await Form.findById(id), uuid);
-  }
-
-  /**
    * add/edit action
    *
    * @route    {get} /:id/view

@@ -53,6 +53,7 @@
 
         // get fields
         this.getField = this.getField.bind(this);
+        this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
         this.onSaveField = this.onSaveField.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
@@ -85,7 +86,7 @@
         }
 
         // set containers
-        if (this.dragula) this.dragula.containers = [...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .list-group'))];
+        if (this.dragula) this.dragula.containers = [...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .draggable'))];
       }
 
       /**
@@ -105,6 +106,9 @@
 
         // set form
         this.form = props.form ? (props.model ? props.model : this.model('form', props.form)) : this.model('form', {});
+
+        // set fields
+        this.form.on('fields', this.setFields);
 
         // init dragula
         if (!this.dragula && !props.preview) this.initDragula();
@@ -146,6 +150,9 @@
       onBeforeUnmount() {
         // on before unmount
         super.onBeforeUnmount(...arguments);
+
+        // set fields
+        this.form.removeListener('fields', this.setFields);
 
         // off mousemove        
         jQuery('body').off('mousemove', this.onMouseMoved);
@@ -463,6 +470,17 @@
       }
 
       /**
+       * set fields
+       */
+      setFields() {
+        // set fields
+        this.fields = this.form.get('render') || [];
+
+        // safe update
+        this.safeUpdate();
+      }
+
+      /**
       * loads form fields
       *
       * @param  {Object} opts
@@ -531,9 +549,9 @@
         const dotProp = require('dot-prop-immutable');
 
         // do dragula
-        this.dragula = dragula([...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .list-group'))], {
+        this.dragula = dragula([...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .draggable'))], {
           moves : (el, container, handle) => {
-            return container.className.includes('list-group') || ((jQuery(el).is('[data-field]') || jQuery(el).closest('[data-field]').length) && (jQuery(handle).is('.move') || jQuery(handle).closest('.move').length) && (jQuery(handle).is('.move') ? jQuery(handle) : jQuery(handle).closest('.move')).attr('for') === jQuery(el).attr('data-field'));
+            return jQuery(container).closest('.eden-blocks-sidebar').length || ((jQuery(el).is('[data-field]') || jQuery(el).closest('[data-field]').length) && (jQuery(handle).is('.move') || jQuery(handle).closest('.move').length) && (jQuery(handle).is('.move') ? jQuery(handle) : jQuery(handle).closest('.move')).attr('for') === jQuery(el).attr('data-field'));
           },
           copy : (el, container) => {
             // check container class

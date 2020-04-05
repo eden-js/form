@@ -147,10 +147,15 @@ class FormController extends Controller {
     if (!id) return null;
 
     // join room
-    opts.socket.join(`placement.${id}`);
+    opts.socket.join(`form.${id}`);
 
     // add to room
-    return await modelHelper.listen(opts.sessionID, await Form.findById(id), uuid);
+    return await modelHelper.addListener(await Form.findById(id), {
+      atomic    : true,
+      user      : opts.user,
+      listenID  : uuid,
+      sessionID : opts.sessionID,
+    });
   }
 
   /**
@@ -166,8 +171,16 @@ class FormController extends Controller {
     // / return if no id
     if (!id) return null;
 
+    // join room
+    opts.socket.leave(`form.${id}`);
+
     // add to room
-    return await modelHelper.deafen(opts.sessionID, await Form.findById(id), uuid);
+    return await modelHelper.removeListener(await Form.findById(id), {
+      atomic    : true,
+      user      : opts.user,
+      listenID  : uuid,
+      sessionID : opts.sessionID,
+    });
   }
 
   /**
