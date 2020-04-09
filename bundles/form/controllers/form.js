@@ -9,9 +9,9 @@ const Controller = require('controller');
 const Form = model('form');
 
 // load helper
+const syncHelper  = helper('sync');
 const formHelper  = helper('form');
 const fieldHelper = helper('form/field');
-const modelHelper = helper('model');
 
 /**
  * build induction controller
@@ -150,7 +150,7 @@ class FormController extends Controller {
     opts.socket.join(`form.${id}`);
 
     // add to room
-    return await modelHelper.addListener(await Form.findById(id), {
+    return await syncHelper.addListener(await Form.findById(id), {
       atomic    : true,
       user      : opts.user,
       listenID  : uuid,
@@ -175,7 +175,7 @@ class FormController extends Controller {
     opts.socket.leave(`form.${id}`);
 
     // add to room
-    return await modelHelper.removeListener(await Form.findById(id), {
+    return await syncHelper.removeListener(await Form.findById(id), {
       atomic    : true,
       user      : opts.user,
       listenID  : uuid,

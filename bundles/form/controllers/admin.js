@@ -8,7 +8,6 @@ const Form = model('form');
 
 // bind helpers
 const fieldHelper = helper('form/field');
-const modelHelper = helper('model');
 
 /**
  * build user FormAdminControler controller
