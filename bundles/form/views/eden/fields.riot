@@ -1,7 +1,7 @@
 <eden-fields>
   <div class="eden-fields eden-blocks">
 
-    <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } data-placement="" if={ !updating }>
+    <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-placement="" if={ !updating }>
       <span class="eden-dropzone-label" if={ !props.preview }>
         { form.get('title') || form.get('placement') }
       </span>
@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <field-sidebar ref={ ref('sidebar') } fields={ props.fields } />
+  <field-sidebar ref={ ref('sidebar') } placement={ props.placement } fields={ props.fields } />
 
   <script>
     // import base
@@ -86,7 +86,7 @@
         }
 
         // set containers
-        if (this.dragula) this.dragula.containers = [...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .draggable'))];
+        if (this.dragula) this.dragula.containers = [...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))];
       }
 
       /**
@@ -549,7 +549,7 @@
         const dotProp = require('dot-prop-immutable');
 
         // do dragula
-        this.dragula = dragula([...(this.$$('.eden-dropzone')), ...(this.$$('.eden-blocks-sidebar .draggable'))], {
+        this.dragula = dragula([...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))], {
           moves : (el, container, handle) => {
             return jQuery(container).closest('.eden-blocks-sidebar').length || ((jQuery(el).is('[data-field]') || jQuery(el).closest('[data-field]').length) && (jQuery(handle).is('.move') || jQuery(handle).closest('.move').length) && (jQuery(handle).is('.move') ? jQuery(handle) : jQuery(handle).closest('.move')).attr('for') === jQuery(el).attr('data-field'));
           },
