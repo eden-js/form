@@ -85,7 +85,7 @@ class FormController extends Controller {
     }, async () => { }, async () => { });
 
     // register default field types
-    ['address', 'boolean', 'money', 'checkbox', 'encrypt', 'date', 'file', 'email', 'image', 'phone', 'number', 'radio', 'select', 'text', 'textarea', 'wysiwyg'].sort().forEach((field) => {
+    ['address', 'boolean', 'money', 'checkbox', 'encrypt', 'date', 'file', 'email', 'image', 'phone', 'number', 'radio', 'select', 'text', 'textarea', 'wysiwyg', 'group'].sort().forEach((field) => {
       // require field
       // eslint-disable-next-line import/no-dynamic-require
       const FieldClass = require(`form/fields/${field}`);
@@ -103,22 +103,22 @@ class FormController extends Controller {
     });
 
     // add middleware
-    this.eden.router.use(this._middleware);
+    this.eden.router.use(this.middlewareAction);
 
     // on render
-    this.eden.pre('view.compile', async (render) => {
+    this.eden.pre('view.compile', async ({ req, res, render }) => {
       // move menus
-      if (render.state.forms && render.state.forms.length) {
+      if (render.forms && render.forms.length) {
         // set Block
         render.forms = {};
 
         // await promise
-        await Promise.all(render.state.forms.map(async (placement) => {
+        await Promise.all(render.forms.map(async (placement) => {
         // get Block
           const form = await formHelper.get(placement);
 
           // set null or Block
-          render.forms[placement] = form ? await formHelper.render(render.req, form) : null;
+          render.forms[placement] = form ? await formHelper.render(req, form) : null;
         }));
       }
 
@@ -127,9 +127,6 @@ class FormController extends Controller {
         // render fields
         render.fields = fieldHelper.renderFields('frontend');
       }
-
-      // delete state fields
-      delete render.state.forms;
     });
   }
 
@@ -362,25 +359,24 @@ class FormController extends Controller {
    * @param  {Response}  res
    * @param  {Function}  next
    */
-  _middleware(req, res, next) {
+  middlewareAction(req, res, next) {
     // set Block
-    res.locals.forms = [];
+    res.forms = [];
 
     // create middle function
     const middleFunction = (form) => {
       // check locals
-      if (!Array.isArray(res.locals.forms)) res.locals.forms = [];
+      if (!Array.isArray(res.forms)) res.forms = [];
 
       // push placement to Block
-      if (res.locals.forms.includes(form)) return;
+      if (res.forms.includes(form)) return;
 
       // add to Block
-      res.locals.forms.push(form);
+      res.forms.push(form);
     };
 
     // create Block method
-    res.form = middleFunction;
-    req.form = middleFunction;
+    res.form = req.form = middleFunction;
 
     // run next
     return next();

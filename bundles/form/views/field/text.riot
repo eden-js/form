@@ -2,9 +2,9 @@
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
       <div if={ props.field.i18n } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lng') !== lng }>
-        <validate type="text" group-class={ props.field.group || 'form-group' } name={ `${props.field.uuid}[${lng}]` } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
+        <validate type="text" group-class={ props.field.group || 'form-group' } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
       </div>
-      <validate type="text" group-class={ props.field.group || 'form-group' } name={ props.field.uuid } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+      <validate type="text" group-class={ props.field.group || 'form-group' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
     </div>
 
     <div slot="validation">
@@ -81,7 +81,7 @@
           // reduce value
           return this.eden.get('i18n.lngs', []).reduce((accum, language) => {
             // add to accum
-            accum[language] = this.$(`[name="${this.props.field.uuid}[${language}]"]`).value;
+            accum[language] = this.$(`[name="${props.getName(`${this.props.field.uuid}[${language}]`)}"]`).value;
 
             // return accum
             return accum;

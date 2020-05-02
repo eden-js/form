@@ -1,7 +1,7 @@
 <field-radio>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="radio" ref={ ref('radio') } options={ props.field.options } group-class={ props.field.group || 'form-group' } multiple={ props.field.multiple } name={ props.field.uuid } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+      <validate type="radio" ref={ ref('radio') } options={ props.field.options } group-class={ props.field.group || 'form-group' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
     </div>
 
     <div slot="modal">

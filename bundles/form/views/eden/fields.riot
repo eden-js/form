@@ -7,7 +7,7 @@
       </span>
 
       <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
-      <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
+      <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-id={ getId } get-name={ getName } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
       <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
 
     </div>
@@ -18,6 +18,7 @@
   <script>
     // import base
     import uuid from 'uuid';
+    import slug from 'slug';
     import Base from '../js/base';
     import Model from '../js/model';
 
@@ -52,6 +53,8 @@
         };
 
         // get fields
+        this.getId = this.getId.bind(this);
+        this.getName = this.getName.bind(this);
         this.getField = this.getField.bind(this);
         this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
@@ -156,6 +159,32 @@
 
         // off mousemove        
         jQuery('body').off('mousemove', this.onMouseMoved);
+      }
+
+      /**
+       * returns field name
+       */
+      getName(name) {
+        // check name
+        if (this.props.getName) {
+          return this.props.getName(name);
+        }
+
+        // return name
+        return name;
+      }
+
+      /**
+       * returns field name
+       */
+      getId(id) {
+        // check name
+        if (this.props.getName) {
+          id = this.props.getName(id);
+        }
+
+        // return name
+        return slug(id, { lower : true });
       }
 
       /**

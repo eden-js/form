@@ -2,9 +2,9 @@
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
       <div if={ get('field.i18n') } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lang') !== lng }>
-        <editor name={ `${props.field.uuid}[${lng}]` } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+        <editor name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
       </div>
-      <editor if={ !get('field.i18n') } name={ props.field.uuid } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+      <editor if={ !get('field.i18n') } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
     </div>
   </field>
   
@@ -66,7 +66,7 @@
           // reduce value
           return this.eden.get('i18n.lngs', []).reduce((accum, language) => {
             // add to accum
-            accum[language] = $(`[name="${this.props.field.uuid}[${language}]"]`, this.root).val();
+            accum[language] = $(`[name="${props.getName(`${this.props.field.uuid}[${language}]`)}"]`, this.root).val();
             
             // return accum
             return accum;

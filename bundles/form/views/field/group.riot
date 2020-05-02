@@ -1,0 +1,120 @@
+<field-group>
+  <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
+    <div slot="body">
+      <div class="card mb-3 border bg-transparent">
+        <div class="card-header border-bottom">
+          { props.field.label || 'Set Label' }
+        </div>
+        <div each={ (item, i) in value } class="card-body border-bottom">
+          
+          <!-- sub form -->
+          <form-render ref={ ref('form') } get-name={ (name) => getName(name, i) } placement={ props.field.uuid } form={ item.form } preview={ props.preview } />
+          <!-- / sub form -->
+
+          <button type="button" class="btn btn-danger mt-4" onclick={ (e) => onRemove(e, i) }>
+            Remove Item
+          </button>
+        </div>
+            
+        <div class="card-footer">
+          <button type="button" class="btn btn-success" onclick={ (e) => onAdd(e) }>
+            Add Item
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <div slot="modal" />
+  </field>
+  
+  <script>
+    // import base
+    import uuid from 'uuid';
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldModel extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+    
+        // set initial value
+        this.value = this.props.data.value || {};
+
+        // bind
+        this.getName = this.getName.bind(this);
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'isMulti'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+       * on variation
+       *
+       * @param  {Event} e
+       */
+      onAdd (e) {
+        // values
+        if (!this.value) this.value = [];
+
+        // add variation
+        this.value.push({
+          form  : JSON.parse(JSON.stringify(this.props.data.form)),
+          value : {},
+        });
+
+        // update view
+        this.update();
+      }
+
+      /**
+       * on variation
+       *
+       * @param  {Event} e
+       */
+      onRemove (e, i) {
+        // add variation
+        this.value.splice(i, 1);
+
+        // update view
+        this.update();
+      }
+
+      /**
+       * get name
+       */
+      getName(name, i) {
+        // check split
+        const split = name.split('[');
+
+        // return name
+        if (split.length > 1) {
+          // 
+          return `${this.props.field.uuid}[${i}][${split.shift()}][${split.join('[')}`;
+        }
+
+        // return name
+        return `${this.props.field.uuid}[${i}][${name}]`;
+      }
+    }
+    
+  </script>
+</field-group>

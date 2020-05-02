@@ -2,12 +2,12 @@
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
       <div class={ props.field.group || 'form-group' }>
-        <label for={ `${props.field.uuid}-geo` }>
+        <label for={ props.getId(`${props.field.uuid}-geo`) }>
           { props.field.label }
           <i if={ !props.field.label }>Set Label</i>
         </label>
-        <input type="hidden" name={ `${props.field.uuid}[address]` } value={ JSON.stringify(value) } />
-        <input type="text" name={ `${props.field.uuid}[geo]` } required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ `${props.field.uuid}-geo` } value={ get('value.formatted') || '' } on-change={ onChange }>
+        <input type="hidden" name={ props.getName(`${props.field.uuid}[address]`) } value={ JSON.stringify(value) } />
+        <input type="text" name={ props.getName(`${props.field.uuid}[geo]`) } required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ props.getId(`${props.field.uuid}-geo`) } value={ get('value.formatted') || '' } on-change={ onChange }>
       </div>
     </div>
   </field>

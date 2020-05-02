@@ -90,7 +90,9 @@
 
         // do select 2
         jQuery(this.$('select')).selectpicker({
-          liveSearch : true
+          liveSearch            : true,
+          noneSelectedText      : this.props.placeholder,
+          liveSearchPlaceholder : this.props.placeholder,
         }).on('change', (e) => {
           // on change
           if (this.props.onChange) this.props.onChange(e);

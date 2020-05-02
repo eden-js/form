@@ -114,7 +114,7 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async submit(req, form, current = []) {
+  async submit(req, form, current = [], row) {
     // return
     const fields = (await Promise.all((await form.get('fields')).map(async (field) => {
       // get from register
@@ -127,7 +127,7 @@ class FormHelper extends Helper {
       const data = await registered.submit(req, field, req.body[field.uuid], (current.find((c) => {
         // return found field
         return c.uuid === field.uuid;
-      }) || {}).value);
+      }) || {}).value, row);
 
       // set uuid
       field.value = data;

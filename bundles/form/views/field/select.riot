@@ -1,7 +1,7 @@
 <field-select>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="select" ref="select" options={ props.field.options } group-class={ props.field.group || 'form-group' } multiple={ props.field.multiple } name={ props.field.uuid } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+      <validate type="select" ref={ ref('select') } options={ props.field.options } group-class={ props.field.group || 'form-group' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
     </div>
 
     <div slot="modal">
@@ -81,7 +81,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.refs.field.refs.select.val();
+        this.props.data.value = this.refs.select.val();
       }
 
       /**
@@ -112,10 +112,10 @@
       *
       * @param {Event} e
       */
-      onOptionName(e, item) {
+      onOptionName(e, option) {
         // set value
-        item.option.label = e.target.value;
-        item.option.value = e.target.value;
+        option.label = e.target.value;
+        option.value = e.target.value;
       }
 
       /**
