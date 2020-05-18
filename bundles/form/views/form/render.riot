@@ -1,12 +1,21 @@
 <form-render>
-  <form if={ props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } class={ getClass() }>
-    <slot name="prepend" />
-    
-    <div class="form-render-fields" is="eden-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
-    
-    <slot name="append" />
-  </form>
-  <div if={ !props.action || props.noForm } class="form-render-fields" is="eden-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
+  <div>
+
+    <form if={ !loading('form') && props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } class={ getClass() }>
+      <slot name="prepend" />
+      <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
+      <slot name="append" />
+    </form>
+
+    <div if={ !loading('form') && !props.action || props.noForm }>
+      <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
+    </div>
+
+    <div if={ loading('form') } class="text-center">
+      <i class="h1 my-5 fa fa-spinner fa-spin" />
+    </div>
+
+  </div>
 
   <script>
     // import base
@@ -18,15 +27,35 @@
       /**
        * on before mount
        */
-      onBeforeMount() {
+      onBeforeMount(...args) {
         // super
-        super.onBeforeMount(...arguments);
+        super.onBeforeMount(...args);
 
         // bind methods
         this.onSave = this.onSave.bind(this);
 
         // is update
         this.isUpdate = false;
+      }
+
+      /**
+       * on before mount
+       */
+      onUpdated(...args) {
+        // super
+        super.onUpdated(...args);
+        
+        // check placement
+        if (this.props.placement !== this.placement) {
+          // set placement
+          this.placement = this.props.placement;
+
+          // laod form
+          this.loading('form', true);
+          
+          // reset form
+          setTimeout(() => this.loading('form', false), 10);
+        }
       }
 
       /**

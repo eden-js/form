@@ -1,19 +1,25 @@
 <eden-fields>
-  <div class="eden-fields eden-blocks">
+  <div>
+    <div class="eden-fields eden-blocks" if={ !state.updating }>
 
-    <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-placement="" if={ !updating }>
-      <span class="eden-dropzone-label" if={ !props.preview }>
-        { form.get('title') || form.get('placement') }
-      </span>
+      <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-placement="">
+        <span class="eden-dropzone-label" if={ !props.preview }>
+          { form.get('title') || form.get('placement') }
+        </span>
 
-      <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
-      <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-id={ getId } get-name={ getName } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
-      <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
+        <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
+        <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-id={ getId } get-name={ getName } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
+        <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
 
+      </div>
     </div>
-  </div>
 
-  <field-sidebar ref={ ref('sidebar') } placement={ props.placement } fields={ props.fields } />
+    <div if={ state.updating } class="text-center">
+      <i class="h1 my-5 fa fa-spinner fa-spin" />
+    </div>
+
+    <field-sidebar ref={ ref('sidebar') } placement={ props.placement } fields={ props.fields } />
+  </div>
 
   <script>
     // import base
@@ -25,24 +31,30 @@
     // export default
     export default class EdenFields extends Base {
 
+
+      // ////////////////////////////////////////////////////////////////////////////
+      //
+      // RIOT METHODS
+      //
+      // ////////////////////////////////////////////////////////////////////////////
+
       /**
        * on before mount
        *
        * @param {Object} props
        */
-      onBeforeMount(props) {
+      onBeforeMount(...args) {
         // super on before mount
-        super.onBeforeMount(...arguments);
+        super.onBeforeMount(...args);
 
         // do mixin
         Model(this);
 
         // set update
-        this.form     = props.form ? (props.model ? props.model : this.model('form', props.form)) : this.model('form', {});
-        this.type     = props.type;
-        this.fields   = (props.form || {}).render || [];
-        this.preview  = !!props.preview;
-        this.updating = false;
+        this.form    = this.props.form ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {});
+        this.type    = this.props.type;
+        this.fields  = (this.props.form || {}).render || [];
+        this.preview = !!this.props.preview;
 
         // set filter fields
         this.filter = {
@@ -68,28 +80,15 @@
        *
        * @param {Object} props
        */
-      onUpdated(props) {
+      onUpdated(...args) {
         // super on before mount
-        super.onUpdated(...arguments);
+        super.onUpdated(...args);
 
         // check frontend
         if (!this.eden.frontend) return;
-        
-        // check has change
-        if (this.hasChange() && !this.updating) {
-          // check placement
-          if (this.placement !== this.props.placement) {
-            // updating
-            this.updating = true;
-            this.update();
-          }
 
-          // on mounted
-          this.onMounted(...arguments);
-        }
-
-        // set containers
-        if (this.dragula) this.dragula.containers = [...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))];
+        // on mounted
+        this.setup();
       }
 
       /**
@@ -97,62 +96,23 @@
        *
        * @param {Object} props
        */
-      onMounted() {
+      onMounted(...args) {
         // super on before mount
-        super.onMounted(...arguments);
+        super.onMounted(...args);
 
         // check frontend
         if (!this.eden.frontend) return;
 
-        // props
-        const props = this.props;
-
-        // set form
-        this.form = props.form ? (props.model ? props.model : this.model('form', props.form)) : this.model('form', {});
-
-        // set fields
-        this.form.on('fields', this.setFields);
-
-        // init dragula
-        if (!this.dragula && !props.preview) this.initDragula();
-
-        // set default positions
-        if (props.positions && !(this.form.get('positions') || []).length && !this.form.get('id')) {
-          // set default
-          this.form.set('positions', props.positions);
-          this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
-
-          // save fields
-          this.saveForm();
-        }
-
-        // set positions
-        if (this.hasChange()) {
-          // set position
-          this.type    = props.type;
-          this.preview = !!props.preview;
-
-          // placement
-          this.updating  = false;
-          this.placement = props.placement;
-
-          // force update
-          this.update();
-        }
-
-        // check fields
-        if (this.shouldLoad()) {
-          // load fields
-          this.loadFields();
-        }
+        // setup
+        this.setup();
       }
 
       /**
        * on before unmount
        */
-      onBeforeUnmount() {
+      onBeforeUnmount(...args) {
         // on before unmount
-        super.onBeforeUnmount(...arguments);
+        super.onBeforeUnmount(...args);
 
         // set fields
         this.form.removeListener('fields', this.setFields);
@@ -160,6 +120,91 @@
         // off mousemove        
         jQuery('body').off('mousemove', this.onMouseMoved);
       }
+
+
+      // ////////////////////////////////////////////////////////////////////////////
+      //
+      // SETUP METHODS
+      //
+      // ////////////////////////////////////////////////////////////////////////////
+
+      /**
+       * setup
+       */
+      async setup () {
+        // set updating
+        if (this.state.updating || !this.hasChange()) return;
+
+        // force update
+        this.update({
+          updating : true,
+        });
+        
+        // check placement
+        if (this.placement !== this.props.placement || this.form.get('placement') !== this.props.placement) {
+          // check form
+          if (this.form) {
+            // remove listeners
+            this.form.removeListener('fields', this.setFields);
+          }
+
+          // set placement
+          this.placement = this.props.placement;
+
+          // updating
+          this.form = this.props.form && this.props.form.placement === this.props.placement ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {
+            placement : this.props.placement
+          });
+
+          // load fields
+          await this.loadFields();
+
+          // set fields
+          this.fields = this.form.get('render') || [];
+
+          // set fields
+          this.form.on('fields', this.setFields);
+        }
+
+        // set default positions
+        if (this.props.positions && !(this.form.get('positions') || []).length && !this.form.get('id')) {
+          // set default
+          this.form.set('positions', this.props.positions);
+          this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
+
+          // save fields
+          this.saveForm();
+        }
+
+        // set position
+        this.type    = this.props.type;
+        this.preview = !!this.props.preview;
+
+        // force update
+        this.update({
+          updating : false
+        });
+
+        // init dragula
+        if (!this.dragula && !this.props.preview) this.initDragula();
+
+        // set containers
+        if (this.dragula) this.dragula.containers = [...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))];
+      }
+
+
+      // ////////////////////////////////////////////////////////////////////////////
+      //
+      // EVENT METHODS
+      //
+      // ////////////////////////////////////////////////////////////////////////////
+
+
+      // ////////////////////////////////////////////////////////////////////////////
+      //
+      // GET METHODS
+      //
+      // ////////////////////////////////////////////////////////////////////////////
 
       /**
        * returns field name
@@ -250,7 +295,7 @@
         }
 
         // log data
-        let res = await fetch('/form/' + this.form.get('id') + '/field/save', {
+        let res = await fetch(`/form/${this.form.get('id')}/field/save`, {
           'body' : JSON.stringify({
             'data'  : data,
             'field' : fieldClone
@@ -305,7 +350,7 @@
         this.update();
 
         // log data
-        let res = await fetch('/form/' + this.form.get('id') + '/field/save', {
+        let res = await fetch(`/form/${this.form.get('id')}/field/save`, {
           'body' : JSON.stringify({
             'data'  : data,
             'field' : field
@@ -344,14 +389,15 @@
         const dotProp = require('dot-prop-immutable');
 
         // set loading
-        this.updating = true;
         field.removing = true;
 
         // update view
-        this.update();
+        this.update({
+          updating : true
+        });
 
         // log data
-        let res = await fetch('/form/' + this.form.get('id') + '/field/remove', {
+        let res = await fetch(`/form/${this.form.get('id')}/field/remove`, {
           'body' : JSON.stringify({
             'data'  : data,
             'field' : field
@@ -376,11 +422,10 @@
         this.form.set('positions', positions.map(this.filter.place).filter((field) => field));
         this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
 
-        // set loading
-        this.updating = false;
-
         // update view
-        this.update();
+        this.update({
+          updating : false
+        });
 
         // save form
         await this.saveForm();
@@ -434,18 +479,6 @@
       }
 
       /**
-       * adds field by type
-       *
-       * @param  {String} type
-       *
-       * @return {*}
-       */
-      async onUpdate () {
-        // update view
-        this.update();
-      }
-
-      /**
        * saves form
        *
        * @return {Promise}
@@ -458,7 +491,7 @@
         if (!this.form.type) this.form.set('type', this.props.type);
 
         // log data
-        let res = await fetch('/form/' + (this.form.get('id') ? this.form.get('id') + '/update' : 'create'), {
+        let res = await fetch(`/form/${this.form.get('id') ? this.form.get('id') + '/update' : 'create'}`, {
           'body'    : JSON.stringify(this.form.get()),
           'method'  : 'post',
           'headers' : {
@@ -520,20 +553,14 @@
         // set opts
         if (!opts) opts = {};
 
-        // return on loading fields
-        if (this.loading('fields')) return;
-
         // require query string
         const qs = require('querystring');
 
         // set opts
         opts = qs.stringify(opts);
 
-        // set loading
-        this.loading('fields', true);
-
         // log data
-        let res = await fetch((this.form.get('id') ? '/form/' + this.form.get('id') + '/view' : '/form/create') + (opts.length ? '?' + opts : ''), {
+        const res = await fetch(`/form/${this.form.get('id') ? `${this.form.get('id')}/view` : '/create'}${(opts.length ? '?' + opts : '')}`, {
           'method'  : 'get',
           'headers' : {
             'Content-Type' : 'application/json'
@@ -542,30 +569,33 @@
         });
 
         // load data
-        let data = await res.json();
+        const data = await res.json();
 
         // set in eden
         if (data.result) {
           // set forms
           if (!window.eden.forms) window.eden.forms = {};
-            
+        
           // set in eden
-          window.eden.forms[this.form.get('id')] = data.result;
+          if (data.result.id) window.eden.forms[data.result.id] = data.result;
 
-          // set fields
-          for (let key in data.result) {
-            // set key
-            this.form.set(key, data.result[key]);
+          // change form
+          if (!this.form.get('id') && data.result.id) {
+            // set new form
+            this.form = this.model('form', data.result);
+          } else {
+            // set fields
+            for (let key in data.result) {
+              // set key
+              this.form.set(key, data.result[key]);
+            }
+            
+            // set fields
+            const missing = (this.form.get('render') || []).filter((field) => !this.fields.find((f) => f.uuid === field.uuid));
+            
+            // push missing fields
+            this.fields.push(...missing);
           }
-          
-          // set fields
-          const missing = (this.form.get('render') || []).filter((field) => !this.fields.find((f) => f.uuid === field.uuid));
-          
-          // push missing fields
-          this.fields.push(...missing);
-
-          // set loading
-          this.loading('fields', false);
         }
       }
 
@@ -659,8 +689,9 @@
           });
 
           // remove logic
-          this.updating = true;
-          this.update();
+          this.update({
+            updating : true
+          });
 
           // set form
           if ((position || '').length) {
@@ -683,8 +714,9 @@
           this.form.set('positions', positions);
 
           // remove logic
-          this.updating = false;
-          this.update();
+          this.update({
+            updating : false
+          });
 
           // save form
           if (!placement) await this.onSaveField(addedField, {});
@@ -730,34 +762,6 @@
         // check matched preview
         if (this.props.placement !== this.placement) {
           // preview does not match
-          return true;
-        }
-
-        // check matched model
-        if ((!this.props.model && (this.props.form || {}).id !== this.form.get('id'))) {
-          // form id does not match
-          return true;
-        }
-
-        // return false
-        return false;
-      }
-
-      /**
-      * returns true if should load
-      *
-      * @return {Boolean}
-      */
-      shouldLoad() {
-        // check matched fields length
-        if ((this.form.get('fields') || []).length !== this.fields.length) {
-          // field lengths do not match
-          return true;
-        }
-
-        // check if empty form
-        if (!(this.form.get('fields') || []).length && !(this.eden.get('forms') || {})[this.form.get('id')]) {
-          // field lengths do not match
           return true;
         }
 
