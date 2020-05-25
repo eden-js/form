@@ -250,17 +250,7 @@ class FormController extends Controller {
 
     // get field
     const fields  = form.get('fields') || [];
-    const current = fields.find(field => field.uuid === req.body.field.uuid);
-
-    // check current
-    if (!current) {
-      // return json
-      return res.json({
-        state   : 'fail',
-        result  : {},
-        message : 'Field not found',
-      });
-    }
+    const current = fields.find(field => field.uuid === req.body.field.uuid) || req.body.field;
 
     // update
     const registered = fieldHelper.fields().find(w => w.type === current.type);
@@ -323,14 +313,21 @@ class FormController extends Controller {
   async updateAction(req, res) {
     // set website variable
     let form = new Form();
-    let create = true;
 
     // check for website model
+    if (req.body.placement) {
+      // load by id
+      form = await Form.findOne({
+        placement : req.body.placement,
+      }) || new Form();
+    }
     if (req.params.id) {
       // load by id
       form = await Form.findById(req.params.id);
-      create = false;
     }
+
+    // create
+    const create = !form.get('_id');
 
     // update placement
     form.set('name', req.body.name);

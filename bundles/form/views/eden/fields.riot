@@ -8,7 +8,7 @@
         </span>
 
         <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
-        <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } data-field={ el.uuid } data={ getField(el) } field={ el } get-id={ getId } get-name={ getName } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
+        <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } form={ form } data-field={ el.uuid } data={ getField(el) } field={ el } get-id={ getId } get-name={ getName } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
         <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
 
       </div>
@@ -51,10 +51,11 @@
         Model(this);
 
         // set update
-        this.form    = this.props.form ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {});
-        this.type    = this.props.type;
-        this.fields  = (this.props.form || {}).render || [];
-        this.preview = !!this.props.preview;
+        this.form      = this.props.form ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {});
+        this.type      = this.props.type;
+        this.fields    = (this.props.form || {}).render || [];
+        this.preview   = !!this.props.preview;
+        this.placement = null;
 
         // set filter fields
         this.filter = {
@@ -65,6 +66,7 @@
         };
 
         // get fields
+        this.build = this.build.bind(this);
         this.getId = this.getId.bind(this);
         this.getName = this.getName.bind(this);
         this.getField = this.getField.bind(this);
@@ -88,7 +90,7 @@
         if (!this.eden.frontend) return;
 
         // on mounted
-        this.setup();
+        this.build();
       }
 
       /**
@@ -103,8 +105,8 @@
         // check frontend
         if (!this.eden.frontend) return;
 
-        // setup
-        this.setup();
+        // build
+        this.build();
       }
 
       /**
@@ -124,14 +126,20 @@
 
       // ////////////////////////////////////////////////////////////////////////////
       //
-      // SETUP METHODS
+      // INIT METHODS
       //
       // ////////////////////////////////////////////////////////////////////////////
 
       /**
-       * setup
+       * build
        */
-      async setup () {
+      async build () {
+        // init dragula
+        if (!this.dragula && !this.props.preview) this.initDragula();
+
+        // set containers
+        if (this.dragula) this.dragula.containers = [...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))];
+
         // set updating
         if (this.state.updating || !this.hasChange()) return;
 
@@ -157,7 +165,7 @@
           });
 
           // load fields
-          await this.loadFields();
+          if (!(this.form.get('render') || []).length) await this.loadFields();
 
           // set fields
           this.fields = this.form.get('render') || [];
@@ -184,12 +192,6 @@
         this.update({
           updating : false
         });
-
-        // init dragula
-        if (!this.dragula && !this.props.preview) this.initDragula();
-
-        // set containers
-        if (this.dragula) this.dragula.containers = [...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))];
       }
 
 
@@ -244,7 +246,7 @@
         if (!field) return;
 
         // get found
-        let found = this.fields.find((b) => b.uuid === field.uuid || (field.name && b.name && field.name === b.name));
+        const found = this.fields.find((b) => b.uuid === field.uuid);
 
         // gets data for field
         if (!found) return null;
@@ -282,16 +284,24 @@
        * @param  {Object} field
        */
       async onSaveField (field, data = {}, form, preventUpdate) {
+        // build meta
+        if (!field._meta) {
+          // set created
+          field._meta = {
+            created : new Date(),
+          };
+        }
+
+        // set updated
+        field._meta.updated = new Date();
+
         // clone
         let fieldClone = Object.assign({}, field);
 
-        // prevent update check
-        if (!preventUpdate) {
-          // set loading
-          field.saving = true;
-
-          // update view
-          this.update();
+        // check id
+        if (!this.form.get('id')) {
+          // save form
+          await this.saveForm(true);
         }
 
         // log data
@@ -325,15 +335,6 @@
 
         // save form
         await this.saveForm(preventUpdate);
-
-        // check prevent update
-        if (!preventUpdate) {
-          // set loading
-          delete field.saving;
-
-          // update view
-          this.update();
-        }
       }
 
       /**
@@ -549,54 +550,72 @@
       *
       * @return {Promise}
       */
-      async loadFields (opts) {
-        // set opts
-        if (!opts) opts = {};
+      loadFields (opts) {
+        // chekc loading
+        if (this.loadingFields) return this.loadingFields;
 
-        // require query string
-        const qs = require('querystring');
+        // loading fields
+        this.loadingFields = new Promise(async (resolve) => {
+          // set opts
+          if (!opts) opts = {};
 
-        // set opts
-        opts = qs.stringify(opts);
+          // require query string
+          const qs = require('querystring');
 
-        // log data
-        const res = await fetch(`/form/${this.form.get('id') ? `${this.form.get('id')}/view` : '/create'}${(opts.length ? '?' + opts : '')}`, {
-          'method'  : 'get',
-          'headers' : {
-            'Content-Type' : 'application/json'
-          },
-          'credentials' : 'same-origin'
+          // set opts
+          opts = qs.stringify(opts);
+
+          // log data
+          const res = await fetch(`/form/${this.form.get('id') ? `${this.form.get('id')}/view` : 'create'}${(opts.length ? '?' + opts : '')}`, {
+            body : JSON.stringify({
+              placement : this.props.placement || this.form.get('placement') || (this.props.form || {}).placement,
+            }),
+            method  : 'post',
+            headers : {
+              'Content-Type' : 'application/json'
+            },
+            credentials : 'same-origin'
+          });
+
+          // load data
+          const data = await res.json();
+
+          // set in eden
+          if (data.result) {
+            // set forms
+            if (!window.eden.forms) window.eden.forms = {};
+          
+            // set in eden
+            if (data.result.id) window.eden.forms[data.result.id] = data.result;
+
+            // change form
+            if (!this.form.get('id') && data.result.id) {
+              // set new form
+              this.form = this.model('form', data.result);
+            } else {
+              // set fields
+              for (let key in data.result) {
+                // set key
+                this.form.set(key, data.result[key]);
+              }
+              
+              // set fields
+              const missing = (this.form.get('render') || []).filter((field) => !this.fields.find((f) => f.uuid === field.uuid));
+              
+              // push missing fields
+              this.fields.push(...missing);
+            }
+          }
+
+          // resolve
+          resolve();
+
+          // remove promise
+          this.loadingFields = null;
         });
 
-        // load data
-        const data = await res.json();
-
-        // set in eden
-        if (data.result) {
-          // set forms
-          if (!window.eden.forms) window.eden.forms = {};
-        
-          // set in eden
-          if (data.result.id) window.eden.forms[data.result.id] = data.result;
-
-          // change form
-          if (!this.form.get('id') && data.result.id) {
-            // set new form
-            this.form = this.model('form', data.result);
-          } else {
-            // set fields
-            for (let key in data.result) {
-              // set key
-              this.form.set(key, data.result[key]);
-            }
-            
-            // set fields
-            const missing = (this.form.get('render') || []).filter((field) => !this.fields.find((f) => f.uuid === field.uuid));
-            
-            // push missing fields
-            this.fields.push(...missing);
-          }
-        }
+        // loading fields
+        return this.loadingFields;
       }
 
       /**
@@ -619,6 +638,11 @@
         }).on('drop', async (el, target, source, sibling) => {
           // get parent
           target = el.parentNode;
+
+          console.log(el, target);
+
+          // check target
+          if (!target) return;
 
           // get current form
           let addedField = {};

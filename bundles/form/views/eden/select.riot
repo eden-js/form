@@ -72,6 +72,12 @@
             });
           }
 
+          // check placeholder
+          if (this.props.placeholder) {
+            // prepend
+            jQuery(this.$('select')).prepend(`<option value=""${this.data.find((i) => i.selected) ? '' : ' selected'}>${this.props.placeholder}</option>`);
+          }
+
           // for each
           data.forEach((item) => {
             // append
@@ -79,17 +85,12 @@
           });
         }
 
-        // check placeholder
-        if (this.props.placeholder) {
-          // prepend
-          jQuery(this.$('select')).prepend(`<option value=""${this.data.find((i) => i.selected) ? '' : ' selected'}>${this.props.placeholder}</option>`);
-        }
-
         // require logic
         require('bootstrap-select/js/bootstrap-select.js');
 
         // do select 2
         jQuery(this.$('select')).selectpicker({
+          header                : this.props.placeholder,
           liveSearch            : true,
           noneSelectedText      : this.props.placeholder,
           liveSearchPlaceholder : this.props.placeholder,

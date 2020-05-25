@@ -1,13 +1,13 @@
 <form-render>
-  <div>
+  <div id={ id }>
 
-    <form if={ !loading('form') && props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } class={ getClass() }>
+    <form if={ !loading('form') && props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } onsubmit={ (e) => onSubmit(e) } class={ getClass() }>
       <slot name="prepend" />
       <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
       <slot name="append" />
     </form>
 
-    <div if={ !loading('form') && !props.action || props.noForm }>
+    <div if={ !loading('form') && (!props.action || props.noForm) }>
       <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ getFields() } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } positions={ props.positions } />
     </div>
 
@@ -20,6 +20,7 @@
   <script>
     // import base
     import Base from '../js/base';
+    import uuid from 'uuid/v4';
 
     // export default
     export default class FormRender extends Base {
@@ -31,11 +32,29 @@
         // super
         super.onBeforeMount(...args);
 
+        // set id
+        this.id = uuid();
+
         // bind methods
         this.onSave = this.onSave.bind(this);
+        this.submit = this.submit.bind(this);
 
         // is update
         this.isUpdate = false;
+
+        // set placement
+        this.placement = this.props.placement;
+      }
+
+      /**
+       * on before mount
+       */
+      onMounted(...args) {
+        // super
+        super.onMounted(...args);
+
+        // set placement
+        this.placement = this.props.placement;
       }
 
       /**
@@ -56,6 +75,24 @@
           // reset form
           setTimeout(() => this.loading('form', false), 10);
         }
+      }
+
+      /**
+       * on submit
+       */
+      onSubmit(e) {
+        // prevent
+        if (this.props.prevent && this.props.prevent(e)) {
+          // prevent default
+          e.preventDefault();
+          e.stopPropagation();
+
+          // return
+          return;
+        }
+
+        // return true
+        return true;
       }
 
       /**
@@ -137,17 +174,25 @@
        * @return {*}
        */
       async submit (isJSON) {
+        // set form
+        let form = this.$('form');
+
+        // stupid
+        if (!form) {
+          form = $(`#${this.id} form`)[0];
+        }
+
         // check json
         if (!isJSON) {
           // submit form
-          return eden.router.submit(this.$('form'));
+          return eden.router.submit(form);
         } else {
           // Get url
-          let url = this.props.action || this.$('form').getAttribute('action') || window.location.href.split(this.eden.get('config').domain)[1];
+          let url = this.props.action || form.getAttribute('action') || window.location.href.split(this.eden.get('config').domain)[1];
 
           // Set request
           const opts = {
-            method  : this.props.method || this.$('form').getAttribute('method') || 'POST',
+            method  : this.props.method || form.getAttribute('method') || 'POST',
             headers : {
               Accept : 'application/json',
             },
@@ -156,12 +201,12 @@
           };
 
           // Set body
-          if (this.props.method.toUpperCase() === 'POST') {
+          if ((this.props.method || form.getAttribute('method') || 'POST').toUpperCase() === 'POST') {
             // Set to body
-            opts.body = new FormData(this.$('form'));
+            opts.body = new FormData(form);
           } else {
             // Add to url
-            url += `?${jQuery(this.$('form')).serialize()}`;
+            url += `?${jQuery(form).serialize()}`;
           }
 
           // Run fetch
