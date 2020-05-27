@@ -73,9 +73,9 @@
           }
 
           // check placeholder
-          if (this.props.placeholder) {
+          if (this.props.placeholder && !data.find((item) => item.selected)) {
             // prepend
-            jQuery(this.$('select')).prepend(`<option value=""${this.data.find((i) => i.selected) ? '' : ' selected'}>${this.props.placeholder}</option>`);
+            jQuery(this.$('select')).prepend(`<option value="">${this.props.placeholder}</option>`);
           }
 
           // for each
