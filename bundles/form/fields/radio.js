@@ -29,6 +29,7 @@ class RadioField {
    * @return {*}
    */
   submit(req, field, value) {
+    console.log(value);
     // return value
     return value;
   }

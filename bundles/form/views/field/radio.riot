@@ -1,7 +1,13 @@
 <field-radio>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="radio" ref={ ref('radio') } options={ props.field.options } group-class={ props.field.group || 'form-group' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+      <span if={ !get('field.options', []).length }>
+        Add Options
+      </span>
+      <label if={ props.field.label }>
+        { props.field.label }
+      </label>
+      <validate type="radio" ref="radio" each={ (option, i) in props.field.options } group-class={ props.field.group || 'form-group' } name={ props.getName(`${props.field.uuid}`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get('data.value') === option.value } />
     </div>
 
     <div slot="modal">
@@ -32,7 +38,7 @@
     import Base from '../js/base';
 
     // export default
-    export default class FieldRadio extends Base {
+    export default class FieldCheckbox extends Base {
       /**
        * on before mount
        */
@@ -72,7 +78,7 @@
       */
       val() {
         // return non accumulated value
-        return jQuery('input', this.root).val();
+        return jQuery(this.$('input')).val();
       }
 
       /**
@@ -82,7 +88,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.refs.field.refs.radio.val();
+        this.props.data.value = this.val();
       }
 
       /**
@@ -109,22 +115,22 @@
       }
 
       /**
-      * on option name
-      *
-      * @param {Event} e
-      */
-      onOptionName(e, item) {
+       * on option name
+       *
+       * @param {Event} e
+       */
+      onOptionName(e, option) {
         // set value
-        item.option.label = e.target.value;
-        item.option.value = e.target.value;
+        option.label = e.target.value;
+        option.value = e.target.value;
       }
 
       /**
-      * on option save
-      *
-      * @param  {Event}  e
-      * @return {Promise}
-      */
+       * on option save
+       *
+       * @param  {Event}  e
+       * @return {Promise}
+       */
       async onOptionSave(e) {
         // prevent default
         e.preventDefault();
@@ -135,10 +141,10 @@
       }
 
       /**
-      * on option
-      *
-      * @param {Event} e
-      */
+       * on option
+       *
+       * @param {Event} e
+       */
       onRemoveOption(e, i) {
         // prevent default
         e.preventDefault();

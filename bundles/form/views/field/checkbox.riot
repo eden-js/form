@@ -7,7 +7,7 @@
       <label if={ props.field.label }>
         { props.field.label }
       </label>
-      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || 'form-group' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get(`value.${option.label}`) === option.value } />
+      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || 'form-group' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get(`data.value.${option.label}`) } />
     </div>
 
     <div slot="modal">
