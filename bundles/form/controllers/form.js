@@ -330,10 +330,10 @@ class FormController extends Controller {
     const create = !form.get('_id');
 
     // update placement
-    form.set('name', req.body.name);
-    form.set('fields', req.body.fields);
     form.set('placement', req.body.placement);
-    form.set('positions', req.body.positions);
+    if (req.body.name) form.set('name', req.body.name);
+    if (req.body.fields) form.set('fields', req.body.fields);
+    if (req.body.positions) form.set('positions', req.body.positions);
 
     // save placement
     await form.save(req.user);
