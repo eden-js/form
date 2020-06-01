@@ -183,7 +183,8 @@ class FormController extends Controller {
   /**
    * add/edit action
    *
-   * @route    {get} /:id/view
+   * @route    {get}  /:id/view
+   * @route    {post} /:id/view
    * @layout   admin
    * @priority 12
    */
@@ -205,7 +206,7 @@ class FormController extends Controller {
         if (!form) {
           // set form by placement
           form = await Form.findOne({
-            placement : req.params.id,
+            placement : req.params.id || (req.body || req.query).placement,
           });
         }
       } catch (e) {}
