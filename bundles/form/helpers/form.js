@@ -39,12 +39,12 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  sanitise(req, form, field, current) {
+  async sanitise(req, form, field, current) {
     // get from register
     const registered = fieldHelper.fields().find(b => b.type === field.type);
 
     // return
-    return registered.render(req, form, field, current);
+    return (await registered.render(req, form, field, current)).value;
   }
 
   /**

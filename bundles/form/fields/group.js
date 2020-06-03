@@ -92,7 +92,7 @@ class GroupField {
     })));
 
     // loop value
-    field.value = await Promise.all((field.value || []).map(async (item) => {
+    field.value = await Promise.all((value || []).map(async (item) => {
       // built form
       const newForm = await formHelper.get(field.uuid);
 
