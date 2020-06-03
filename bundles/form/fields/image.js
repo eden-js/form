@@ -71,8 +71,6 @@ class ImageField {
     // set tag
     field.tag = 'image';
 
-    console.log(value);
-
     // eslint-disable-next-line no-nested-ternary
     field.value = value
       ? (Array.isArray(value) ? await Promise.all(value.map(async (item) => {
