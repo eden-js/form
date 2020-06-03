@@ -44,7 +44,10 @@ class ImageField {
         const image = await Image.findById(val);
 
         // check image
-        if (image) return image;
+        if (image) return {
+          id    : image.get('_id'),
+          model : 'image',
+        };
 
         // return null
         return null;
@@ -70,7 +73,10 @@ class ImageField {
 
     // eslint-disable-next-line no-nested-ternary
     field.value = value
-      ? (Array.isArray(value) ? await Promise.all(value.map((item) => {
+      ? (Array.isArray(value) ? await Promise.all(value.map(async (item) => {
+        // find
+        if (item.model && item.id) item = await Image.findById(item.id);
+
         // return sanitised item
         return item.sanitise();
       })) : await value.sanitise())
