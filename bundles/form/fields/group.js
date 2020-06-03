@@ -125,6 +125,9 @@ class GroupField {
         // value only
         rendered[f.name || f.uuid] = formHelper.sanitise(req, f, item[f.name || f.uuid], valueOnly);
       }));
+
+      // return rendered
+      return rendered;
     }));
 
     // return
