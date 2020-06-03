@@ -114,6 +114,10 @@
         this.updating = {};
 
         // bind
+        this.onUpdateSidebar = this.onUpdateSidebar.bind(this);
+        this.onRemoveSidebar = this.onRemoveSidebar.bind(this);
+
+        // bind
         this.isTab = this.isTab.bind(this);
         this.onTab = this.onTab.bind(this);
           
