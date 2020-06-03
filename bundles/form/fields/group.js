@@ -98,6 +98,8 @@ class GroupField {
     field.value = await Promise.all((field.value || []).map(async (item) => {
       // built form
       const newForm = await formHelper.get(field.uuid);
+      
+      console.log('value only', valueOnly);
 
       // check value only
       if (!valueOnly) {
