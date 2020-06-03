@@ -91,6 +91,9 @@ class GroupField {
       };
     })));
 
+    // set value
+    if (value && !Array.isArray(value)) value = [value];
+
     // loop value
     field.value = await Promise.all((value || []).map(async (item) => {
       // built form
