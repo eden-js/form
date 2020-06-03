@@ -79,7 +79,7 @@ class ImageField {
 
         // return sanitised item
         return item.sanitise();
-      })) : await value.sanitise())
+      })) : await (value.model && value.id ? await Image.findById(value.id) : value).sanitise())
       : null;
 
     // return
