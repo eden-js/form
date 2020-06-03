@@ -74,7 +74,7 @@ class GroupField {
    *
    * @return {*}
    */
-  async render(req, field, value) {
+  async render(req, field, value, valueOnly) {
     // set tag
     field.tag = 'group';
     field.value = value;
@@ -99,20 +99,32 @@ class GroupField {
       // built form
       const newForm = await formHelper.get(field.uuid);
 
-      // rendered
-      const rendered = await formHelper.render(req, newForm, await Promise.all((newForm.get('fields') || []).map(async (f) => {
-        // return fields map
-        return {
-          uuid  : f.uuid,
-          value : item[f.name || f.uuid],
-        };
-      })));
+      // check value only
+      if (!valueOnly) {
+        // rendered
+        const rendered = await formHelper.render(req, newForm, await Promise.all((newForm.get('fields') || []).map(async (f) => {
+          // return fields map
+          return {
+            uuid  : f.uuid,
+            value : item[f.name || f.uuid],
+          };
+        })));
 
-      // rendered form
-      return {
-        form  : rendered,
-        value : item.price,
-      };
+        // rendered form
+        return {
+          form  : rendered,
+          value : item.price,
+        };
+      }
+
+      // set rendered
+      const rendered = {};
+
+      // rendered
+      await Promise.all((newForm.get('fields') || []).map((f) => {
+        // value only
+        rendered[f.name || f.uuid] = formHelper.sanitise(req, f, item[f.name || f.uuid], valueOnly);
+      }));
     }));
 
     // return
