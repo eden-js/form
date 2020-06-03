@@ -79,6 +79,9 @@ class GroupField {
     field.tag = 'group';
     field.value = value;
 
+    // set value
+    if (field.value && !Array.isArray(field.value)) field.value = [field.value];
+
     // built form
     const form = await formHelper.get(field.uuid);
 
@@ -91,11 +94,8 @@ class GroupField {
       };
     })));
 
-    // set value
-    if (value && !Array.isArray(value)) value = [value];
-
     // loop value
-    field.value = await Promise.all((value || []).map(async (item) => {
+    field.value = await Promise.all((field.value || []).map(async (item) => {
       // built form
       const newForm = await formHelper.get(field.uuid);
 
@@ -112,8 +112,7 @@ class GroupField {
 
         // rendered form
         return {
-          form  : rendered,
-          value : item.price,
+          form : rendered,
         };
       }
 
