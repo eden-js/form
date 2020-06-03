@@ -44,7 +44,7 @@ class FormHelper extends Helper {
     const registered = fieldHelper.fields().find(b => b.type === field.type);
 
     // return
-    return registered.sanitise(req, form, field, current);
+    return registered.render(req, form, field, current);
   }
 
   /**
