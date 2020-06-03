@@ -121,9 +121,9 @@ class GroupField {
       const rendered = {};
 
       // rendered
-      await Promise.all((newForm.get('fields') || []).map((f) => {
+      await Promise.all((newForm.get('fields') || []).map(async (f) => {
         // value only
-        rendered[f.name || f.uuid] = formHelper.sanitise(req, f, item[f.name || f.uuid], valueOnly);
+        rendered[f.name || f.uuid] = await formHelper.sanitise(req, f, item[f.name || f.uuid], valueOnly);
       }));
 
       // return rendered
