@@ -28,62 +28,6 @@ class FormController extends Controller {
     // run super
     super();
 
-    // register simple field
-    fieldHelper.field('structure.container', {
-      for         : ['frontend', 'admin'],
-      title       : 'Container Element',
-      categories  : ['structure'],
-      description : 'Creates container structure',
-    }, async (req, field) => {
-      // set tag
-      field.tag = 'container';
-
-      // return
-      return field;
-    }, async () => { }, async () => { });
-
-    // register simple field
-    fieldHelper.field('structure.row', {
-      for         : ['frontend', 'admin'],
-      title       : 'Row Element',
-      categories  : ['structure'],
-      description : 'Creates row structure',
-    }, async (req, field) => {
-      // set tag
-      field.tag = 'row';
-
-      // return
-      return field;
-    }, async () => { }, async () => { });
-
-    // register simple field
-    fieldHelper.field('structure.div', {
-      for         : ['frontend', 'admin'],
-      title       : 'Div Element',
-      categories  : ['structure'],
-      description : 'Creates div structure',
-    }, async (req, field) => {
-      // set tag
-      field.tag = 'div';
-
-      // return
-      return field;
-    }, async () => { }, async () => { });
-
-    // register simple field
-    fieldHelper.field('structure.card', {
-      for         : ['frontend', 'admin'],
-      title       : 'Card Element',
-      categories  : ['structure'],
-      description : 'Creates card structure',
-    }, async (req, field) => {
-      // set tag
-      field.tag = 'card';
-
-      // return
-      return field;
-    }, async () => { }, async () => { });
-
     // register default field types
     ['address', 'boolean', 'money', 'checkbox', 'encrypt', 'date', 'file', 'email', 'image', 'phone', 'number', 'radio', 'select', 'text', 'textarea', 'wysiwyg', 'group'].sort().forEach((field) => {
       // require field
@@ -332,9 +276,10 @@ class FormController extends Controller {
 
     // update placement
     form.set('placement', req.body.placement);
+
+    // set name/fields
     if (req.body.name) form.set('name', req.body.name);
     if (req.body.fields) form.set('fields', req.body.fields);
-    if (req.body.positions) form.set('positions', req.body.positions);
 
     // save placement
     await form.save(req.user);

@@ -1,6 +1,6 @@
 <eden-fields>
   <div>
-    <div class="eden-fields eden-blocks" if={ !state.updating }>
+    <div class="eden-fields eden-blocks" if={ !state.reorder }>
 
       <div class={ `${ classes({ 'empty' : !getFields().length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-placement="">
         <span class="eden-dropzone-label" if={ !props.preview }>
@@ -8,13 +8,17 @@
         </span>
 
         <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
-        <div each={ (el, i) in getFields() } data-is={ getElement(el) } is={ getElement(el) } el={ el } class={ el.class } preview={ preview } form={ form } data-field={ el.uuid } data={ getField(el) } field={ el } get-id={ getId } get-name={ getName } get-field={ getField } on-save={ onSaveField } on-remove={ onRemoveField } on-refresh={ onRefreshField } on-update={ onUpdate } placement={ i } i={ i } />
+
+        <div class="row form-fields">
+          <div each={ (field, i) in getFields() } is={ getType(field) } class={ `${field.col ? 'col' : 'col-12'} ${field.class}` } preview={ preview } form={ form } id={ field.uuid } data={ getData(field) } field={ field } get-id={ getId } get-name={ getName } on-save={ onSaveField } on-remove={ onRemoveField } on-update={ onUpdate } />
+        </div>
+
         <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
 
       </div>
     </div>
 
-    <div if={ state.updating } class="text-center">
+    <div if={ state.reorder } class="text-center">
       <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
@@ -27,6 +31,7 @@
     import slug from 'slug';
     import Base from '../js/base';
     import Model from '../js/model';
+    import dotProp from 'dot-prop';
 
     // export default
     export default class EdenFields extends Base {
@@ -53,23 +58,15 @@
         // set update
         this.form      = this.props.form ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {});
         this.type      = this.props.type;
-        this.fields    = (this.props.form || {}).render || [];
+        this.data    = (this.props.form || {}).render || [];
         this.preview   = !!this.props.preview;
         this.placement = null;
-
-        // set filter fields
-        this.filter = {
-          fix     : this.filterFix.bind(this),
-          place   : this.filterPlace.bind(this),
-          flatten : this.filterFlatten.bind(this),
-          replace : this.filterReplace.bind(this),
-        };
 
         // get fields
         this.build = this.build.bind(this);
         this.getId = this.getId.bind(this);
         this.getName = this.getName.bind(this);
-        this.getField = this.getField.bind(this);
+        this.getData = this.getData.bind(this);
         this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
         this.onSaveField = this.onSaveField.bind(this);
@@ -118,9 +115,6 @@
 
         // set fields
         this.form.removeListener('fields', this.setFields);
-
-        // off mousemove        
-        jQuery('body').off('mousemove', this.onMouseMoved);
       }
 
 
@@ -135,10 +129,7 @@
        */
       async build () {
         // init dragula
-        if (!this.dragula && !this.props.preview) this.initDragula();
-
-        // set containers
-        if (this.dragula) this.dragula.containers = [...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))];
+        if (!this.props.preview) this.initSort();
 
         // set updating
         if (this.state.updating || !this.hasChange()) return;
@@ -168,17 +159,16 @@
           if (!(this.form.get('render') || []).length) await this.loadFields();
 
           // set fields
-          this.fields = this.form.get('render') || [];
+          this.data = this.form.get('render') || [];
 
           // set fields
           this.form.on('fields', this.setFields);
         }
 
         // set default positions
-        if (this.props.positions && !(this.form.get('positions') || []).length) {
+        if (this.props.positions && !(this.form.get('fields') || []).length) {
           // set default
-          this.form.set('positions', this.props.positions);
-          this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
+          this.form.set('fields', this.props.positions || []);
 
           // save fields
           this.saveForm();
@@ -241,12 +231,12 @@
        *
        * @return {*}
        */
-      getField (field) {
+      getData (field) {
         // return on no field
         if (!field) return;
 
         // get found
-        const found = this.fields.find((b) => b.uuid === field.uuid);
+        const found = this.data.find((b) => b.uuid === field.uuid);
 
         // gets data for field
         if (!found) return null;
@@ -262,9 +252,9 @@
        *
        * @return {*}
        */
-      getElement (child) {
+      getType (child) {
         // return get child
-        return (this.getField(child) || {}).tag ? `field-${this.getField(child).tag}` : 'eden-loading';
+        return (this.getData(child) || {}).tag ? `field-${this.getData(child).tag}` : 'eden-loading';
       }
 
       /**
@@ -274,7 +264,18 @@
        */
       getFields () {
         // return filtered fields
-        return (this.form.get('positions') || []).map(this.filter.fix).filter((field) => field);
+        return (this.form.get('fields') || []).filter((field) => field).sort((a, b) => {
+          // set order
+          if (!a.order) a.order = 0;
+          if (!b.order) b.order = 0;
+
+          // get order
+          if (a.order > a.order) return 1;
+          if (a.order < a.order) return -1;
+
+          // return no change
+          return 0;
+        });
       }
 
       /**
@@ -284,6 +285,9 @@
        * @param  {Object} field
        */
       async onSaveField (field, data = {}, form, preventUpdate) {
+        // update view
+        if (!preventUpdate) this.loading(`field.${field.uuid}`, true);
+
         // build meta
         if (!field._meta) {
           // set created
@@ -295,9 +299,6 @@
         // set updated
         field._meta.updated = new Date();
 
-        // clone
-        let fieldClone = Object.assign({}, field);
-
         // check id
         if (!this.form.get('id')) {
           // save form
@@ -305,10 +306,10 @@
         }
 
         // log data
-        let res = await fetch(`/form/${this.form.get('id')}/field/save`, {
+        const res = await fetch(`/form/${this.form.get('id')}/field/save`, {
           'body' : JSON.stringify({
             'data'  : data,
-            'field' : fieldClone
+            'field' : field
           }),
           'method'  : 'post',
           'headers' : {
@@ -318,7 +319,7 @@
         });
 
         // load data
-        let result = await res.json();
+        const result = await res.json();
 
         // set logic
         for (let key in result.result) {
@@ -327,14 +328,13 @@
         }
 
         // set to fields
-        if (!this.fields.find((b) => b.uuid === data.uuid)) this.fields.push(data);
-        
-        // set flat
-        this.form.set('positions', (this.form.get('positions') || []).map(this.filter.replace(fieldClone)));
-        this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
+        if (!this.data.find((b) => b.uuid === data.uuid)) this.data.push(data);
 
         // save form
         await this.saveForm(preventUpdate);
+
+        // update view
+        if (!preventUpdate) this.loading(`field.${field.uuid}`, false);
       }
 
       /**
@@ -343,15 +343,12 @@
        * @param  {Event}  e
        * @param  {Object} field
        */
-      async onRefreshField (field, data) {
-        // set loading
-        field.refreshing = true;
-
+      async onRemoveField (field, data) {
         // update view
-        this.update();
+        this.loading(`field.${field.uuid}`, true);
 
         // log data
-        let res = await fetch(`/form/${this.form.get('id')}/field/save`, {
+        const res = await fetch(`/form/${this.form.get('id')}/field/remove`, {
           'body' : JSON.stringify({
             'data'  : data,
             'field' : field
@@ -364,69 +361,13 @@
         });
 
         // load data
-        let result = await res.json();
+        const result = await res.json();
 
-        // set logic
-        for (let key in result.result) {
-          // clone to form
-          data[key] = result.result[key];
-        }
-
-        // set loading
-        delete field.refreshing;
+        // set fields
+        this.form.set('fields', (this.form.get('fields') || []).filter(f => f.uuid !== field.uuid));
 
         // update view
-        this.update();
-      }
-
-      /**
-       * on refresh field
-       *
-       * @param  {Event}  e
-       * @param  {Object} field
-       */
-      async onRemoveField (field, data, form) {
-        // get uuid
-        const dotProp = require('dot-prop-immutable');
-
-        // set loading
-        field.removing = true;
-
-        // update view
-        this.update({
-          updating : true
-        });
-
-        // log data
-        let res = await fetch(`/form/${this.form.get('id')}/field/remove`, {
-          'body' : JSON.stringify({
-            'data'  : data,
-            'field' : field
-          }),
-          'method'  : 'post',
-          'headers' : {
-            'Content-Type' : 'application/json'
-          },
-          'credentials' : 'same-origin'
-        });
-
-        // load data
-        let result = await res.json();
-
-        // get positions
-        let positions = (this.form.get('positions') || []).map(this.filter.fix).filter((field) => field);
-
-        // set moving on field
-        positions = dotProp.set(positions, `${form}.removing`, true);
-
-        // get positions
-        this.form.set('positions', positions.map(this.filter.place).filter((field) => field));
-        this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
-
-        // update view
-        this.update({
-          updating : false
-        });
+        this.loading(`field.${field.uuid}`, false);
 
         // save form
         await this.saveForm();
@@ -438,6 +379,9 @@
        * @param {Event} e
        */
       onMouseMoved (e) {
+        // check dragging
+        if (!this.dragging) return;
+
         // width
         const maxTop = jQuery(window).height() / 2;
         const maxLeft = jQuery(window).width() - jQuery('.eden-blocks-sidebar').width();
@@ -514,10 +458,10 @@
         }
         
         // set fields
-        const missing = (this.form.get('render') || []).filter((field) => !this.fields.find((f) => f.uuid === field.uuid));
+        const missing = (this.form.get('render') || []).filter((field) => !this.data.find((f) => f.uuid === field.uuid));
         
         // push missing fields
-        this.fields.push(...missing);
+        this.data.push(...missing);
         
         // set forms
         if (!window.eden.forms) window.eden.forms = {};
@@ -537,7 +481,7 @@
        */
       setFields() {
         // set fields
-        this.fields = this.form.get('render') || [];
+        this.data = this.form.get('render') || [];
 
         // safe update
         this.safeUpdate();
@@ -600,10 +544,10 @@
               }
               
               // set fields
-              const missing = (this.form.get('render') || []).filter((field) => !this.fields.find((f) => f.uuid === field.uuid));
+              const missing = (this.form.get('render') || []).filter((field) => !this.data.find((f) => f.uuid === field.uuid));
               
               // push missing fields
-              this.fields.push(...missing);
+              this.data.push(...missing);
             }
           }
 
@@ -621,148 +565,125 @@
       /**
       * init dragula
       */
-      initDragula () {
-        // require dragula
-        const dragula = require('dragula');
-        const dotProp = require('dot-prop-immutable');
+      initSort () {
+        // require sort
+        const Sortable = require('sortablejs');
 
-        // do dragula
-        this.dragula = dragula([...(this.$$(`.eden-dropzone[data-form="${this.props.placement}"]`)), ...(this.$$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`))], {
-          moves : (el, container, handle) => {
-            return jQuery(container).closest('.eden-blocks-sidebar').length || ((jQuery(el).is('[data-field]') || jQuery(el).closest('[data-field]').length) && (jQuery(handle).is('.move') || jQuery(handle).closest('.move').length) && (jQuery(handle).is('.move') ? jQuery(handle) : jQuery(handle).closest('.move')).attr('for') === jQuery(el).attr('data-field'));
-          },
-          copy : (el, container) => {
-            // check container class
-            return jQuery(container).closest('.eden-blocks-sidebar').length;
-          }
-        }).on('drop', async (el, target, source, sibling) => {
-          // get parent
-          target = el.parentNode;
+        // sortables
+        if (this.sortables) {
+          // destroy
+          this.sortables.forEach((sortable) => sortable.destroy());
+        }
 
-          console.log(el, target);
+        // sortables
+        this.sortables = [];
 
-          // check target
-          if (!target) return;
+        // create sortables
+        [this.$(`[data-form="${this.props.placement}"] .form-fields`), this.$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`)].forEach((item) => {
+          // sometimes can be missing
+          if (!item) return;
 
-          // get current form
-          let addedField = {};
-          const placement = el.getAttribute('placement') || null;
-          const position = target.getAttribute('data-placement');
+          // push
+          this.sortables.push(new Sortable(item, {
+            group          : this.props.placement,
+            handle         : '.move, [data-type]',
+            animation      : 200,
+            forceFallback  : true,
+            fallbackOnBody : true,
 
-          // get positions
-          let positions = (this.form.get('positions') || []).map(this.filter.fix).filter((field) => field);
+            onStart : (e) => {
+              // add class
+              this.dragging = true;
 
-          // check position
-          if (jQuery(target).closest('.eden-blocks-sidebar').length) {
-            // check
-            if (placement && !position) {
-              // set get from
-              let getFrom = el.getAttribute('placement') || null;
-              let gotField = getFrom ? dotProp.get(positions, getFrom) : null;
-              
-              // check got field
-              if (gotField) {
-                // remove el
-                jQuery(el).remove();
+              // add listener
+              $(document).on('mousemove', this.onMouseMoved);
+            },
 
-                // on remove
-                return this.onRemoveField(gotField, {}, getFrom);
+            onEnd : async (e) => {
+              // add class
+              this.dragging = false;
+
+              // add listener
+              $(document).off('mousemove', this.onMouseMoved);
+
+              // set item
+              const el     = e.item;
+              const target = e.to;
+              const source = e.from;
+
+              // check target
+              if (!target) return;
+
+              // check position
+              if ($(target).get('id') && $(target).closest('.eden-blocks-sidebar').length) {
+                // check
+                if (field.uuid) {
+                  // on remove
+                  return this.onRemoveField(field, {});
+                }
               }
+
+              // check target
+              if (!target || !source || !el || (target && !target.className.includes('form-fields'))) return;
+
+              // set fields
+              const fields = [];
+              let addedField = null;
+              let addedFieldEl = null;
+
+              // loop physical fields
+              target.childNodes.forEach((f, i) => {
+                // check placement
+                if (!f.getAttribute) return;
+                
+                // set get from
+                let fieldItem = (this.form.get('fields') || []).find((fi) => fi.uuid === f.getAttribute('id'));
+
+                // return on no field
+                if (!fieldItem) {
+                  // create new field
+                  addedField = {
+                    type : el.getAttribute('data-type'),
+                    uuid : uuid(),
+                  };
+                  fieldItem = addedField;
+                  addedFieldEl = f;
+                }
+
+                // set order
+                fieldItem.order = i;
+
+                // get actual field
+                fields.push(fieldItem);
+              });
+
+              // remove element
+              if (addedFieldEl) $(addedFieldEl).remove();
+
+              // update form
+              this.form.set('fields', fields);
+
+              // save form
+              if (addedField) {
+                // added field
+                await this.onSaveField(addedField, {});
+              }
+
+              // update
+              this.safeUpdate({
+                reorder : true,
+              });
+
+              // update
+              setTimeout(() => this.safeUpdate({
+                reorder : false,
+              }), 10);
+
+              // save
+              this.saveForm();
             }
-          }
-
-          // check target
-          if (!target || !source || !el || (target && !target.className.includes('eden-dropzone'))) return;
-
-          // get fields of target
-          let fields = [];
-
-          // set moving on field
-          if (placement) positions = dotProp.set(positions, placement + '.moving', true);
-
-          // loop physical fields
-          target.childNodes.forEach((field) => {
-            // check placement
-            if (!field.getAttribute) return;
-            if (!field.getAttribute('data-type') && !field.getAttribute('placement')) return;
-            
-            // set get from
-            let getFrom = field.getAttribute('placement') || null;
-            let gotField = getFrom ? dotProp.get(positions, getFrom) : null;
-
-            // return on no field
-            if (!gotField && placement) return;
-
-            // clone field
-            if (getFrom === placement || field.getAttribute('data-type') === el.getAttribute('data-type')) {
-              // clone field
-              gotField = gotField ? JSON.parse(JSON.stringify(gotField)) : {
-                type : el.getAttribute('data-type'),
-                uuid : uuid(),
-              };
-
-              // delete placing
-              if (gotField.moving) delete gotField.moving;
-
-              // set field
-              addedField = gotField;
-            }
-
-            // get actual field
-            fields.push(gotField);
-          });
-
-          // remove logic
-          this.update({
-            updating : true
-          });
-
-          // set form
-          if ((position || '').length) {
-            // get
-            if (!dotProp.get(positions, position)) {
-              positions = dotProp.set(positions, position, []);
-            }
-
-            // set positions
-            positions = dotProp.set(positions, position, fields);
-          } else {
-            // set positions
-            positions = fields;
-          }
-
-          // get positions
-          positions = (positions || []).map(this.filter.place).filter((field) => field);
-
-          // update form
-          this.form.set('positions', positions);
-
-          // remove logic
-          this.update({
-            updating : false
-          });
-
-          // save form
-          if (!placement) await this.onSaveField(addedField, {});
-
-          // save
-          this.saveForm();
-        }).on('drag', (el, source) => {
-          // add is dragging
-          this.dragging = true;
-        }).on('dragend', () => {
-          // remove is dragging
-          this.dragging = false;
-        }).on('over', function (el, container) {
-          // add class
-          
-        }).on('out', function (el, container) {
-          // remove class
-          
+          }));
         });
-        
-        // add listener
-        jQuery('body').on('mousemove touchmove', this.onMouseMoved);
       }
 
       /**
@@ -791,155 +712,6 @@
 
         // return false
         return false;
-      }
-
-      // ////////////////////////////////////////////////////////////////////////////
-      //
-      // Filter Methods
-      //
-      // ////////////////////////////////////////////////////////////////////////////
-
-      /**
-      * filter fix
-      *
-      * @param  {Object} field
-      *
-      * @return {Object}
-      */
-      filterFix(field) {
-        // standard children fields
-        const children = ['left', 'right', 'children'];
-
-        // return if moving
-        if (!field) return null;
-
-        // check children
-        for (const child of children) {
-          // check child
-          if (field[child]) {
-            // remove empty fields
-            field[child] = Object.values(field[child]).filter(f => f);
-
-            // push children to flat
-            field[child] = field[child].map(this.filter.fix);
-          }
-        }
-
-        // return accum
-        return field;
-      }
-
-      /**
-      * filter field
-      *
-      * @param  {Object} field
-      *
-      * @returns {Object}
-      */
-      filterPlace(field) {
-        // standard children fields
-        const children = ['left', 'right', 'children'];
-
-        // return if moving
-        if (field.moving || field.removing) return null;
-
-        // check children
-        for (const child of children) {
-          // check child
-          if (field[child]) {
-            // remove empty fields
-            field[child] = Object.values(field[child]);
-
-            // push children to flat
-            field[child] = field[child].map(this.filter.place).filter(f => f);
-          }
-        }
-
-        // return accum
-        return field;
-      }
-
-      /**
-      * filter flatten
-      *
-      * @param  {Array}  accum
-      * @param  {Object} field
-      *
-      * @returns {Array}
-      */
-      filterFlatten(accum, field) {
-        // standard children fields
-        const children = ['left', 'right', 'children'];
-
-        // get sanitised
-        const sanitised = JSON.parse(JSON.stringify(field));
-
-        // loop for of
-        for (const child of children) {
-          // delete child field
-          delete sanitised[child];
-          delete sanitised.saving;
-        }
-
-        // check field has children
-        accum.push(sanitised);
-
-        // check children
-        for (const child of children) {
-          // check child
-          if (field[child]) {
-            // remove empty fields
-            field[child] = field[child].filter(f => f);
-
-            // push children to flat
-            accum.push(...field[child].reduce(this.filter.flatten, []));
-          }
-        }
-
-        // return accum
-        return accum;
-      }
-
-      /**
-      * filter replace
-      *
-      * @param  {Field} b
-      *
-      * @returns {*}
-      */
-      filterReplace(b) {
-        // return field
-        return (field) => {
-          // standard children fields
-          const children = ['left', 'right', 'children'];
-
-          // return if moving
-          if (field.moving || field.removing) return null;
-
-          // set field info for replace
-          if (field.uuid === b.uuid) {
-            // remove
-            Object.keys(b).forEach((key) => {
-              // set key
-              field[key] = b[key];
-            });
-          }
-
-          // check children
-          for (const child of children) {
-            // check child
-            if (field[child]) {
-              // remove empty fields
-              field[child] = Object.values(field[child]);
-
-              // push children to flat
-              field[child] = field[child].map(this.filter.replace(b)).filter(f => f);
-            }
-          }
-
-          // return accum
-          return field;
-        };
       }
     }
   </script>

@@ -41,7 +41,6 @@ class Form extends Model {
       action    : this.get('action'),
       fields    : this.get('fields') || [],
       placement : this.get('placement'),
-      positions : this.get('positions') || [],
     };
   }
 }
