@@ -175,7 +175,7 @@
         }
 
         // set default positions
-        if (this.props.positions && !(this.form.get('positions') || []).length && !this.form.get('id')) {
+        if (this.props.positions && !(this.form.get('positions') || []).length) {
           // set default
           this.form.set('positions', this.props.positions);
           this.form.set('fields', (this.form.get('positions') || []).reduce(this.filter.flatten, []));
