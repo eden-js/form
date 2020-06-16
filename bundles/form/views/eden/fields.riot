@@ -115,6 +115,12 @@
 
         // set fields
         this.form.removeListener('fields', this.setFields);
+
+        // sortables
+        if (this.sortables) {
+          // destroy
+          this.sortables.forEach((sortable) => sortable.destroy());
+        }
       }
 
 
@@ -129,7 +135,19 @@
        */
       async build () {
         // init dragula
-        if (!this.props.preview) this.initSort();
+        if (!this.props.preview) {
+          // init sort
+          this.initSort();
+        } else {
+          // sortables
+          if (this.sortables) {
+            // destroy
+            this.sortables.forEach((sortable) => sortable.destroy());
+          }
+
+          // sortables
+          this.sortables = [];
+        }
 
         // set updating
         if (this.state.updating || !this.hasChange()) return;
