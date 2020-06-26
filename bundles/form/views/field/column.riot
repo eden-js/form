@@ -1,0 +1,62 @@
+<field-column>
+  <div class="d-flex flex-row">
+    <div is={ `field-${props.column.meta.data.tag}` } field={ props.column.meta.field } ref={ ref('field') } class="field-column flex-1" data={ getData() } get-name={ () => 'grid' } preview={ true } />
+    <button class="btn btn-success" onclick={ (e) => onChange(e) }>
+      <i class="fa fa-check" />
+    </button>
+  </div>
+
+  <script>
+    // import base
+    import Base from '../js/base';
+
+    // export default
+    export default class FieldColumn extends Base {
+
+      /**
+       * on before mount
+       */
+      onBeforeMount(...args) {
+        // on before mount
+        super.onBeforeMount(...args);
+      }
+
+      /**
+       * on before mount
+       */
+      onMounted(...args) {
+        // on before mount
+        super.onMounted(...args);
+
+        // focus
+        $(this.$('input')).focus();
+      }
+
+      /**
+       * on change
+       */
+      async onChange(e) {
+        // loading submit
+        this.loading('submit', true);
+      
+        // save
+        if (this.props.onSave) await this.props.onSave(this.props.row, this.props.column, this.refs.field.val());
+
+        // loading submit
+        this.loading('submit', false);
+      }
+
+      /**
+      * get data
+      *
+      * @return {*}
+      */
+      getData() {
+        // return object assign
+        return Object.assign({}, this.props.column.meta, {
+          value : this.props.dataValue
+        });
+      }
+    }
+  </script>
+</field-column>

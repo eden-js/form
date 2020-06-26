@@ -22,7 +22,7 @@
       <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
-    <field-sidebar ref={ ref('sidebar') } placement={ props.placement } fields={ props.fields } />
+    <field-sidebar ref={ ref('sidebar') } loading={ state.reorder } placement={ props.placement } fields={ props.fields } />
   </div>
 
   <script>
@@ -121,6 +121,9 @@
           // destroy
           this.sortables.forEach((sortable) => sortable.destroy());
         }
+
+        // popover
+        $('body > .tooltip').remove();
       }
 
 
@@ -148,6 +151,9 @@
           // sortables
           this.sortables = [];
         }
+
+        // popover
+        $('[data-toggle="tooltip"]').tooltip();
 
         // set updating
         if (this.state.updating || !this.hasChange()) return;
@@ -633,11 +639,24 @@
               if (!target) return;
 
               // check position
-              if ($(target).get('id') && $(target).closest('.eden-blocks-sidebar').length) {
+              if (el.getAttribute('id') && $(target).closest('.eden-blocks-sidebar').length) {
+                // get field
+                const field = (this.form.get('fields') || []).find((fi) => fi.uuid === el.getAttribute('id'));
+
                 // check
                 if (field.uuid) {
                   // on remove
-                  return this.onRemoveField(field, {});
+                  await this.onRemoveField(field, {});
+
+                  // update
+                  this.safeUpdate({
+                    reorder : true,
+                  });
+
+                  // update
+                  return setTimeout(() => this.safeUpdate({
+                    reorder : false,
+                  }), 10);
                 }
               }
 
