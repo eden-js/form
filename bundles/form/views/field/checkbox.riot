@@ -1,18 +1,18 @@
 <field-checkbox>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
-    <div slot="body">
+    <div slot="body" class="mb-3">
       <span if={ !get('field.options', []).length }>
         Add Options
       </span>
-      <label if={ props.field.label }>
+      <label class="form-label" if={ props.field.label }>
         { props.field.label }
       </label>
-      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || 'form-group' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get(`data.value`, []).includes(option.label) } />
+      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get(`data.value`, []).includes(option.label) } />
     </div>
 
     <div slot="modal">
-      <div each={ (option, i) in props.field.options } class="form-group">
-        <label>
+      <div each={ (option, i) in props.field.options } class="mb-3">
+        <label class="form-label">
           Checkbox #{ i + 1 }
         </label>
         <div class="input-group">

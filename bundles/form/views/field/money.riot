@@ -1,7 +1,7 @@
 <field-money>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="number" step="0.01" group-class={ props.field.group || 'form-group' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
+      <validate type="number" step="0.01" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
         <div slot="prepend" class="input-group-prepend">
           <span class="input-group-text">
             $
@@ -11,14 +11,14 @@
     </div>
     
     <div slot="validation">
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Min Length
         </label>
         <input class="form-control" type="number" ref="min-length" value={ get('field.validateLength.min', 0) } onchange={ (e) => onMinLength(e) } />
       </div>
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Max Length
         </label>
         <input class="form-control" type="number" ref="min-length" value={ get('field.validateLength.min', 1000) } onchange={ (e) => onMaxLength(e) } />

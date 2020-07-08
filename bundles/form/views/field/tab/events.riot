@@ -1,8 +1,8 @@
 <field-tab-events>
   <div class="field-settings">
     <div if={ props.isInput }>
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           On Change
         </label>
         <input class="form-control" ref="change" value={ props.field.change || '' } onchange={ (e) => onChange(e) } />

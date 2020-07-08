@@ -1,5 +1,5 @@
 <eden-select>
-  <select class="selectpicker w-100" name={ props.name } multiple={ props.multiple } />
+  <select class="selectpicker show-tick form-control" name={ props.name } multiple />
 
   <script>
     // import base
@@ -39,23 +39,18 @@
         if (this.props.url) {
           // await fetch
           const res = await fetch(this.props.url);
-          let data = await res.json();
+          const data = (await res.json()).map((item) => {
+            // check if selected
+            if (((this.data || []).find((l) => l.value === item.value) || {}).selected) {
+              item.selected = true;
+            }
 
-          // merge in selected
-          const selected = (this.data || []).find((item) => item.selected);
-
-          // selected
-          if (selected) {
-            // find
-            data = data.filter((item) => item.value !== selected.value);
-
-            // add selected
-            data.push(selected);
-          }
+            // return item
+            return item;
+          });
 
           // set data
           this.data = data;
-          await this.update();
         }
 
         // append
@@ -72,31 +67,37 @@
             });
           }
 
-          // check placeholder
-          if (this.props.placeholder && !data.find((item) => item.selected)) {
-            // prepend
-            jQuery(this.$('select')).prepend(`<option value="">${this.props.placeholder}</option>`);
-          }
-
           // for each
           data.forEach((item) => {
             // append
-            jQuery(this.$('select')).append(`<option value="${item.value}"${item.selected ? ` selected` : ''}>${item.name || item.text}</option>`);
+            $(this.$('select')).append(`<option value="${item.value}"${item.selected ? ` selected` : ''}>${item.name || item.text}</option>`);
           });
         }
 
         // require logic
         require('bootstrap-select/js/bootstrap-select.js');
 
+        // opts
+        const opts = {
+          header           : this.props.placeholder,
+          multiple         : true,
+          liveSearch       : true,
+          noneSelectedText : this.props.placeholder,
+        };
+        
+        // multiple
+        if (!this.props.multiple) {
+          // max
+          opts.maxOptions = 1;
+        }
+
         // do select 2
-        jQuery(this.$('select')).selectpicker({
-          header                : this.props.placeholder,
-          liveSearch            : true,
-          noneSelectedText      : this.props.placeholder,
-          liveSearchPlaceholder : this.props.placeholder,
-        }).on('change', (e) => {
+        $(this.$('select')).selectpicker(opts).on('change', (e) => {
+          // check value
+          const value = $(this.$('select')).selectpicker('val');
+
           // on change
-          if (this.props.onChange) this.props.onChange(e);
+          if (this.props.onChange) this.props.onChange(e, this.props.multiple ? value : value[0]);
         });
 
         // ajax
@@ -105,7 +106,7 @@
           require('ajax-bootstrap-select/dist/js/ajax-bootstrap-select.min.js');
 
           // add ajax logic
-          jQuery(this.$('select')).ajaxSelectPicker({
+          $(this.$('select')).ajaxSelectPicker({
             ajax : {
               url  : this.props.url,
               type : 'GET',
@@ -121,15 +122,15 @@
               dataType : 'json',
             },
             locale : {
-              emptyTitle : this.props.label
+              emptyTitle : this.props.placeholder
             },
             minLength    : 0,
-            clearOnEmpty : false,
+            clearOnEmpty : true,
             emptyRequest : true,
           })
 
           // trigger change
-          jQuery(this.$('.bs-searchbox .form-control')).trigger('keyup');
+          $(this.$('.bs-searchbox .form-control')).trigger('keyup');
         }
       }
 
@@ -148,7 +149,13 @@
        */
       val() {
         // return value
-        return jQuery(this.$('select')).val();
+        const value = $(this.$('select')).selectpicker('val');
+
+        // return value
+        if (this.props.multiple) return value;
+
+        // return first
+        return value[0];
       }
     }
   </script>

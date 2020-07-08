@@ -1,8 +1,8 @@
 <field-address>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <div class={ props.field.group || 'form-group' }>
-        <label for={ props.getId(`${props.field.uuid}-geo`) }>
+      <div class={ props.field.group || 'mb-3' }>
+        <label class="form-label" for={ props.getId(`${props.field.uuid}-geo`) }>
           { props.field.label }
           <i if={ !props.field.label }>Set Label</i>
         </label>

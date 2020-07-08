@@ -24,24 +24,24 @@
           </ul>
         </div>
         <div class="card-body">
-          <div class="form-group">
-            <label for="title">Form Title</label>
+          <div class="mb-3">
+            <label class="form-label" for="title">Form Title</label>
             <input type="text" id="title" name={ `title[${lng}]` } class="form-control" value={ (form.get('title') || {})[lng] || '' } data-input={ `title.${lng}` } hide={ eden.get('i18n.lang')() !== lng } each={ (lng, i) in languages } onchange={ onSlug }>
           </div>
-          <div class="form-group">
-            <label for="slug">Form Slug</label>
+          <div class="mb-3">
+            <label class="form-label" for="slug">Form Slug</label>
             <input type="text" id="slug" name="slug" class="form-control" ref="slug" data-input="slug" value={ form.get('slug') || '' } onchange={ onInput }>
           </div>
-          <div class="form-group">
-            <label for="placement">Form Placement</label>
+          <div class="mb-3">
+            <label class="form-label" for="placement">Form Placement</label>
             <input type="text" id="placement" name="placement" class="form-control" ref="placement" data-input="placement" value={ form.get('placement') || '' } onchange={ onInput }>
           </div>
-          <div class="form-group">
-            <label for="action">Form Action</label>
+          <div class="mb-3">
+            <label class="form-label" for="action">Form Action</label>
             <input type="text" id="action" name="action" class="form-control" ref="action" data-input="action" value={ form.get('action') || '' } onchange={ onInput }>
           </div>
-          <div class="form-group">
-            <label for="layout">Form Layout</label>
+          <div class="mb-3">
+            <label class="form-label" for="layout">Form Layout</label>
             <input type="text" id="layout" name="layout" class="form-control" ref="layout" data-input="layout" value={ form.get('layout') || '' } onchange={ onInput }>
           </div>
         </div>

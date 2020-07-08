@@ -1,7 +1,7 @@
 <field-boolean>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="boolean" group-class={ props.field.group || 'form-group' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ props.data.value } required={ props.field.required } on-change={ onChange } />
+      <validate type="boolean" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ props.data.value } required={ props.field.required } on-change={ onChange } />
     </div>
     
   </field>

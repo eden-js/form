@@ -1,15 +1,15 @@
 <field-tab-display>
   <div class="tab-display">
   
-    <div class="form-group" if={ props.isInput }>
-      <label>
+    <div class="mb-3" if={ props.isInput }>
+      <label class="form-label">
         Label
       </label>
       <input class="form-control" ref="label" value={ get('field.label', '') } onchange={ (e) => onLabel(e) } />
     </div>
     
-    <div class="form-group" if={ props.isMultiple }>
-      <label>
+    <div class="mb-3" if={ props.isMultiple }>
+      <label class="form-label">
         Multiple Values
       </label>
       <select class="form-control" onchange={ (e) => onAllowMultiple(e) }>
@@ -18,30 +18,30 @@
       </select>
     </div>
     
-    <div class="form-group">
-      <label>
+    <div class="mb-3">
+      <label class="form-label">
         Container Class
       </label>
       <input class="form-control" ref="class" value={ get('field.class', '') } onchange={ (e) => onClass(e) } />
     </div>
     
     <div if={ props.isInput }>
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Group Class
         </label>
-        <input class="form-control" ref="group" value={ get('field.group', 'form-group') } onchange={ (e) => onGroupClass(e) } />
+        <input class="form-control" ref="group" value={ get('field.group', 'mb-3') } onchange={ (e) => onGroupClass(e) } />
       </div>
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Input Class
         </label>
         <input class="form-control" ref="field" value={ get('field.field', 'form-control') } onchange={ (e) => onFieldClass(e) } />
       </div>
       
       <div if={ props.i18n }>
-        <div class="form-group">
-          <label>
+        <div class="mb-3">
+          <label class="form-label">
             Enable i18n
           </label>
           <select class="form-control" onchange={ (e) => onLanguage(e) }>

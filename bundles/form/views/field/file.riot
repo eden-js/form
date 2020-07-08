@@ -1,8 +1,8 @@
 <field-file>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <div class="form-group">
-        <label for={ props.getId(props.field.uuid) }>
+      <div class="mb-3">
+        <label class="form-label" for={ props.getId(props.field.uuid) }>
           { props.field.label }
           <i if={ !props.field.label }>Set Label</i>
         </label>
@@ -11,14 +11,14 @@
     </div>
     
     <div slot="modal">
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Field Column
         </label>
         <input class="form-control" ref="col" value={ props.field.col } onchange={ (e) => onCol(e) } />
       </div>
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Input Type
         </label>
         <select class="form-control" ref="input" value={ props.field.input } onchange={ (e) => onInput(e) }>

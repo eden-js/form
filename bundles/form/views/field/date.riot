@@ -1,18 +1,18 @@
 <field-date>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="date" group-class={ props.field.group || 'form-group' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+      <validate type="date" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
     </div>
     
     <div slot="validation">
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           Start Year
         </label>
         <input class="form-control" ref="start-year" value={ props.field.startYear || (new Date()).getFullYear() } onchange={ (e) => onStartYear(e) } />
       </div>
-      <div class="form-group">
-        <label>
+      <div class="mb-3">
+        <label class="form-label">
           End Year
         </label>
         <input class="form-control" ref="end-year" value={ props.field.endYear || ((new Date()).getFullYear() - 80) } onchange={ (e) => onEndYear(e) } />
