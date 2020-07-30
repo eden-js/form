@@ -2,9 +2,9 @@
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
       <div if={ get('field.i18n') } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lang') !== lng }>
-        <editor name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+        <editor show-toolbar={ true } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
       </div>
-      <editor if={ !get('field.i18n') } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+      <editor show-toolbar={ true } if={ !get('field.i18n') } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
     </div>
   </field>
   

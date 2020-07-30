@@ -6,7 +6,7 @@
           { props.field.label }
           <i if={ !props.field.label }>Set Label</i>
         </label>
-        <upload name={ props.getName(props.field.uuid) } multi={ props.field.multiple } image={ props.data.value } col={ props.field.col } show-type={ props.field.input } on-change={ onChange } />
+        <upload name={ props.getName(props.field.uuid) } multi={ props.field.multiple } image={ props.data.value } col={ props.type === 'grid' ? 'col-12' : props.field.col } show-type={ props.type === 'grid' ? 'input' : props.field.input } on-change={ onChange } />
       </div>
     </div>
     

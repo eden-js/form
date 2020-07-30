@@ -53,9 +53,10 @@
       */
       getData() {
         // return object assign
-        return Object.assign({}, this.props.column.meta, {
-          value : this.props.dataValue
-        });
+        return {
+          ...(this.props.column.meta),
+          value : this.props.dataValue,
+        };
       }
     }
   </script>
