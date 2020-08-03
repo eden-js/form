@@ -1,5 +1,5 @@
 <eden-select>
-  <select class="selectpicker show-tick form-control" name={ props.name } multiple />
+  <select class="selectpicker show-tick form-control" name={ props.name } multiple="multiple" />
 
   <script>
     // import base
@@ -124,9 +124,10 @@
             locale : {
               emptyTitle : this.props.placeholder
             },
-            minLength    : 0,
-            clearOnEmpty : true,
-            emptyRequest : true,
+            minLength        : 0,
+            clearOnEmpty     : true,
+            emptyRequest     : true,
+            preserveSelected : false,
           })
 
           // trigger change
@@ -137,9 +138,9 @@
       /**
        * check should update
        */
-      shouldUpdate(data) {
+      shouldUpdate(newProps, currentProps) {
         // check initialized
-        return !this.initialized;
+        return false;
       }
     
       /**
