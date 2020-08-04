@@ -22,7 +22,7 @@
       <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
-    <field-sidebar ref={ ref('sidebar') } loading={ state.reorder } placement={ props.placement } fields={ props.fields } />
+    <field-sidebar ref={ ref('sidebar') } loading={ loading } placement={ props.placement } fields={ props.fields } />
   </div>
 
   <script>
@@ -609,7 +609,10 @@
 
           // push
           this.sortables.push(new Sortable(item, {
-            group          : this.props.placement,
+            group : {
+              pull : item.getAttribute('data-type') ? 'clone' : true,
+              name : this.props.placement,
+            },
             handle         : '.move, [data-type]',
             animation      : 200,
             forceFallback  : true,
@@ -666,7 +669,6 @@
               // set fields
               const fields = [];
               let addedField = null;
-              let addedFieldEl = null;
 
               // loop physical fields
               target.childNodes.forEach((f, i) => {
@@ -684,7 +686,6 @@
                     uuid : uuid(),
                   };
                   fieldItem = addedField;
-                  addedFieldEl = f;
                 }
 
                 // set order
@@ -693,9 +694,6 @@
                 // get actual field
                 fields.push(fieldItem);
               });
-
-              // remove element
-              if (addedFieldEl) $(addedFieldEl).remove();
 
               // update form
               this.form.set('fields', fields);

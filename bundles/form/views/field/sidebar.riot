@@ -23,8 +23,8 @@
             <input class="form-control" placeholder="search" type="Search" onkeyup={ (e) => onSearch(e) } onchange={ (e) => onSearch(e) } ref="search" />
           </div>
           
-          <div class="draggable">
-            <div if={ !props.reorder } each={ (field, i) in getFields() } class={ classes({ 'card card-body mb-2' : true, 'active' : isActive(field) }) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
+          <div class="draggable" if={ !props.loading() }>
+            <div each={ (field, i) in getFields() } class={ classes({ 'card card-body mb-2' : true, 'active' : isActive(field) }) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
               <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
                   { field.opts.title }
