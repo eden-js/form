@@ -4,7 +4,9 @@
       <div class="mb-3">
         <label class="form-label" for={ props.getId(props.field.uuid) }>
           { props.field.label }
-          <i if={ !props.field.label }>Set Label</i>
+          <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
+            <i>Set Label</i>
+          </a>
         </label>
         <upload type="file" name={ props.getName(props.field.uuid) } multi={ props.field.multiple } image={ props.data.value } col={ props.field.col } show-type={ props.field.input } on-change={ onChange } />
       </div>
@@ -44,6 +46,14 @@
     
         // set initial value
         this.value = this.props.data.value;
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
 
       /**

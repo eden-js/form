@@ -1,7 +1,12 @@
 <field-select>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="select" ref={ ref('select') } options={ props.field.options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+      <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
+        <a href="#!" onclick={ (e) => onUpdate(e) }>
+          <i>Set Label</i>
+        </a>
+      </label>
+      <validate type="select" ref={ ref('select') } options={ props.field.options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
     </div>
 
     <div slot="modal">
@@ -45,6 +50,14 @@
     
         // set initial value
         this.value = this.props.data.value;
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
 
       /**

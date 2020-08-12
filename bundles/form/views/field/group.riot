@@ -3,7 +3,10 @@
     <div slot="body">
       <div class="card mb-3 border bg-transparent">
         <div class="card-header border-bottom">
-          { props.field.label || 'Set Label' }
+          { props.field.label }
+          <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
+            <i>Set Label</i>
+          </a>
         </div>
         <div each={ (item, i) in value } class="card-body border-bottom">
           
@@ -46,6 +49,14 @@
 
         // bind
         this.getName = this.getName.bind(this);
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
 
       /**

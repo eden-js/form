@@ -1,10 +1,15 @@
 <field-textarea>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
+      <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
+        <a href="#!" onclick={ (e) => onUpdate(e) }>
+          <i>Set Label</i>
+        </a>
+      </label>
       <div if={ props.field.i18n } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lng') !== lng }>
-        <validate type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
+        <validate type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
       </div>
-      <validate type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+      <validate type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
     </div>
 
     <div slot="validation">
@@ -41,6 +46,14 @@
     
         // set initial value
         this.value = this.props.data.value;
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
 
       /**

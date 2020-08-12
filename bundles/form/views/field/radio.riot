@@ -4,8 +4,11 @@
       <span if={ !get('field.options', []).length }>
         Add Options
       </span>
-      <label if={ props.field.label } class="form-label">
+      <label class="form-label">
         { props.field.label }
+          <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
+            <i>Set Label</i>
+          </a>
       </label>
       <validate type="radio" ref="radio" each={ (option, i) in props.field.options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get('data.value') === option.value } />
     </div>
@@ -51,6 +54,14 @@
     
         // set initial value
         this.value = this.props.data.value;
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
 
       /**

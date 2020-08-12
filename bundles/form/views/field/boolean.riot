@@ -1,7 +1,12 @@
 <field-boolean>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
     <div slot="body">
-      <validate type="boolean" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label || 'Set Label' } data-value={ props.data.value } required={ props.field.required } on-change={ onChange } />
+      <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
+        <a href="#!" onclick={ (e) => onUpdate(e) }>
+          <i>Set Label</i>
+        </a>
+      </label>
+      <validate type="boolean" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.data.value } required={ props.field.required } on-change={ onChange } />
     </div>
     
   </field>
@@ -52,6 +57,14 @@
       onChange(e) {
         // set value
         this.props.data.value = this.val();
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
     
       /**

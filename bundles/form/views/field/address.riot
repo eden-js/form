@@ -4,7 +4,9 @@
       <div class={ props.field.group || 'mb-3' }>
         <label class="form-label" for={ props.getId(`${props.field.uuid}-geo`) }>
           { props.field.label }
-          <i if={ !props.field.label }>Set Label</i>
+          <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
+            <i>Set Label</i>
+          </a>
         </label>
         <input type="hidden" name={ props.getName(`${props.field.uuid}[address]`) } value={ JSON.stringify(value) } />
         <input type="text" name={ props.getName(`${props.field.uuid}[geo]`) } required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ props.getId(`${props.field.uuid}-geo`) } value={ get('value.formatted') || '' } on-change={ onChange }>
@@ -59,6 +61,14 @@
           // render location
           this.initialize();
         }
+      }
+
+      /**
+       * on update
+       */
+      onUpdate(e) {
+        // on update
+        this.refs.field.onUpdate(e);
       }
 
       /**
