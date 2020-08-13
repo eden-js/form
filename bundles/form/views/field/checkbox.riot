@@ -10,7 +10,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get(`data.value`, []).includes(option.label) } />
+      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ getValue().includes(option.label) } />
     </div>
 
     <div slot="modal">
@@ -29,9 +29,6 @@
       </div>
       <button class="btn btn-success mr-3" onclick={ (e) => onOption(e) }>
         Add Checkbox
-      </button>
-      <button class="btn btn-success" onclick={ (e) => onOptionSave(e) }>
-        Save Checkboxes
       </button>
     </div>
   </field>
@@ -93,6 +90,14 @@
       }
 
       /**
+       * get value
+       */
+      getValue() {
+        // get value
+        return Object.keys(this.get(`data.value`, {}));
+      }
+
+      /**
       * on change
       *
       * @param {Event} e
@@ -130,10 +135,13 @@
        *
        * @param {Event} e
        */
-      onOptionName(e, option) {
+      async onOptionName(e, option) {
         // set value
         option.label = e.target.value;
         option.value = e.target.value;
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
       }
 
       /**

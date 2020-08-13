@@ -30,9 +30,6 @@
       <button class="btn btn-success mr-3" onclick={ (e) => onOption(e) }>
         Add Option
       </button>
-      <button class="btn btn-success" onclick={ (e) => onOptionSave(e) }>
-        Save Options
-      </button>
     </div>
   </field>
 
@@ -130,10 +127,13 @@
        *
        * @param {Event} e
        */
-      onOptionName(e, option) {
+      async onOptionName(e, option) {
         // set value
         option.label = e.target.value;
         option.value = e.target.value;
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
       }
 
       /**
