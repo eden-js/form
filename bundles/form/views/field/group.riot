@@ -14,7 +14,7 @@
           <form-render ref={ ref('form') } get-name={ (name) => getName(name, i) } placement={ props.field.uuid } form={ item.form } preview={ props.preview } />
           <!-- / sub form -->
 
-          <button type="button" class="btn btn-danger mt-4" onclick={ (e) => onRemove(e, i) }>
+          <button type="button" class="btn btn-danger" onclick={ (e) => onRemove(e, i) }>
             Remove Item
           </button>
         </div>
