@@ -6,11 +6,11 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="select" ref={ ref('select') } options={ props.field.options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+      <validate type="select" ref={ ref('select') } options={ options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
     </div>
 
     <div slot="modal">
-      <div each={ (option, i) in props.field.options } class="mb-3">
+      <div each={ (option, i) in options } class="mb-3">
         <label class="form-label">
           Option #{ i + 1 }
         </label>
@@ -46,7 +46,8 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value = this.props.data.value;
+        this.value   = this.props.data.value;
+        this.options = this.props.field.options || [];
       }
 
       /**
@@ -106,10 +107,7 @@
         e.stopPropagation();
 
         // add option
-        if (!this.props.field.options) this.props.field.options = [];
-
-        // add option
-        this.props.field.options.push({
+        this.options.push({
           label : '',
           value : '',
         });
@@ -128,6 +126,9 @@
         option.label = e.target.value;
         option.value = e.target.value;
 
+        // set options
+        this.props.field.options = this.options;
+
         // run opts
         if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
       }
@@ -143,6 +144,9 @@
         e.preventDefault();
         e.stopPropagation();
 
+        // set options
+        this.props.field.options = this.options;
+
         // run opts
         if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
       }
@@ -152,16 +156,19 @@
       *
       * @param {Event} e
       */
-      onRemoveOption(e, i) {
+      async onRemoveOption(e, i) {
         // prevent default
         e.preventDefault();
         e.stopPropagation();
 
         // remove option
-        this.props.field.options.splice(i, 1);
+        this.options.splice(i, 1);
 
-        // update view
-        this.update();
+        // set options
+        this.props.field.options = this.options;
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
       }
     }
 

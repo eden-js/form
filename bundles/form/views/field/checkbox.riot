@@ -10,11 +10,11 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="checkbox" ref="checkbox" each={ (option, i) in props.field.options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ getValue().includes(option.label) } />
+      <validate type="checkbox" ref="checkbox" each={ (option, i) in options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ getValue().includes(option.label) } />
     </div>
 
     <div slot="modal">
-      <div each={ (option, i) in props.field.options } class="mb-3">
+      <div each={ (option, i) in options } class="mb-3">
         <label class="form-label">
           Checkbox #{ i + 1 }
         </label>
@@ -50,7 +50,8 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value = this.props.data.value;
+        this.value   = this.props.data.value;
+        this.options = this.props.field.options || [];
       }
 
       /**
@@ -118,10 +119,7 @@
         e.stopPropagation();
 
         // add option
-        if (!this.props.field.options) this.props.field.options = [];
-
-        // add option
-        this.props.field.options.push({
+        this.options.push({
           label : '',
           value : '',
         });
@@ -139,6 +137,9 @@
         // set value
         option.label = e.target.value;
         option.value = e.target.value;
+
+        // set options
+        this.props.field.options = this.options;
 
         // run opts
         if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
@@ -164,16 +165,19 @@
        *
        * @param {Event} e
        */
-      onRemoveOption(e, i) {
+      async onRemoveOption(e, i) {
         // prevent default
         e.preventDefault();
         e.stopPropagation();
 
         // remove option
-        this.props.field.options.splice(i, 1);
+        this.options.splice(i, 1);
 
-        // update view
-        this.update();
+        // set options
+        this.props.field.options = this.options;
+
+        // run opts
+        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
       }
     }
 
