@@ -312,6 +312,16 @@
         // update view
         if (!preventUpdate) this.loading(`field.${field.uuid}`, true);
 
+        // set data
+        const fields = this.form.get('fields') || [];
+        const actualField = fields.find((f) => f.uuid === field.uuid);
+
+        // set data
+        for (const key in field) {
+          // set value
+          actualField[key] = field[key];
+        }
+
         // build meta
         if (!field._meta) {
           // set created

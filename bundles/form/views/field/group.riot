@@ -89,7 +89,7 @@
 
         // add variation
         this.value.push({
-          form  : JSON.parse(JSON.stringify(this.props.data.form)),
+          form  : Object.assign({}, this.props.data.form),
           value : {},
         });
 
