@@ -141,7 +141,7 @@ class FormHelper extends Helper {
       if (!registered) return null;
 
       // get data
-      const data = await registered.submit(req, field, req.body[field.uuid], (current.find((c) => {
+      const data = await registered.submit(req, field, req.body[field.name] ? req.body[field.name] : req.body[field.uuid], (current.find((c) => {
         // return found field
         return c.uuid === field.uuid;
       }) || {}).value, row);
