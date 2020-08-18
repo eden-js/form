@@ -32,7 +32,10 @@ class EncryptField {
    *
    * @return {*}
    */
-  submit(req, field, value) {
+  submit(req, field, value, old) {
+    // return old
+    if (!value || !`${value}`.length) return old;
+
     // encrypt value
     const encrypted = crypto.createHmac('sha256', config.get('secret'))
       .update(value)
