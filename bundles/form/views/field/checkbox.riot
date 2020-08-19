@@ -95,7 +95,7 @@
        */
       getValue() {
         // get value
-        return Object.keys(this.get(`dataValue`, {}));
+        return Object.keys(this.props.dataValue || {});
       }
 
       /**
