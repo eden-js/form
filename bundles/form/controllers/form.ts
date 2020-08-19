@@ -196,10 +196,12 @@ export default class FormController extends Controller {
     // get field
     const fields  = form.get('fields') || [];
     let field = fields.find(field => field.uuid === req.body.field.uuid);
+    let create = false;
 
     // check create
     if (!field) {
       field = {};
+      create = true;
       fields.push(field);
     }
 
@@ -223,6 +225,9 @@ export default class FormController extends Controller {
 
     // emit
     socket.room(`form.${form.get('_id').toString()}`, `form.${form.get('_id').toString()}.field`, field);
+
+    // send alert
+    req.alert('success', `Successfully ${create ? 'Created' : 'Updated'} field!`);
 
     // return JSON
     return res.json({
