@@ -92,8 +92,8 @@ export default class FormController extends Controller {
 
     // add to room
     return await syncHelper.addListener(await Form.findById(id), {
-      atomic    : true,
       user      : opts.user,
+      atomic    : true,
       listenID  : uuid,
       sessionID : opts.sessionID,
     });
@@ -117,8 +117,8 @@ export default class FormController extends Controller {
 
     // add to room
     return await syncHelper.removeListener(await Form.findById(id), {
-      atomic    : true,
       user      : opts.user,
+      atomic    : true,
       listenID  : uuid,
       sessionID : opts.sessionID,
     });

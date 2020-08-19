@@ -322,10 +322,13 @@
         // set data
         const actualField = (this.form.get('fields') || []).find((f) => f.uuid === field.uuid);
 
-        // set data
-        for (const key in field) {
-          // set value
-          actualField[key] = field[key];
+        // actual field
+        if (actualField) {
+          // set data
+          for (const key in field) {
+            // set value
+            actualField[key] = field[key];
+          }
         }
 
         // build meta
