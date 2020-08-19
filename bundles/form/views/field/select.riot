@@ -1,12 +1,13 @@
 <field-select>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
-    <div slot="body">
-      <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
-        <a href="#!" onclick={ (e) => onUpdate(e) }>
+    <div slot="body" class="mb-3">
+      <label class="form-label" for={ props.getId(props.field.uuid) }>
+        { props.field.label }
+        <a if={ !props.field.label } href="#!" onclick={ (e) => onUpdate(e) }>
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="select" ref={ ref('select') } options={ options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ onChange } />
+      <eden-select ref={ ref('select') } data={ getData() } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } required={ props.field.required } on-change={ onChange } />
     </div>
 
     <div slot="modal">
@@ -47,6 +48,7 @@
     
         // set initial value
         this.value   = this.props.dataValue;
+        this.colors  = ['primary', 'secondary', 'success', 'info', 'warning', 'danger'];
         this.options = this.props.field.options || [];
       }
 
@@ -70,9 +72,10 @@
           preview   : this.props.preview,
           placement : this.props.placement,
 
-          'onSave'   : this.props.onSave,
-          'isInput'  : true,
-          'onRemove' : this.props.onRemove,
+          'onSave'     : this.props.onSave,
+          'isInput'    : true,
+          'onRemove'   : this.props.onRemove,
+          'isMultiple' : true,
         };
       }
 
@@ -110,6 +113,7 @@
         this.options.push({
           label : '',
           value : '',
+          color : '',
         });
 
         // update view
@@ -131,6 +135,23 @@
 
         // run opts
         if (this.props.onSave) await this.props.onSave(this.props.field);
+      }
+
+      /**
+       * get data
+       */
+      getData() {
+        // return value
+        return (this.props.field.options || []).map((field) => {
+          // return
+          return {
+            name  : field.label,
+            value : field.value,
+            color : field.color,
+            
+            selected : (this.props.dataValue || []).includes(field),
+          };
+        });
       }
 
       /**
