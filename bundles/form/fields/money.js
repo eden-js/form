@@ -11,8 +11,8 @@ class MoneyField {
     this._helper = helper;
 
     // bind methods
+    this.value = this.value.bind(this);
     this.submit = this.submit.bind(this);
-    this.render = this.render.bind(this);
 
     // set meta
     this.title = 'Money';
@@ -42,13 +42,9 @@ class MoneyField {
    *
    * @return {*}
    */
-  async render(req, field, value) {
-    // set tag
-    field.tag = 'money';
-    field.value = parseFloat(value || 0);
-
+  async value(req, field, value) {
     // return
-    return field;
+    return parseFloat(value || 0);
   }
 }
 

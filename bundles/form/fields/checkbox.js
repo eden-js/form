@@ -11,8 +11,8 @@ class CheckboxField {
     this._helper = helper;
 
     // bind methods
+    this.value = this.value.bind(this);
     this.submit = this.submit.bind(this);
-    this.render = this.render.bind(this);
 
     // set meta
     this.title = 'Checkbox';
@@ -42,13 +42,9 @@ class CheckboxField {
    *
    * @return {*}
    */
-  async render(req, field, value) {
-    // set tag
-    field.tag = 'checkbox';
-    field.value = value;
-
+  async value(req, field, value) {
     // return
-    return field;
+    return value;
   }
 }
 

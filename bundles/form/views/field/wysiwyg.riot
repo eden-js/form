@@ -7,9 +7,9 @@
         </a>
       </label>
       <div if={ get('field.i18n') } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lang') !== lng }>
-        <editor show-toolbar={ true } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+        <editor show-toolbar={ true } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } content={ get(`dataValue.${eden.get('i18n.lng')}`, get('dataValue', '')) } required={ props.field.required } on-change={ onChange } />
       </div>
-      <editor show-toolbar={ true } if={ !get('field.i18n') } name={ props.getName(props.field.uuid) } label={ props.field.label } content={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ onChange } />
+      <editor show-toolbar={ true } if={ !get('field.i18n') } name={ props.getName(props.field.uuid) } label={ props.field.label } content={ get(`dataValue.${eden.get('i18n.lng')}`, get('dataValue', '')) } required={ props.field.required } on-change={ onChange } />
     </div>
   </field>
   
@@ -30,7 +30,7 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value = this.props.data.value;
+        this.value = this.props.dataValue;
       }
 
       /**
@@ -66,7 +66,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.val();
+        this.value = this.val();
       }
     
       /**

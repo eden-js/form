@@ -6,7 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="boolean" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.data.value } required={ props.field.required } on-change={ onChange } />
+      <validate type="boolean" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ onChange } />
     </div>
     
   </field>
@@ -28,7 +28,7 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value = this.props.data.value;
+        this.value = this.props.dataValue;
       }
 
       /**
@@ -56,7 +56,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.val();
+        this.value = this.val();
       }
 
       /**

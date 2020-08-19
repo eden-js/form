@@ -50,7 +50,7 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value   = this.props.data.value;
+        this.value   = this.props.dataValue;
         this.options = this.props.field.options || [];
       }
 
@@ -95,7 +95,7 @@
        */
       getValue() {
         // get value
-        return Object.keys(this.get(`data.value`, {}));
+        return Object.keys(this.get(`dataValue`, {}));
       }
 
       /**
@@ -105,7 +105,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.val();
+        this.value = this.val();
       }
 
       /**
@@ -142,7 +142,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
 
       /**
@@ -157,7 +157,7 @@
         e.stopPropagation();
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
 
       /**
@@ -177,7 +177,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
     }
 

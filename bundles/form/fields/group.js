@@ -14,8 +14,8 @@ class GroupField {
     this._helper = helper;
 
     // bind methods
+    this.value = this.value.bind(this);
     this.submit = this.submit.bind(this);
-    this.render = this.render.bind(this);
 
     // set meta
     this.title = 'Group';
@@ -74,19 +74,15 @@ class GroupField {
    *
    * @return {*}
    */
-  async render(req, field, value, valueOnly) {
-    // set tag
-    field.tag = 'group';
-    field.value = value;
-
+  async value(req, field, value, valueOnly) {
     // set value
-    if (field.value && !Array.isArray(field.value)) field.value = [field.value];
+    if (value && !Array.isArray(value)) value = [value];
 
     // built form
     const form = await formHelper.get(field.uuid);
 
     // digest into form
-    field.form = await formHelper.render(req, form, await Promise.all((form.get('fields') || []).map(async (f) => {
+    const render = await formHelper.render(req, form, await Promise.all((form.get('fields') || []).map(async (f) => {
       // return fields map
       return {
         uuid  : f.uuid,
@@ -95,7 +91,7 @@ class GroupField {
     })));
 
     // loop value
-    field.value = await Promise.all((field.value || []).map(async (item) => {
+    value = await Promise.all((value || []).map(async (item) => {
       // built form
       const newForm = await formHelper.get(field.uuid);
 
@@ -130,7 +126,7 @@ class GroupField {
     }));
 
     // return
-    return field;
+    return { form : render, value };
   }
 }
 

@@ -36,13 +36,13 @@ class FieldHelper extends Helper {
    *
    * @param  {String}   type
    * @param  {Object}   opts
-   * @param  {Function} render
+   * @param  {Function} value
    * @param  {Function} save
    * @param  {Function} submit
    *
    * @return {*}
    */
-  field(type, opts, render, save, submit) {
+  field(type, opts, value, save, submit) {
     // check found
     const found = this.__fields.find(field => field.type === type);
 
@@ -53,16 +53,16 @@ class FieldHelper extends Helper {
         type,
         opts,
         save,
+        value,
         submit,
-        render,
       });
     } else {
       // set on found
       found.type = type;
       found.opts = opts;
       found.save = save;
+      found.value = value;
       found.submit = submit;
-      found.render = render;
     }
   }
 

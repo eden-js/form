@@ -14,8 +14,8 @@ class FileField {
     this._helper = helper;
 
     // bind methods
+    this.value = this.value.bind(this);
     this.submit = this.submit.bind(this);
-    this.render = this.render.bind(this);
 
     // set meta
     this.title = 'File';
@@ -64,20 +64,14 @@ class FileField {
    *
    * @return {*}
    */
-  async render(req, field, value) {
-    // set tag
-    field.tag = 'file';
-
+  async value(req, field, value) {
     // eslint-disable-next-line no-nested-ternary
-    field.value = value
+    return value
       ? (Array.isArray(value) ? await Promise.all(value.map((item) => {
         // return sanitised item
         return item.sanitise();
       })) : await value.sanitise())
       : null;
-
-    // return
-    return field;
   }
 }
 

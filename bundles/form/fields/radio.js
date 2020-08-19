@@ -11,8 +11,8 @@ class RadioField {
     this._helper = helper;
 
     // bind methods
+    this.value = this.value.bind(this);
     this.submit = this.submit.bind(this);
-    this.render = this.render.bind(this);
 
     // set meta
     this.title = 'Radio';
@@ -29,7 +29,6 @@ class RadioField {
    * @return {*}
    */
   submit(req, field, value) {
-    console.log(value);
     // return value
     return value;
   }
@@ -43,13 +42,9 @@ class RadioField {
    *
    * @return {*}
    */
-  async render(req, field, value) {
-    // set tag
-    field.tag = 'radio';
-    field.value = value;
-
+  async value(req, field, value) {
     // return
-    return field;
+    return value;
   }
 }
 

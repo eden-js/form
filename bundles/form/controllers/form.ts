@@ -2,8 +2,8 @@
 /* eslint-disable global-require */
 
 // require dependencies
-const socket     = require('socket');
-const Controller = require('controller');
+import socket     from 'socket';
+import Controller from 'controller';
 
 // load models
 const Form = model('form');
@@ -20,7 +20,7 @@ const fieldHelper = helper('form/field');
  * @fail  /
  * @mount /form
  */
-class FormController extends Controller {
+export default class FormController extends Controller {
   /**
    * construct example controller class
    */
@@ -43,7 +43,7 @@ class FormController extends Controller {
         title       : fieldClassBuilt.title,
         categories  : fieldClassBuilt.categories,
         description : fieldClassBuilt.description,
-      }, fieldClassBuilt.render, fieldClassBuilt.save, fieldClassBuilt.submit);
+      }, fieldClassBuilt.value, fieldClassBuilt.save, fieldClassBuilt.submit);
     });
 
     // add middleware
@@ -195,27 +195,40 @@ class FormController extends Controller {
 
     // get field
     const fields  = form.get('fields') || [];
-    const current = fields.find(field => field.uuid === req.body.field.uuid) || req.body.field;
+    let field = fields.find(field => field.uuid === req.body.field.uuid);
+
+    // check create
+    if (!field) {
+      field = {};
+      fields.push(field);
+    }
+
+    // loop
+    for (const key in req.body.field) {
+      field[key] = req.body.field[key];
+    }
 
     // update
-    const registered = fieldHelper.fields().find(w => w.type === current.type);
+    const registered = fieldHelper.fields().find(w => w.type === field.type);
 
     // await save
-    if (registered && registered.save) await registered.save(req, req.body.field);
+    if (registered && registered.save) await registered.save(req, field);
 
     // get rendered
-    const rendered = await registered.render(req, req.body.field);
+    const value = await registered.value(req, field);
 
-    // set uuid
-    rendered.uuid = req.body.field.uuid;
+    // set
+    form.set('fields', fields);
+    await form.save();
 
     // emit
-    socket.room(`form.${form.get('_id').toString()}`, `form.${form.get('_id').toString()}.field`, rendered);
+    socket.room(`form.${form.get('_id').toString()}`, `form.${form.get('_id').toString()}.field`, field);
 
     // return JSON
     return res.json({
+      value,
       state   : 'success',
-      result  : rendered,
+      result  : field,
       message : 'Successfully saved field',
     });
   }
@@ -325,10 +338,3 @@ class FormController extends Controller {
     return next();
   }
 }
-
-/**
- * export form controller
- *
- * @type {FormController}
- */
-module.exports = FormController;

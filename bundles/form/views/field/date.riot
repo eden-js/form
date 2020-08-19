@@ -6,7 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="date" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+      <validate type="date" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
     </div>
     
     <div slot="validation">
@@ -42,7 +42,7 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value = this.props.data.value;
+        this.value = this.props.dataValue;
       }
 
       /**
@@ -78,7 +78,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.val();
+        this.value = this.val();
       }
 
       /**
@@ -108,7 +108,7 @@
         props.field.startYear = parseInt(e.target.value.length ? e.target.value : (new Date()).getFullYear());
 
         // run opts
-        if (props.onSave) await props.onSave(props.field, props.data, props.placement);
+        if (props.onSave) await props.onSave(props.field);
       }
 
       /**
@@ -128,7 +128,7 @@
         props.field.endYear = parseInt(e.target.value.length ? e.target.value : ((new Date()).getFullYear() - 80));
 
         // run opts
-        if (props.onSave) await props.onSave(props.field, props.data, props.placement);
+        if (props.onSave) await props.onSave(props.field);
       }
     }
 

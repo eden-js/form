@@ -7,13 +7,13 @@
           { form.get('title') || form.get('placement') }
         </span>
 
-        <eden-add type="top" onclick={ (e) => onAddBlock(e) } if={ !preview } />
+        <eden-add type="top" onclick={ (e) => onCreate(e) } if={ !props.preview } />
 
         <div class="row form-fields">
-          <div each={ (field, i) in getFields() } is={ getType(field) } class={ `${field.col ? 'col' : 'col-12'} ${field.class}` } preview={ preview } form={ form } id={ field.uuid } data={ getData(field) } field={ field } get-id={ getId } get-name={ getName } on-save={ onSaveField } on-remove={ onRemoveField } on-update={ onUpdate } />
+          <div each={ (field, i) in getFields() } is={ getType(field) } class={ `${field.col ? 'col' : 'col-12'} ${field.class}` } preview={ preview } form={ form } id={ field.uuid } dataValue={ getValue(field) } field={ field } get-id={ getId } get-name={ getName } on-save={ onSaveField } on-remove={ onRemoveField } on-update={ onUpdate } />
         </div>
 
-        <eden-add type="bottom" onclick={ (e) => onAddBlock(e) } if={ !preview } />
+        <eden-add type="bottom" onclick={ (e) => onCreate(e) } if={ !props.preview } />
 
       </div>
     </div>
@@ -55,10 +55,21 @@
         // do mixin
         Model(this);
 
+        // set form
+        if (this.props.model) {
+          // is model
+          this.form = this.props.model;
+        } else if (typeof this.props.form === 'string') {
+          // is string
+          this.form = this.model('form', {
+            id : this.props.form,
+          });
+        } else {
+          // nothing
+          this.form = this.model('form', this.props.form || {})
+        }
+
         // set update
-        this.form      = this.props.form ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {});
-        this.type      = this.props.type;
-        this.data    = (this.props.form || {}).render || [];
         this.preview   = !!this.props.preview;
         this.placement = null;
 
@@ -66,7 +77,7 @@
         this.build = this.build.bind(this);
         this.getId = this.getId.bind(this);
         this.getName = this.getName.bind(this);
-        this.getData = this.getData.bind(this);
+        this.getValue = this.getValue.bind(this);
         this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
         this.onSaveField = this.onSaveField.bind(this);
@@ -137,31 +148,24 @@
        * build
        */
       async build () {
-        // init dragula
+        // init tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // destroy sortables
+        (this.sortables || []).forEach((sortable) => sortable.destroy());
+        this.sortables = [];
+        
+        // check preview
         if (!this.props.preview) {
           // init sort
           this.initSort();
-        } else {
-          // sortables
-          if (this.sortables) {
-            // destroy
-            this.sortables.forEach((sortable) => sortable.destroy());
-          }
-
-          // sortables
-          this.sortables = [];
         }
 
-        // popover
-        $('[data-toggle="tooltip"]').tooltip();
-
         // set updating
-        if (this.state.updating || !this.hasChange()) return;
+        if (!this.hasChange() || this.loading('setup')) return;
 
         // force update
-        this.update({
-          updating : true,
-        });
+        this.loading('setup', true);
         
         // check placement
         if (this.placement !== this.props.placement || this.form.get('placement') !== this.props.placement) {
@@ -174,38 +178,41 @@
           // set placement
           this.placement = this.props.placement;
 
-          // updating
-          this.form = this.props.form && this.props.form.placement === this.props.placement ? (this.props.model ? this.props.model : this.model('form', this.props.form)) : this.model('form', {
-            placement : this.props.placement
-          });
+          // set form
+          if (this.props.model) {
+            // is model
+            this.form = this.props.model;
+          } else if (typeof this.props.form === 'string') {
+            // is string
+            this.form = this.model('form', {
+              id : this.props.form,
+            });
+          } else {
+            // nothing
+            this.form = this.model('form', this.props.form || {})
+          }
 
           // load fields
-          if (!(this.form.get('render') || []).length) await this.loadFields();
-
-          // set fields
-          this.data = this.form.get('render') || [];
+          if (!(this.form.get('fields') || []).length) await this.init();
 
           // set fields
           this.form.on('fields', this.setFields);
-        }
 
-        // set default positions
-        if (this.props.positions && !(this.form.get('fields') || []).length) {
-          // set default
-          this.form.set('fields', this.props.positions || []);
+          // set default positions
+          if (this.props.positions && !(this.form.get('fields') || []).length) {
+            // set default
+            this.form.set('fields', this.props.positions || []);
 
-          // save fields
-          this.saveForm();
+            // save fields
+            this.saveForm();
+          }
         }
 
         // set position
-        this.type    = this.props.type;
         this.preview = !!this.props.preview;
 
         // force update
-        this.update({
-          updating : false
-        });
+        this.loading('setup', false);
       }
 
 
@@ -255,12 +262,12 @@
        *
        * @return {*}
        */
-      getData (field) {
+      getValue (field) {
         // return on no field
         if (!field) return;
 
         // get found
-        const found = this.data.find((b) => b.uuid === field.uuid);
+        const found = this.form.get(`data.${field.name}`) || this.form.get(`data.${field.uuid}`);
 
         // gets data for field
         if (!found) return null;
@@ -278,7 +285,7 @@
        */
       getType (child) {
         // return get child
-        return (this.getData(child) || {}).tag ? `field-${this.getData(child).tag}` : 'eden-loading';
+        return `field-${child.type}`;
       }
 
       /**
@@ -288,7 +295,7 @@
        */
       getFields () {
         // return filtered fields
-        return (this.form.get('fields') || []).filter((field) => field).sort((a, b) => {
+        return (this.form.get('fields') || []).filter((f) => f).sort((a, b) => {
           // set order
           if (!a.order) a.order = 0;
           if (!b.order) b.order = 0;
@@ -308,13 +315,12 @@
        * @param  {Event}  e
        * @param  {Object} field
        */
-      async onSaveField (field, data = {}, form, preventUpdate) {
+      async onSaveField (field, preventUpdate) {
         // update view
         if (!preventUpdate) this.loading(`field.${field.uuid}`, true);
 
         // set data
-        const fields = this.form.get('fields') || [];
-        const actualField = fields.find((f) => f.uuid === field.uuid);
+        const actualField = (this.form.get('fields') || []).find((f) => f.uuid === field.uuid);
 
         // set data
         for (const key in field) {
@@ -333,42 +339,45 @@
         // set updated
         field._meta.updated = new Date();
 
-        // check id
-        if (!this.form.get('id')) {
-          // save form
-          await this.saveForm(true);
-        }
-
         // log data
         const res = await fetch(`/form/${this.form.get('id')}/field/save`, {
-          'body' : JSON.stringify({
-            'data'  : data,
-            'field' : field
+          body : JSON.stringify({
+            field : field
           }),
-          'method'  : 'post',
-          'headers' : {
+          method  : 'post',
+          headers : {
             'Content-Type' : 'application/json'
           },
-          'credentials' : 'same-origin'
+          credentials : 'same-origin'
         });
 
         // load data
         const result = await res.json();
 
+        // fields
+        const fields = this.form.get('fields') || [];
+
+        // check found
+        if (!fields.find((f) => f.uuid === field.uuid)) {
+          // add
+          fields.push(field);
+          this.form.set('fields', fields);
+        }
+
         // set logic
         for (let key in result.result) {
           // clone to form
-          data[key] = result.result[key];
+          field[key] = result.result[key];
         }
 
-        // set to fields
-        if (!this.data.find((b) => b.uuid === data.uuid)) this.data.push(data);
-
-        // save form
-        await this.saveForm(preventUpdate);
-
         // update view
-        if (!preventUpdate) this.loading(`field.${field.uuid}`, false);
+        if (!preventUpdate) {
+          // loading
+          this.loading(`field.${field.uuid}`, false);
+        } else {
+          // update
+          this.update();
+        }
       }
 
       /**
@@ -383,15 +392,15 @@
 
         // log data
         const res = await fetch(`/form/${this.form.get('id')}/field/remove`, {
-          'body' : JSON.stringify({
-            'data'  : data,
-            'field' : field
+          body : JSON.stringify({
+            data  : data,
+            field : field
           }),
-          'method'  : 'post',
-          'headers' : {
+          method  : 'post',
+          headers : {
             'Content-Type' : 'application/json'
           },
-          'credentials' : 'same-origin'
+          credentials : 'same-origin'
         });
 
         // load data
@@ -402,9 +411,6 @@
 
         // update view
         this.loading(`field.${field.uuid}`, false);
-
-        // save form
-        await this.saveForm();
       }
 
       /**
@@ -448,7 +454,7 @@
        *
        * @param {Event} e
        */
-      onAddBlock (e) {
+      onCreate (e) {
         // prevent
         e.preventDefault();
         e.stopPropagation();
@@ -490,18 +496,6 @@
           // set in opts
           if (this.props.form && data.result[key] && !this.props.model) this.props.form[key] = data.result[key];
         }
-        
-        // set fields
-        const missing = (this.form.get('render') || []).filter((field) => !this.data.find((f) => f.uuid === field.uuid));
-        
-        // push missing fields
-        this.data.push(...missing);
-        
-        // set forms
-        if (!window.eden.forms) window.eden.forms = {};
-
-        // set in eden
-        window.eden.forms[this.form.get('id')] = data.result;
 
         // on save
         if (this.props.onSave) this.props.onSave(this.form);
@@ -514,11 +508,7 @@
        * set fields
        */
       setFields() {
-        // set fields
-        this.data = this.form.get('render') || [];
-
-        // safe update
-        this.safeUpdate();
+        
       }
 
       /**
@@ -528,12 +518,12 @@
       *
       * @return {Promise}
       */
-      loadFields (opts) {
+      init (opts) {
         // chekc loading
-        if (this.loadingFields) return this.loadingFields;
+        if (this.initializing) return this.initializing;
 
         // loading fields
-        this.loadingFields = new Promise(async (resolve) => {
+        this.initializing = new Promise(async (resolve) => {
           // set opts
           if (!opts) opts = {};
 
@@ -560,12 +550,6 @@
 
           // set in eden
           if (data.result) {
-            // set forms
-            if (!window.eden.forms) window.eden.forms = {};
-          
-            // set in eden
-            if (data.result.id) window.eden.forms[data.result.id] = data.result;
-
             // change form
             if (!this.form.get('id') && data.result.id) {
               // set new form
@@ -576,12 +560,6 @@
                 // set key
                 this.form.set(key, data.result[key]);
               }
-              
-              // set fields
-              const missing = (this.form.get('render') || []).filter((field) => !this.data.find((f) => f.uuid === field.uuid));
-              
-              // push missing fields
-              this.data.push(...missing);
             }
           }
 
@@ -589,11 +567,11 @@
           resolve();
 
           // remove promise
-          this.loadingFields = null;
+          this.initializing = null;
         });
 
         // loading fields
-        return this.loadingFields;
+        return this.initializing;
       }
 
       /**
@@ -602,15 +580,6 @@
       initSort () {
         // require sort
         const Sortable = require('sortablejs');
-
-        // sortables
-        if (this.sortables) {
-          // destroy
-          this.sortables.forEach((sortable) => sortable.destroy());
-        }
-
-        // sortables
-        this.sortables = [];
 
         // create sortables
         [this.$(`[data-form="${this.props.placement}"] .form-fields`), this.$(`.eden-blocks-sidebar[data-form="${this.props.placement}"] .draggable`)].forEach((item) => {
@@ -711,7 +680,7 @@
               // save form
               if (addedField) {
                 // added field
-                await this.onSaveField(addedField, {});
+                await this.onSaveField(addedField);
               }
 
               // update
@@ -737,12 +706,6 @@
       * @return {Boolean}
       */
       hasChange() {
-        // check matched type
-        if (this.props.type !== this.type) {
-          // type does not match
-          return true;
-        }
-
         // check matched preview
         if (!!this.props.preview !== !!this.preview) {
           // preview does not match

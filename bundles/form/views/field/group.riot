@@ -36,7 +36,7 @@
     import Base from '../js/base';
 
     // export default
-    export default class FieldModel extends Base {
+    export default class FieldGroup extends Base {
       /**
        * on before mount
        */
@@ -45,7 +45,7 @@
         super.onBeforeMount(...arguments);
     
         // set initial value
-        this.value = this.props.data.value || {};
+        this.value = (this.props.dataValue || {}).value || {};
 
         // bind
         this.getName = this.getName.bind(this);
@@ -89,7 +89,7 @@
 
         // add variation
         this.value.push({
-          form  : Object.assign({}, this.props.data.form),
+          form  : Object.assign({}, (this.props.dataValue || {}).form),
           value : {},
         });
 

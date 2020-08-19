@@ -10,7 +10,7 @@
             <i>Set Label</i>
           </a>
       </label>
-      <validate type="radio" ref="radio" each={ (option, i) in options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get('data.value') === option.value } />
+      <validate type="radio" ref="radio" each={ (option, i) in options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ get('dataValue') === option.value } />
     </div>
 
     <div slot="modal">
@@ -50,7 +50,7 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value   = this.props.data.value;
+        this.value   = this.props.dataValue;
         this.options = this.props.field.options || [];
       }
 
@@ -97,7 +97,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.val();
+        this.value = this.val();
       }
 
       /**
@@ -134,7 +134,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
 
       /**
@@ -152,7 +152,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
 
       /**
@@ -172,7 +172,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
     }
 

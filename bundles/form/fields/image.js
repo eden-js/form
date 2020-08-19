@@ -14,8 +14,8 @@ class ImageField {
     this._helper = helper;
 
     // bind methods
+    this.value = this.value.bind(this);
     this.submit = this.submit.bind(this);
-    this.render = this.render.bind(this);
 
     // set meta
     this.title = 'Image';
@@ -67,12 +67,9 @@ class ImageField {
    *
    * @return {*}
    */
-  async render(req, field, value) {
-    // set tag
-    field.tag = 'image';
-
+  async value(req, field, value) {
     // eslint-disable-next-line no-nested-ternary
-    field.value = value
+    return value
       ? (Array.isArray(value) ? await Promise.all(value.map(async (item) => {
         // find
         if (item.model && item.id) item = await Image.findById(item.id);
@@ -81,9 +78,6 @@ class ImageField {
         return item.sanitise();
       })) : await (value.model && value.id ? await Image.findById(value.id) : value).sanitise())
       : null;
-
-    // return
-    return field;
   }
 }
 

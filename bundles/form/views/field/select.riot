@@ -6,7 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="select" ref={ ref('select') } options={ options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value')) } required={ props.field.required } on-change={ onChange } />
+      <validate type="select" ref={ ref('select') } options={ options } group-class={ props.field.group || 'mb-3' } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ onChange } />
     </div>
 
     <div slot="modal">
@@ -46,7 +46,7 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value   = this.props.data.value;
+        this.value   = this.props.dataValue;
         this.options = this.props.field.options || [];
       }
 
@@ -93,7 +93,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.refs.select.val();
+        this.value = this.refs.select.val();
       }
 
       /**
@@ -130,7 +130,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
 
       /**
@@ -148,7 +148,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
 
       /**
@@ -168,7 +168,7 @@
         this.props.field.options = this.options;
 
         // run opts
-        if (this.props.onSave) await this.props.onSave(this.props.field, this.props.data, this.props.placement);
+        if (this.props.onSave) await this.props.onSave(this.props.field);
       }
     }
 

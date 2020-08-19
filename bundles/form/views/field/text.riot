@@ -7,9 +7,9 @@
         </a>
       </label>
       <div if={ props.field.i18n } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lng') !== lng }>
-        <validate type="text" group-class={ props.field.group || 'mb-3' } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
+        <validate type="text" group-class={ props.field.group || 'mb-3' } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
       </div>
-      <validate type="text" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ get(`data.value.${eden.get('i18n.lng')}`, get('data.value', '')) } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+      <validate type="text" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
     </div>
 
     <div slot="validation">
@@ -45,14 +45,13 @@
         this.onChange = this.onChange.bind(this);
     
         // set initial value
-        this.value = this.props.data.value;
+        this.value = this.props.dataValue;
       }
 
       /**
        * on update
        */
       onUpdate(e) {
-        console.log(this.refs.field);
         // on update
         this.refs.field.onUpdate(e);
       }
@@ -82,7 +81,7 @@
       */
       onChange(e) {
         // set value
-        this.props.data.value = this.val();
+        this.value = this.val();
       }
 
       /**
@@ -123,7 +122,7 @@
         props.field.validateLength.min = e.target.value.length ? parseInt(e.target.value) : null;
 
         // run opts
-        if (props.onSave) await props.onSave(props.field, props.data, props.placement, true);
+        if (props.onSave) await props.onSave(props.field, true);
       }
 
       /**
@@ -142,7 +141,7 @@
         props.field.validateLength.max = e.target.value.length ? parseInt(e.target.value) : null;
 
         // run opts
-        if (props.onSave) await props.onSave(props.field, props.data, props.placement, true);
+        if (props.onSave) await props.onSave(props.field, true);
       }
     }
 
