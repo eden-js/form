@@ -241,11 +241,27 @@ export default class FormController extends Controller {
   /**
    * remove field action
    *
-   * @route    {post} /:id/field/remove
-   * @layout   admin
-   * @priority 12
+   * @route {post} /:id/field/remove
    */
-  async removeBlockAction(req, res) {
+  async removeFieldAction(req, res) {
+    // set website variable
+    let form = new Form({
+      creator : req.user,
+    });
+
+    // check for website model
+    if (req.params.id && req.params.id !== 'null') {
+      // load by id
+      form = await Form.findById(req.params.id);
+    }
+
+    // get field
+    const fields  = form.get('fields') || [];
+
+    // set
+    form.set('fields', fields.filter((f) => f.uuid !== req.body.field.uuid));
+    await form.save();
+    
     // return JSON
     res.json({
       state   : 'success',
