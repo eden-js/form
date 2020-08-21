@@ -99,6 +99,9 @@
 
           // on change
           if (this.props.onChange) this.props.onChange(e, this.props.multiple ? value : value[0]);
+          
+          // render
+          if (this.props.isBlock) $(this.$('select')).selectpicker('show').selectpicker('refresh');
         });
 
         // ajax
@@ -120,7 +123,14 @@
                 // return params
                 return params;
               },
-              dataType : 'json',
+              dataType       : 'json',
+              preprocessData : (data) => {
+                // set data
+                this.data = data;
+
+                // return data
+                return data;
+              }
             },
             locale : {
               emptyTitle : this.props.placeholder
@@ -130,11 +140,11 @@
             clearOnEmpty     : true,
             emptyRequest     : true,
             preserveSelected : false,
-          })
-
-          // trigger change
-          $(this.$('.bs-searchbox .form-control')).trigger('keyup');
+          });
         }
+        
+        // render
+        if (this.props.isBlock) $(this.$('select')).selectpicker('show');
       }
 
       /**
