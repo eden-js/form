@@ -649,7 +649,8 @@
               if (!target || !source || !el || (target && !target.className.includes('form-fields'))) return;
 
               // set fields
-              const fields = [];
+              const fields  = [];
+              const changed = [];
               let addedField = null;
 
               // loop physical fields
@@ -685,6 +686,9 @@
                 // added field
                 await this.onSaveField(addedField);
               }
+
+              // save form
+              await this.saveForm(true);
 
               // update
               this.safeUpdate({
