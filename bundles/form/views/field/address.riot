@@ -88,10 +88,14 @@
        */
       onChange(e) {
         // set value
-        this.props.dataValue = this.val();
+        this.value = this.val();
 
-        // emit update
-        
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
 
       /**

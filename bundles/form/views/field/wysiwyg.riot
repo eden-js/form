@@ -6,10 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <div if={ get('field.i18n') } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lang') !== lng }>
-        <editor show-toolbar={ true } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } content={ get(`dataValue.${eden.get('i18n.lng')}`, get('dataValue', '')) } required={ props.field.required } on-change={ onChange } />
-      </div>
-      <editor ref={ ref('wysiwyg') } show-toolbar={ true } if={ !get('field.i18n') } name={ props.getName(props.field.uuid) } label={ props.field.label } content={ get(`dataValue.${eden.get('i18n.lng')}`, get('dataValue', '')) } required={ props.field.required } on-change={ onChange } />
+      <editor ref={ ref('wysiwyg') } show-toolbar={ true } name={ props.getName(props.field.uuid) } label={ props.field.label } content={ get(`dataValue.${eden.get('i18n.lng')}`, get('dataValue', '')) } required={ props.field.required } on-change={ onChange } />
     </div>
   </field>
   
@@ -66,7 +63,14 @@
       */
       onChange(e) {
         // set value
-        this.value = this.val();
+        this.value = (this.val() || '').replace('<p><br></p>', '').trim();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
     
       /**
@@ -75,20 +79,8 @@
       * @return {*}
       */
       val() {
-        // get val
-        if (this.props.field.i18n) {
-          // reduce value
-          return this.eden.get('i18n.lngs', []).reduce((accum, language) => {
-            // add to accum
-            accum[language] = $(`[name="${props.getName(`${this.props.field.uuid}[${language}]`)}"]`, this.root).val();
-            
-            // return accum
-            return accum;
-          }, {});
-        } else {
-          // return non accumulated value
-          return this.refs.wysiwyg ? this.refs.wysiwyg.val() : $('textarea', this.root).val();
-        }
+        // return non accumulated value
+        return this.refs.wysiwyg ? this.refs.wysiwyg.val() : $('textarea', this.root).val();
       }
     }
     

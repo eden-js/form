@@ -6,7 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="number" step="0.01" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
+      <validate type="number" read-only={ props.readOnly } step="0.01" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
         <div slot="prepend" class="input-group-prepend">
           <span class="input-group-text">
             $
@@ -85,6 +85,13 @@
       onChange(e) {
         // set value
         this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
 
       /**

@@ -97,6 +97,13 @@
       onChange(e) {
         // set value
         this.value = this.refs.select.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
 
       /**

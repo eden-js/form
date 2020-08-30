@@ -6,10 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <div if={ props.field.i18n } each={ (lng, i) in eden.get('i18n.lngs', []) } hide={ eden.get('i18n.lng') !== lng }>
-        <validate type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(`${props.field.uuid}[${lng}]`) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ props.onChange } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } append="field-i18n" on-change={ onChange } />
-      </div>
-      <validate type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+      <validate read-only={ props.readOnly } type="textarea" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
     </div>
 
     <div slot="validation">
@@ -82,6 +79,13 @@
       onChange(e) {
         // set value
         this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
 
       /**
@@ -90,20 +94,8 @@
       * @return {*}
       */
       val() {
-        // get val
-        if (this.props.field.i18n) {
-          // reduce value
-          return this.eden.get('i18n.lngs', []).reduce((accum, language) => {
-            // add to accum
-            accum[language] = this.$(`[name="${props.getName(`${this.props.field.uuid}[${language}]`)}"]`).value;
-
-            // return accum
-            return accum;
-          }, {});
-        } else {
-          // return non accumulated value
-          return this.$('input').value;
-        }
+        // return non accumulated value
+        return this.$('input').value;
       }
 
       /**

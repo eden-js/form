@@ -6,7 +6,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="boolean" group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ onChange } />
+      <validate type="boolean" read-only={ props.readOnly } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.dataValue } required={ props.field.required } on-change={ onChange } />
     </div>
     
   </field>
@@ -57,6 +57,13 @@
       onChange(e) {
         // set value
         this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
 
       /**

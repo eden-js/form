@@ -10,7 +10,7 @@
           <i>Set Label</i>
         </a>
       </label>
-      <validate type="checkbox" ref="checkbox" each={ (option, i) in options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ getValue().includes(option.label) } />
+      <validate type="checkbox" read-only={ props.readOnly } ref="checkbox" each={ (option, i) in options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ getValue().includes(option.label) } />
     </div>
 
     <div slot="modal">
@@ -106,6 +106,13 @@
       onChange(e) {
         // set value
         this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
       }
 
       /**

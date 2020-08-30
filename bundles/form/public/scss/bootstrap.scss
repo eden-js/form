@@ -31,3 +31,18 @@
     }
   }
 }
+
+.eden-fields {
+
+  .field-hidden {
+    display : none;
+  }
+
+  .eden-dropzone .field-hidden {
+    display : block;
+
+    div[slot="body"] {
+      opacity : 0.5;
+    }
+  }
+}

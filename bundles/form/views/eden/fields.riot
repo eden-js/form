@@ -10,7 +10,7 @@
         <eden-add type="top" onclick={ (e) => onCreate(e) } if={ !props.preview } />
 
         <div class="row form-fields">
-          <div each={ (field, i) in getFields() } is={ getType(field) } class={ `${field.col ? 'col' : 'col-12'} ${field.class}` } preview={ preview } form={ form } id={ field.uuid } dataValue={ getValue(field) } field={ field } get-id={ getId } get-name={ getName } on-save={ onSaveField } on-remove={ onRemoveField } on-update={ onUpdate } />
+          <div each={ (field, i) in getFields() } is={ getType(field) } class={ `${field.col ? 'col' : 'col-12'} ${field.class || ''}${shouldShow(field) ? '' : ' field-hidden'}` } preview={ preview } form={ form } id={ field.uuid } data-value={ getValue(field) } read-only={ !shouldRead(field) } field={ field } get-id={ getId } get-name={ getName } on-save={ onSaveField } on-remove={ onRemoveField } on-update={ onUpdateField } />
         </div>
 
         <eden-add type="bottom" onclick={ (e) => onCreate(e) } if={ !props.preview } />
@@ -30,6 +30,7 @@
     import uuid from 'uuid';
     import slug from 'slug';
     import Base from '../js/base';
+    import query from 'query';
     import Model from '../js/model';
     import dotProp from 'dot-prop';
 
@@ -80,8 +81,10 @@
         this.getValue = this.getValue.bind(this);
         this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
+        this.shouldShow = this.shouldShow.bind(this);
         this.onSaveField = this.onSaveField.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
+        this.onUpdateField = this.onUpdateField.bind(this);
         this.onRemoveField = this.onRemoveField.bind(this);
       }
 
@@ -218,9 +221,90 @@
 
       // ////////////////////////////////////////////////////////////////////////////
       //
-      // EVENT METHODS
+      // VALIDATION METHODS
       //
       // ////////////////////////////////////////////////////////////////////////////
+
+      /**
+       * should show
+       *
+       * @return {*}
+       */
+      shouldShow(field) {
+        // check field
+        if (!field) return;
+
+        // visibility
+        let visibility = [];
+
+        // try/catch
+        try {
+          visibility = JSON.parse(field.visibility);
+        } catch (e) {}
+
+        // check field
+        if (visibility && visibility.length) {
+          // get data
+          const data = this.form ? (this.form.get('data') || {}) : {};
+
+          // create actual data
+          const newData = {};
+
+          // loop
+          Object.keys(data).forEach((key) => {
+            // set value
+            if (data[key] !== null && !(Array.isArray(data[key]) && !data[key].length)) newData[(this.getFields().find((f) => f && f.uuid === key) || {}).name || key] = data[key];
+          });
+          
+          // loop
+          if (visibility.find((item) => {
+            // return found when 0
+            if (!query.query([newData], item).length) return true;
+          })) return false;
+        }
+
+        // return true
+        return true;
+      }
+
+      /**
+       * should show
+       *
+       * @return {*}
+       */
+      shouldRead(field) {
+        // readonly
+        let readonly = [];
+
+        // try/catch
+        try {
+          readonly = JSON.parse(field.readonly);
+        } catch (e) {}
+
+        // check field
+        if (readonly && readonly.length) {
+          // get data
+          const data = this.form ? (this.form.get('data') || {}) : {};
+
+          // create actual data
+          const newData = {};
+
+          // loop
+          Object.keys(data).forEach((key) => {
+            // set value
+            if (data[key] !== null && !(Array.isArray(data[key]) && !data[key].length)) newData[(this.getFields().find((f) => f && f.uuid === key) || {}).name || key] = data[key];
+          });
+          
+          // loop
+          if (readonly.find((item) => {
+            // return found when 0
+            if (!query.query([newData], item).length) return true;
+          })) return false;
+        }
+
+        // return true
+        return true;
+      }
 
 
       // ////////////////////////////////////////////////////////////////////////////
@@ -381,6 +465,14 @@
           // update
           this.update();
         }
+      }
+
+      /**
+       * on field update
+       */
+      onUpdateField () {
+        // safe update
+        this.update();
       }
 
       /**
