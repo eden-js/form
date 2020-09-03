@@ -106,23 +106,6 @@ class GroupField {
       // built form
       const newForm = await formHelper.get(field.uuid);
 
-      // check value only
-      if (!valueOnly) {
-        // rendered
-        const rendered = await formHelper.render(req, newForm, await Promise.all((newForm.get('fields') || []).map(async (f) => {
-          // return fields map
-          return {
-            uuid  : f.uuid,
-            value : item[f.name || f.uuid],
-          };
-        })));
-
-        // rendered form
-        return {
-          form : rendered,
-        };
-      }
-
       // set rendered
       const rendered = {};
 

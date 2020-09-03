@@ -11,7 +11,7 @@
         <div each={ (item, i) in value } class="card-body border-bottom">
           
           <!-- sub form -->
-          <form-render ref={ ref('form') } get-name={ (name) => getName(name, i) } placement={ props.field.uuid } form={ item.form } preview={ props.preview } />
+          <form-render ref={ ref('form') } get-name={ (name) => getName(name, i) } placement={ props.field.uuid } form={ getForm(item) } preview={ props.preview } />
           <!-- / sub form -->
 
           <button type="button" class="btn btn-danger" onclick={ (e) => onRemove(e, i) }>
@@ -88,10 +88,7 @@
         if (!this.value) this.value = [];
 
         // add variation
-        this.value.push({
-          form  : Object.assign({}, (this.props.field || {}).form),
-          value : {},
-        });
+        this.value.push({});
 
         // update view
         this.update();
@@ -108,6 +105,16 @@
 
         // update view
         this.update();
+      }
+
+      /**
+       * get form
+       */
+      getForm(item) {
+        // return form
+        return Object.assign({}, (this.props.field || {}).form, {
+          data : item,
+        });
       }
 
       /**

@@ -44,7 +44,13 @@ class FileField {
         const upload = await File.findById(val);
 
         // check image
-        if (upload) return upload;
+        if (upload) {
+          // return sanitised
+          return {
+            id    : upload.get('_id'),
+            model : 'file',
+          };
+        }
 
         // return null
         return null;
@@ -67,10 +73,15 @@ class FileField {
   async value(req, field, value) {
     // eslint-disable-next-line no-nested-ternary
     return value
-      ? (Array.isArray(value) ? await Promise.all(value.map((item) => {
+      ? (Array.isArray(value) ? await Promise.all(value.map(async (item) => {
+        // find item
+        if (!(item instanceof File) && item.id && item.model) {
+          item = await File.findById(item.id);
+        }
+
         // return sanitised item
-        return item.sanitise();
-      })) : await value.sanitise())
+        return item && item.sanitise ? item.sanitise() : null;
+      })) : await (value.model && value.id ? await File.findById(value.id) : value).sanitise())
       : null;
   }
 }
