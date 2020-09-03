@@ -132,8 +132,11 @@
 
         // sortables
         if (this.sortables) {
-          // destroy
-          this.sortables.forEach((sortable) => sortable.destroy());
+          // try/catch
+          try {
+            // destroy
+            this.sortables.forEach((sortable) => sortable.destroy());
+          } catch (e) {}
         }
 
         // popover
@@ -153,9 +156,17 @@
       async build () {
         // init tooltips
         $('[data-toggle="tooltip"]').tooltip();
-        
-        // destroy sortables
-        (this.sortables || []).forEach((sortable) => sortable.destroy());
+
+        // sortables
+        if (this.sortables) {
+          // try/catch
+          try {
+            // destroy
+            this.sortables.forEach((sortable) => sortable.destroy());
+          } catch (e) {}
+        }
+
+        // set sortables
         this.sortables = [];
         
         // check preview
