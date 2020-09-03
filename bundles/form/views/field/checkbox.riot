@@ -87,7 +87,7 @@
       */
       val() {
         // return non accumulated value
-        return jQuery(this.$('input')).val();
+        return this.$$('input:checked').map((item) => jQuery(item).val());
       }
 
       /**

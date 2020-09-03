@@ -81,7 +81,7 @@
       */
       val() {
         // get val
-        return jQuery('input', this.root).val() === 'true';
+        return jQuery(this.$('select')).val() === 'true';
       }
     }
     
