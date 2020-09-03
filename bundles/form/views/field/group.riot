@@ -15,13 +15,13 @@
           <!-- / sub form -->
 
           <button type="button" class="btn btn-danger" onclick={ (e) => onRemove(e, i) }>
-            Remove Item
+            { `Remove ${props.field.label || 'Item'}` }
           </button>
         </div>
             
         <div class="card-footer">
           <button type="button" class="btn btn-success" onclick={ (e) => onAdd(e) }>
-            Add Item
+            { `Add ${props.field.label || 'Item'}` }
           </button>
         </div>
 
@@ -45,7 +45,7 @@
         super.onBeforeMount(...arguments);
     
         // set initial value
-        this.value = (this.props.dataValue || {}).value || {};
+        this.value = this.props.dataValue || [];
 
         // bind
         this.getName = this.getName.bind(this);
@@ -89,7 +89,7 @@
 
         // add variation
         this.value.push({
-          form  : Object.assign({}, (this.props.dataValue || {}).form),
+          form  : Object.assign({}, (this.props.field || {}).form),
           value : {},
         });
 

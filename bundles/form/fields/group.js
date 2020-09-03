@@ -66,6 +66,17 @@ class GroupField {
   }
 
   /**
+   * save
+   *
+   * @param {*} req 
+   * @param {*} field 
+   */
+  async save(req, field) {
+    // safe field
+    delete field.form;
+  }
+
+  /**
    * renders form field
    *
    * @param {req}    Request
@@ -125,8 +136,11 @@ class GroupField {
       return rendered;
     }));
 
-    // return
-    return { form : render, value };
+    // check form
+    field.form = render;
+
+    // return value
+    return value;
   }
 }
 
