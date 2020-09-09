@@ -30,14 +30,8 @@ class AddressField {
    * @return {*}
    */
   submit(req, field, value, old) {
-    // run try/catch
-    try {
-      // return value
-      return JSON.parse(value.address);
-    } catch (e) {
-      // return old
-      return old;
-    }
+    // submit
+    return value;
   }
 
   /**
