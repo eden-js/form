@@ -33,6 +33,7 @@ class GroupField {
    */
   submit(req, field, value, old = {}) {
     // ensure
+    if (!value) value = [];
     if (!Array.isArray(value)) value = [value];
 
     // return value
