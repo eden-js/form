@@ -113,11 +113,13 @@
           $(this.$('select')).ajaxSelectPicker({
             ajax : {
               url  : this.props.url,
-              type : 'GET',
+              type : this.props.type || 'GET',
               data : () => {
                 // create params
                 const params = {
-                  q : '{{{q}}}'
+                  q : '{{{q}}}',
+
+                  ...(this.props.body || {}),
                 };
 
                 // return params
