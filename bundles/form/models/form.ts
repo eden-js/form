@@ -30,7 +30,7 @@ export default class Form extends Model {
         const value = registered && await registered.value(req, field, (current.find((c) => {
           // return found field
           return c.uuid === field.uuid;
-        }) || {}).value);
+        }) || {}).value, this);
 
         // add to data
         data[field.uuid] = value;

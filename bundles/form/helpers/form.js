@@ -39,12 +39,12 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async sanitise(req, field, current) {
+  async sanitise(req, field, current, row) {
     // get from register
     const registered = fieldHelper.fields().find(b => b.type === field.type);
 
     // return
-    return registered ? await registered.value(req, field, current, true) : null;
+    return registered ? await registered.value(req, field, current, row) : null;
   }
 
   /**
@@ -107,7 +107,7 @@ class FormHelper extends Helper {
 
           // get data
           // eslint-disable-next-line max-len
-          const data = await registered.submit(subReq, field, value, await row.get(field.name || field.uuid));
+          const data = await registered.submit(subReq, field, value, await row.get(field.name || field.uuid), row);
 
           // set data
           row.set(field.name || field.uuid, data);
@@ -131,7 +131,7 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async submit(req, form, current = [], row) {
+  async submit(req, form, current) {
     // return
     const fields = (await Promise.all((await form.get('fields')).map(async (field) => {
       // get from register
@@ -141,10 +141,7 @@ class FormHelper extends Helper {
       if (!registered) return null;
 
       // get data
-      const data = await registered.submit(req, field, req.body[field.name] ? req.body[field.name] : req.body[field.uuid], (current.find((c) => {
-        // return found field
-        return c.uuid === field.uuid;
-      }) || {}).value, row);
+      const data = await registered.submit(req, field, req.body[field.name] ? req.body[field.name] : req.body[field.uuid], current ? await current.get(field.name || field.uuid) : null, current);
 
       // set uuid
       field.value = data;
