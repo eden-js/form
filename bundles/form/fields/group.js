@@ -2,6 +2,9 @@
 // get form helper
 const formHelper = helper('form');
 
+// model
+const Unsave = model('unsaveable');
+
 /**
  * build text helper
  */
@@ -41,28 +44,16 @@ class GroupField {
       // built form
       const form = await formHelper.get(field.uuid);
 
+      // unsave
+      const unsave = new Unsave((old || [])[i] || {});
+
       // digest into form
-      const fields = await formHelper.submit(Object.assign({}, req, {
+      await formHelper.submit(Object.assign({}, req, {
         body,
-      }), form, await Promise.all(form.get('fields').map(async (f) => {
-        // return fields map
-        return {
-          uuid  : f.uuid,
-          value : ((old || [])[i] || {})[f.name || f.uuid],
-        };
-      })));
+      }), form, unsave);
 
       // return
-      const rtn = {};
-
-      // loop fields
-      for (const f of fields) {
-        // set value
-        rtn[f.name || f.uuid] = f.value;
-      }
-
-      // return
-      return rtn;
+      return unsave.get();
     }));
   }
 

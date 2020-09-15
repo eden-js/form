@@ -143,8 +143,11 @@ class FormHelper extends Helper {
       // get data
       const data = await registered.submit(req, field, req.body[field.name] ? req.body[field.name] : req.body[field.uuid], current ? await current.get(field.name || field.uuid) : null, current);
 
-      // set uuid
+      // for extra fields
       field.value = data;
+
+      // set uuid
+      current.set(field.name || field.uuid, data);
 
       // return render
       return field;
