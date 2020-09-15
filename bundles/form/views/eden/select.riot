@@ -4,7 +4,11 @@
   <script>
     // import base
     import Base from '../js/base';
-    import { escape } from 'lodash';
+
+    // escpae
+    const escape = (str) => {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    };
 
     // export default
     export default class EdenSelect extends Base {
