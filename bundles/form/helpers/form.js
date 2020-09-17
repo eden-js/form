@@ -131,7 +131,7 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async submit(req, form, current) {
+  async submit(req, form, current, allowEmpty) {
     // return
     const fields = (await Promise.all((await form.get('fields')).map(async (field) => {
       // get from register
@@ -139,6 +139,9 @@ class FormHelper extends Helper {
 
       // check registered
       if (!registered) return null;
+
+      // only where exists
+      if (!allowEmpty && typeof (req.body[field.name] ? req.body[field.name] : req.body[field.uuid]) === 'undefined') return null;
 
       // get data
       const data = await registered.submit(req, field, req.body[field.name] ? req.body[field.name] : req.body[field.uuid], current ? await current.get(field.name || field.uuid) : null, current);
