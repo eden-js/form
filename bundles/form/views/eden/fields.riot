@@ -10,7 +10,10 @@
         <eden-add type="top" onclick={ (e) => onCreate(e) } if={ !props.preview } />
 
         <div class="row form-fields">
-          <div each={ (field, i) in getFields('root') } is={ getType(field) } { ...getProps(field) } />
+          <template each={ (field, i) in getFields('root') }>
+            <div is={ getType(field) } { ...getProps(field) } />
+            <div if={ field.break } class="w-100" />
+          </template>
         </div>
 
         <eden-add type="bottom" onclick={ (e) => onCreate(e) } if={ !props.preview } />
@@ -82,6 +85,7 @@
         this.getValue = this.getValue.bind(this);
         this.onCreate = this.onCreate.bind(this);
         this.getProps = this.getProps.bind(this);
+        this.getClass = this.getClass.bind(this);
         this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
         this.shouldShow = this.shouldShow.bind(this);
@@ -383,7 +387,7 @@
        */
       getType (child) {
         // return get child
-        return `field-${child.type}`;
+        return `field-${(child || {}).type}`;
       }
 
       /**
@@ -420,7 +424,7 @@
           field,
           id        : field.uuid,
           form      : this.form,
-          class     : `${field.col ? 'col' : 'col-12'} ${field.class || ''}${this.shouldShow(field) ? '' : ' field-hidden'}`,
+          class     : this.getClass(field),
           fields    : this.getFields(),
           preview   : this.preview,
           readOnly  : !this.shouldRead(field),
@@ -435,9 +439,18 @@
           onCreate  : this.onCreate,
           onRemove  : this.onRemoveField,
           getProps  : this.getProps,
+          getClass  : this.getClass,
           onUpdate  : this.onUpdateField,
           getFields : this.getFields,
         };
+      }
+
+      /**
+       * gets props
+       */
+      getClass(field) {
+        // return class
+        return `${field.col ? 'col' : 'col-12'} ${field.break ? 'break-after' : ''} ${field.class || ''}${this.shouldShow(field) ? '' : ' field-hidden'}`;
       }
 
       /**

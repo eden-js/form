@@ -1,15 +1,21 @@
 <field-group>
   <field ref={ ref('field') } class="field-container-inner" { ...fieldProps() }>
-    <div slot="body">
-      <div class="card mb-3 border bg-transparent">
-        <div class="card-header border-bottom">
+    <div slot="body" class="mb-3">
+      <label if={ props.field.multiple } class="form-label">
+        { props.field.label }
+        <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
+          <i>Set Label</i>
+        </a>
+      </label>
+      <div each={ (item, i) in value } class="card mb-3">
+        <div if={ !props.field.multiple } class="card-header">
           { props.field.label }
           <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
             <i>Set Label</i>
           </a>
         </div>
-        <div each={ (item, i) in value } class="card-body border-bottom">
-          
+        <div class="card-body pb-0">
+        
           <!-- sub form -->
           <div class={ `${ classes({ 'empty' : !props.getFields(props.field.uuid).length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-parent={ props.field.uuid }>
             <span class="eden-dropzone-label" if={ !props.preview }>
@@ -19,25 +25,28 @@
             <eden-add type="top" onclick={ (e) => props.onCreate(e) } if={ !props.preview } />
 
             <div class="row form-fields">
-              <div each={ (field, i) in props.getFields(props.field.uuid) } is={ props.getType(field) } { ...getProps(field, i) } />
+              <template each={ (field, i) in props.getFields(props.field.uuid) }>
+                <div is={ props.getType(field) } { ...getProps(field) } />
+                <div if={ field.break } class="w-100" />
+              </template>
             </div>
 
             <eden-add type="bottom" onclick={ (e) => props.onCreate(e) } if={ !props.preview } />
 
           </div>
           <!-- / sub form -->
+        </div>
 
-          <button type="button" class="btn btn-danger" onclick={ (e) => onRemove(e, i) }>
+        <div if={ props.field.multiple } class="card-footer d-flex">
+          <button type="button" class="btn btn-danger ml-auto" onclick={ (e) => onRemove(e, i) }>
             { `Remove ${props.field.label || 'Item'}` }
           </button>
         </div>
-            
-        <div class="card-footer">
-          <button type="button" class="btn btn-success" onclick={ (e) => onAdd(e) }>
-            { `Add ${props.field.label || 'Item'}` }
-          </button>
-        </div>
-
+      </div>
+      <div>
+        <button if={ props.field.multiple } type="button" class="btn btn-success" onclick={ (e) => onAdd(e) }>
+          { `Add ${props.field.label || 'Item'}` }
+        </button>
       </div>
     </div>
     <div slot="modal" />
@@ -61,10 +70,21 @@
         this.value = this.props.dataValue || [];
 
         // set value
-        if (!this.value.length) this.value = [{}];
+        if (!this.value.length && (!this.props.field.multiple || !this.props.preview)) this.value = [{}];
 
         // bind
         this.getName = this.getName.bind(this);
+      }
+
+      /**
+       * on before mount
+       */
+      onBeforeUpdate() {
+        // run super
+        super.onBeforeUpdate(...arguments);
+
+        // set value
+        if (!this.value.length && (!this.props.field.multiple || !this.props.preview)) this.value = [{}];
       }
 
       /**
@@ -87,10 +107,10 @@
           preview   : this.props.preview,
           placement : this.props.placement,
 
-          'onSave'   : this.props.onSave,
-          'isInput'  : true,
-          'isMulti'  : true,
-          'onRemove' : this.props.onRemove,
+          'onSave'     : this.props.onSave,
+          'isInput'    : true,
+          'onRemove'   : this.props.onRemove,
+          'isMultiple' : true,
         };
       }
 
