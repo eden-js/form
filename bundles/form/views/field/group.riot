@@ -11,7 +11,20 @@
         <div each={ (item, i) in value } class="card-body border-bottom">
           
           <!-- sub form -->
-          <form-render ref={ ref('form') } get-name={ (name) => getName(name, i) } placement={ props.field.uuid } form={ getForm(item) } preview={ props.preview } />
+          <div class={ `${ classes({ 'empty' : !props.getFields(props.field.uuid).length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-parent={ props.field.uuid }>
+            <span class="eden-dropzone-label" if={ !props.preview }>
+              { props.form.get('title') || props.form.get('placement') }
+            </span>
+
+            <eden-add type="top" onclick={ (e) => props.onCreate(e) } if={ !props.preview } />
+
+            <div class="row form-fields">
+              <div each={ (field, i) in props.getFields(props.field.uuid) } is={ props.getType(field) } { ...getProps(field, i) } />
+            </div>
+
+            <eden-add type="bottom" onclick={ (e) => props.onCreate(e) } if={ !props.preview } />
+
+          </div>
           <!-- / sub form -->
 
           <button type="button" class="btn btn-danger" onclick={ (e) => onRemove(e, i) }>
@@ -47,6 +60,9 @@
         // set initial value
         this.value = this.props.dataValue || [];
 
+        // set value
+        if (!this.value.length) this.value = [{}];
+
         // bind
         this.getName = this.getName.bind(this);
       }
@@ -76,6 +92,20 @@
           'isMulti'  : true,
           'onRemove' : this.props.onRemove,
         };
+      }
+
+      /**
+       * get props
+       */
+      getProps(field, i) {
+        // get parent
+        const actual = this.props.getProps(field);
+
+        // get name
+        actual.getName = (name) => this.getName(name, i);
+
+        // return actual
+        return actual;
       }
 
       /**
