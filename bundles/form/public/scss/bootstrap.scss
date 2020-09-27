@@ -3,22 +3,6 @@
 @import "~bootstrap-select/sass/bootstrap-select";
 @import "~ajax-bootstrap-select/dist/css/ajax-bootstrap-select.min";
 
-.field-column {
-  label {
-    display : none;
-  }
-  .form-control,
-  .mb-3 {
-    margin : 0;
-  }
-}
-
-.table {
-  .element-image img {
-    max-height : ($spacer * 5);
-  }
-}
-
 .eden-dropzone {
 
   &.empty {

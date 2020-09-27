@@ -1,38 +1,54 @@
 
-// require local dependencies
+// import field interface
+import Field from 'field';
+
+// require models
 const File = model('file');
 
 /**
- * build file helper
+ * build address helper
  */
-class FileField {
+export default class FileField extends Field {
   /**
-   * construct file helper
+   * returns field type
    */
-  constructor(helper) {
-    // set helper
-    this._helper = helper;
-
-    // bind methods
-    this.value = this.value.bind(this);
-    this.submit = this.submit.bind(this);
-
-    // set meta
-    this.title = 'File';
-    this.description = 'File Field';
+  get type() {
+    // return field type label
+    return 'file';
   }
 
   /**
-   * submits form field
-   *
-   * @param {req}    Request
-   * @param {Object} field
-   * @param {*}      value
-   * @param {*}      old
-   *
-   * @return {*}
+   * returns field type
    */
-  async submit(req, field, value, old) {
+  get title() {
+    // return field type label
+    return 'File';
+  }
+
+  /**
+   * returns category list to show field in
+   */
+  get categories() {
+    // return array of categories
+    return ['frontend'];
+  }
+
+  /**
+   * returns category list to show field in
+   */
+  get description() {
+    // return description string
+    return 'File Field';
+  }
+
+  /**
+   * submit field value
+   *
+   * @param {*} param0 
+   * @param {*} field 
+   * @param {*} value 
+   */
+  async submit({ req, old }, field, value) {
     // check array
     if (!Array.isArray(value)) value = [value];
 
@@ -62,15 +78,13 @@ class FileField {
   }
 
   /**
-   * renders form field
+   * returns sanitised result of field submission
    *
-   * @param {req}    Request
-   * @param {Object} field
-   * @param {*}      value
-   *
-   * @return {*}
+   * @param {*} param0 
+   * @param {*} field 
+   * @param {*} value 
    */
-  async value(req, field, value) {
+  async sanitise({ req }, field, value) {
     // eslint-disable-next-line no-nested-ternary
     return value
       ? (Array.isArray(value) ? await Promise.all(value.map(async (item) => {
@@ -85,10 +99,3 @@ class FileField {
       : null;
   }
 }
-
-/**
- * export built file helper
- *
- * @type {text}
- */
-module.exports = FileField;

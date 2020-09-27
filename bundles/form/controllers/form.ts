@@ -9,8 +9,6 @@ import Controller from 'controller';
 const Form = model('form');
 
 // load helper
-const syncHelper  = helper('sync');
-const formHelper  = helper('form');
 const fieldHelper = helper('form/field');
 
 /**
@@ -32,95 +30,13 @@ export default class FormController extends Controller {
     ['address', 'boolean', 'money', 'checkbox', 'encrypt', 'date', 'file', 'email', 'image', 'phone', 'number', 'radio', 'select', 'text', 'textarea', 'wysiwyg', 'group'].sort().forEach((field) => {
       // require field
       // eslint-disable-next-line import/no-dynamic-require
-      const FieldClass = require(`form/fields/${field}`);
+      const FieldInterface = require(`form/fields/${field}`);
 
       // initialize class
-      const fieldClassBuilt = new FieldClass(fieldHelper);
+      const actualField = new FieldInterface();
 
       // register
-      fieldHelper.field(field, {
-        for         : ['frontend', 'admin'],
-        title       : fieldClassBuilt.title,
-        categories  : fieldClassBuilt.categories,
-        description : fieldClassBuilt.description,
-      }, fieldClassBuilt.value, fieldClassBuilt.save, fieldClassBuilt.submit);
-    });
-
-    // add middleware
-    this.eden.router.use(this.middlewareAction);
-
-    // on render
-    this.eden.pre('view.compile', async ({ req, res, render }) => {
-      // move menus
-      if (render.forms && render.forms.length) {
-        // set Block
-        render.forms = {};
-
-        // await promise
-        await Promise.all(render.forms.map(async (placement) => {
-        // get Block
-          const form = await formHelper.get(placement);
-
-          // set null or Block
-          render.forms[placement] = form ? await formHelper.render(req, form) : null;
-        }));
-      }
-
-      // check fields
-      if (!render.fields && !render.isJSON) {
-        // render fields
-        render.fields = fieldHelper.renderFields('frontend');
-      }
-    });
-  }
-
-  /**
-   * socket listen action
-   *
-   * @param  {String} id
-   * @param  {Object} opts
-   *
-   * @call   model.listen.form
-   * @return {Async}
-   */
-  async listenAction(id, uuid, opts) {
-    // / return if no id
-    if (!id) return null;
-
-    // join room
-    opts.socket.join(`form.${id}`);
-
-    // add to room
-    return await syncHelper.addListener(await Form.findById(id), {
-      user      : opts.user,
-      atomic    : true,
-      listenID  : uuid,
-      sessionID : opts.sessionID,
-    });
-  }
-
-  /**
-   * socket listen action
-   *
-   * @param  {String} id
-   * @param  {Object} opts
-   *
-   * @call   model.deafen.form
-   * @return {Async}
-   */
-  async deafenAction(id, uuid, opts) {
-    // / return if no id
-    if (!id) return null;
-
-    // join room
-    opts.socket.leave(`form.${id}`);
-
-    // add to room
-    return await syncHelper.removeListener(await Form.findById(id), {
-      user      : opts.user,
-      atomic    : true,
-      listenID  : uuid,
-      sessionID : opts.sessionID,
+      fieldHelper.register(actualField);
     });
   }
 
