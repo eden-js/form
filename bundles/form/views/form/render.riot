@@ -112,33 +112,6 @@
       }
 
       /**
-       * on update name
-       *
-       * @param  {Event} e
-       */
-      onToggleUpdate (e) {
-        // prevent default
-        e.preventDefault();
-        e.stopPropagation();
-
-        // set update
-        this.isUpdate = !this.isUpdate;
-
-        // update
-        this.update();
-      }
-
-      /**
-       * add load fields function
-       *
-       * @return {*}
-       */
-      loadFields () {
-        // return internal proxied
-        return this.refs.fields.loadFields(...arguments);
-      }
-
-      /**
        * gets fields
        *
        * @return {Array}

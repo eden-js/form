@@ -77,18 +77,27 @@
         this.preview   = !!this.props.preview;
         this.placement = null;
 
-        // get fields
+        // build methods
         this.build = this.build.bind(this);
+
+        // get methods
         this.getId = this.getId.bind(this);
         this.getName = this.getName.bind(this);
         this.getType = this.getType.bind(this);
         this.getValue = this.getValue.bind(this);
-        this.onCreate = this.onCreate.bind(this);
         this.getProps = this.getProps.bind(this);
         this.getClass = this.getClass.bind(this);
-        this.setFields = this.setFields.bind(this);
         this.getFields = this.getFields.bind(this);
+
+        // set methods
+        this.setFields = this.setFields.bind(this);
+
+        // validation methods
+        this.shouldRead = this.shouldRead.bind(this);
         this.shouldShow = this.shouldShow.bind(this);
+
+        // event fields
+        this.onCreate = this.onCreate.bind(this);
         this.onSaveField = this.onSaveField.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onUpdateField = this.onUpdateField.bind(this);
