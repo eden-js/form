@@ -46,7 +46,33 @@ export default class SelectField extends Field {
    * @param {*} value 
    */
   async submit({ req, old }, field, value) {
+    // check value
+    if (!value) value = [];
+    if (!Array.isArray(value)) value = [value];
+
+    // filter
+    value = value.filter((v) => v);
+
     // return database value
-    return Array.isArray(value) ? value : (value && [value]);
+    return value;
+  }
+
+  /**
+   * returns sanitised result of field submission
+   *
+   * @param {*} param0 
+   * @param {*} field 
+   * @param {*} value 
+   */
+  async sanitise({ req, form, noChild }, field, value) {
+    // check value
+    if (!value) value = [];
+    if (!Array.isArray(value)) value = [value];
+
+    // filter
+    value = value.filter((v) => v);
+
+    // return database value
+    return value;
   }
 }
