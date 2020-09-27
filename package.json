@@ -17,12 +17,7 @@
   },
   "homepage": "https://github.com/eden-js/form#readme",
   "devDependencies": {
-    "@edenjs/eslint-config-eden": "^2.0.14",
-    "eslint": "^6.0.1",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-plugin-import": "^2.18.0",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.2"
+    "@dashup/eslint-config-dashup": "0.0.1"
   },
   "dependencies": {
     "ajax-bootstrap-select": "^1.4.5",
