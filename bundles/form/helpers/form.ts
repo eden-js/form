@@ -62,7 +62,7 @@ class FormHelper extends Helper {
     // return
     const returnFields = (await Promise.all(fields.map(async (field) => {
       // get from register
-      const registered = fieldHelper.find(field.type);
+      const registered = await fieldHelper.find(field.type);
 
       // check registered
       if (!registered) return;

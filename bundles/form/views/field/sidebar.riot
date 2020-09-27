@@ -11,7 +11,7 @@
             <ul class="nav nav-tabs card-header-tabs w-100">
               <li class="nav-item" each={ (tab, i) in getTabs() }>
                 <button class={ classes({ 'nav-link' : true, 'active' : isTab(tab) }) } onclick={ (e) => onTab(e, tab) }>
-                  { eden.get('i18n.t')(`cms.category.${tab}`) }
+                  { tab }
                 </button>
               </li>
             </ul>
@@ -24,13 +24,13 @@
           </div>
           
           <div class="draggable" if={ !props.loading() }>
-            <div each={ (field, i) in getFields() } class={ classes({ 'card card-body mb-2' : true, 'active' : isActive(field) }) } data-type={ field.type || field.tag } onclick={ (e) => onField(e, field) }>
+            <div each={ (field, i) in getFields() } class={ classes({ 'card card-body mb-2' : true, 'active' : isActive(field) }) } data-type={ field.type } onclick={ (e) => onField(e, field) }>
               <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
-                  { field.opts.title }
+                  { field.title }
                 </h5>
               </div>
-              <p class="m-0">{ field.opts.description }</p>
+              <p class="m-0">{ field.description }</p>
             </div>
           </div>
           
@@ -59,7 +59,7 @@
         super.onBeforeMount(...arguments);
 
         // set showing
-        this.tab = this.tab || 'default';
+        this.tab = this.getTabs()[0];
         this.state = {
           showing : false,
         };
@@ -141,7 +141,7 @@
         e.stopPropagation();
         
         // activate field
-        this.type = field.type || field.tag;
+        this.type = field.type;
         
         // update view
         this.update();
@@ -159,26 +159,26 @@
         // return sorted fields
         let rtn = (this.props.fields || []).sort((a, b) => {
           // Return sort
-          return ('' + a.opts.title).localeCompare(b.opts.title);
+          return ('' + a.title).localeCompare(b.title);
         });
         
         // check default
         if (category !== 'default') {
           rtn = rtn.filter((field) => {
             // set category
-            return (field.opts.categories || []).includes(category);
+            return (field.categories || []).includes(category);
           });
         } else {
           rtn = rtn.filter((field) => {
             // check categories
-            return !(field.opts.categories);
+            return !(field.categories);
           });
         }
 
         // do block search
         if (this.search && this.search.length) rtn = rtn.filter((field) => {
           // check search
-          return ('' + field.opts.title).toLowerCase().includes(this.search.toLowerCase());
+          return ('' + field.title).toLowerCase().includes(this.search.toLowerCase());
         });
         
         // return rtn
@@ -192,14 +192,14 @@
         // return categories
         return (this.props.fields || []).reduce((accum, field) => {
           // loop categories
-          (field.opts.categories || []).forEach((category) => {
+          (field.categories || []).forEach((category) => {
             // add category
             if (!accum.includes(category)) accum.push(category);
           });
 
           // return accumulator
           return accum;
-        }, ['default']);
+        }, []);
       }
       
       /**

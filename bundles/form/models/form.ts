@@ -29,7 +29,8 @@ export default class Form extends Model {
         result[field.name || field.uuid] = await fieldHelper.sanitise({
           ...data,
           current,
-          form : this,
+          form   : this,
+          fields : await fieldHelper.fields(data.req),
         }, field, await current.get(field.name || field.uuid));
       }));
     }

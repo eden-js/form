@@ -33,9 +33,27 @@ class FieldHelper extends Helper {
    *
    * @param type 
    */
-  find(type) {
+  async find(type, data = {}) {
     // return found
-    return this.__fields.find(f => f.type === type);
+    return (data.fields || await this.fields(data)).find(f => f.type === type);
+  }
+
+  /**
+   * lists form fields
+   *
+   * @param req 
+   */
+  async list(data = {}) {
+    // done
+    return (data.fields || await this.fields(data)).map((field) => {
+      // return sanitised value
+      return {
+        type        : field.type,
+        title       : field.title,
+        categories  : field.categories,
+        description : field.description,
+      };
+    });
   }
 
   /**
@@ -43,9 +61,21 @@ class FieldHelper extends Helper {
    *
    * @return {Array}
    */
-  fields() {
-    // returns fields
-    return this.__fields;
+  async fields(data = {}) {
+    // default fields
+    const fields = new Map();
+
+    // loop fields
+    this.__fields.forEach((field) => {
+      // set value
+      fields.set(field.type, field);
+    });
+
+    // await hook
+    await this.eden.hook('form.fields', data, fields);
+
+    // done
+    return Array.from(fields.values());
   }
 
   /**
@@ -68,12 +98,12 @@ class FieldHelper extends Helper {
    * @param field 
    * @param value 
    */
-  sanitise(data, field, value) {
+  async sanitise(data, field, value) {
     // get registered
-    const registered = this.find(field.type);
+    const registered = await this.find(field.type, data);
 
     // get value
-    return registered && registered.sanitise(data, field, value);
+    return registered && await registered.sanitise(data, field, value);
   }
 }
 
