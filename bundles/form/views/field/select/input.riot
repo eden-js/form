@@ -1,0 +1,80 @@
+<field-select-input>
+  <div class={ props.field.group || 'mb-3' }>
+    <label class="form-label" for={ props.getId(props.field.uuid) }>
+      <a if={ !props.field.label } href="#!" onclick={ (e) => props.updateAction(e, props.field) }>
+        <i>Set Label</i>
+      </a>
+      { props.field.label }
+    </label>
+    <eden-select ref={ ref('select') } data={ getData() } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } required={ props.field.required } on-change={ onChange } />
+  </div>
+
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldSelect extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value   = this.props.value;
+        this.colors  = ['primary', 'secondary', 'success', 'info', 'warning', 'danger'];
+        this.options = this.props.field.options || [];
+      }
+
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // return non accumulated value
+        return jQuery('input', this.root).val();
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.value = this.refs.select.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
+      }
+
+      /**
+       * get data
+       */
+      getData() {
+        // return value
+        return (this.props.field.options || []).map((field) => {
+          // return
+          return {
+            name  : field.label,
+            value : field.value,
+            color : field.color,
+            
+            selected : (this.value || []).includes(field),
+          };
+        });
+      }
+    }
+
+  </script>
+</field-select-input>

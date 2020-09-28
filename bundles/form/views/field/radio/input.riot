@@ -1,0 +1,65 @@
+<field-radio-input>
+  <div class={ props.field.group || 'mb-3' }>
+    <label class="form-label">
+      { props.field.label }
+      <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
+        <i>Set Label</i>
+      </a>
+    </label>
+    <span if={ !get('field.options', []).length }>
+      Add Options
+    </span>
+    <validate type="radio" read-only={ !props.shouldRead(props.field) } each={ (option, i) in options } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ value.includes(option.label) } />
+  </div>
+
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldRadioInput extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value   = this.props.value || [];
+        this.options = this.props.field.options || [];
+      }
+
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // return non accumulated value
+        return this.$$('input:checked').map((item) => jQuery(item).val());
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
+      }
+    }
+
+  </script>
+</field-radio-input>

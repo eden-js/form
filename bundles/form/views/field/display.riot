@@ -1,0 +1,38 @@
+<field-display>
+  <div class="flex-1">
+    <div class="form-check form-switch" if={ props.multiple }>
+      <input class="form-check-input" id="is-multiple" type="checkbox" onchange={ (e) => onSwitch(e, 'multiple') } { ...getProps({ checked : props.field.multiple }) }>
+      <label class="form-check-label" for="is-multiple">
+        Enable multiple values
+      </label>
+    </div>
+  </div>
+
+  <script>
+
+    export default class FieldDisplay {
+
+      /**
+       * get props
+       */
+      getProps(obj) {
+        // return get props
+        return Object.keys(obj).reduce((accum, key) => {
+          // set accum
+          if (obj[key]) accum[key] = true;
+
+          // return accum
+          return accum;
+        }, {});
+      }
+
+      /**
+       * on switch
+       */
+      onSwitch(e, name) {
+        // set
+        this.props.set(name, jQuery(e.target).is(':checked'));
+      }
+    }
+  </script>
+</field-display>

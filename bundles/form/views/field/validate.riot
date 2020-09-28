@@ -1,0 +1,38 @@
+<field-validate>
+  <div class="flex-1">
+    <div class="form-check form-switch" if={ props.required }>
+      <input class="form-check-input" id="is-required" type="checkbox" onchange={ (e) => onSwitch(e, 'required') } { ...getProps({ checked : props.field.multiple }) }>
+      <label class="form-check-label" for="is-required">
+        Require field input
+      </label>
+    </div>
+  </div>
+
+  <script>
+
+    export default class FieldDisplay {
+
+      /**
+       * get props
+       */
+      getProps(obj) {
+        // return get props
+        return Object.keys(obj).reduce((accum, key) => {
+          // set accum
+          if (obj[key]) accum[key] = true;
+
+          // return accum
+          return accum;
+        }, {});
+      }
+
+      /**
+       * on switch
+       */
+      onSwitch(e, name) {
+        // set
+        this.props.set(name, jQuery(e.target).is(':checked'));
+      }
+    }
+  </script>
+</field-validate>

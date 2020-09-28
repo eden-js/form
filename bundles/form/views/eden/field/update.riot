@@ -1,0 +1,130 @@
+<eden-field-update>
+  <div class="modal fade">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="m-0">
+            Update Field
+          </h5>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">
+              Name
+            </label>
+            <input class="form-control" ref="name" value={ get('field.name', '') } onchange={ (e) => onName(e) } />
+          </div>
+          
+
+        </div>
+        
+        <div class="modal-header border-top">
+          <nav class="nav nav-tabs">
+            <a each={ (t, i) in tabs } class={ classes({ 'nav-item nav-link' : true, 'active' : isTab(t) }) } href="#" onclick={ (e) => onTab(e, t) }>{ t }</a>
+          </nav>
+        </div>
+        <div class="modal-body">
+          BODYYYY
+        </div>
+        <div class="modal-footer">
+          <button class={ classes({ 'btn btn-secondary float-right' : true, 'disabled' : loading('update') }) } onclick={ (e) => onHideSidebar(e) } disabled={ loading('update') }>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // import default
+    import Base from '../../js/base';
+
+    // export default
+    export default class EdenFieldUpdate extends Base {
+      
+      /**
+       * on before mount
+       */
+      onBeforeMount(props) {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // field
+        this.field = this.props.getField(this.props.field);
+
+        // set variables
+        this.tabs = (this.field.data || {}).tabs || ['Display'];
+
+        // bind
+        this.isTab = this.isTab.bind(this);
+        this.onTab = this.onTab.bind(this);
+          
+        // set tab
+        this.state.tab = this.tabs[0];
+      }
+      
+      /**
+       * on before mount
+       */
+      onBeforeUpdate(props) {
+        // run super
+        super.onBeforeUpdate(...arguments);
+
+        // field
+        this.field = this.props.getField(this.props.field);
+
+        // set variables
+        this.tabs = (this.field.data || {}).tabs || ['Display'];
+      }
+
+      /**
+       * is tab
+       *
+       * @param  {String} tab
+       *
+       * @return {Boolean}
+       */
+      isTab(tab) {
+        // return is tab
+        return this.state.tab === tab;
+      }
+
+      /**
+       * on tab
+       *
+       * @param  {Event} e
+       * @return {*}
+       */
+      onTab(e, tab) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+  
+        // set tab
+        this.update({
+          tab,
+        });
+      }
+
+      /**
+       * on settings
+       *
+       * @param {Event} e
+       */
+      show() {
+        // show modal
+        $(this.$('.modal')).modal('show');
+      }
+
+      /**
+       * on settings
+       *
+       * @param {Event} e
+       */
+      hide() {
+        // show modal
+        $(this.$('.modal')).modal('hide');
+      }
+    }
+  </script>
+</eden-field-update>

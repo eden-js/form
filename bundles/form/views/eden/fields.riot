@@ -11,7 +11,7 @@
 
         <div class="row form-fields">
           <template each={ (field, i) in getFields('root') }>
-            <div is={ getType(field) } { ...getProps(field) } />
+            <eden-field-input { ...getProps(field) } />
             <div if={ field.break } class="w-100" />
           </template>
         </div>
@@ -25,17 +25,21 @@
       <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
-    <field-sidebar ref={ ref('sidebar') } loading={ loading } placement={ props.placement } fields={ props.fields } />
+    <eden-field-update if={ state.updating } ref={ ref('updating') } set={ (k, v) => onSet(state.updating, k, v) } get-field={ getField } form={ form } field={ state.updating } />
+    <eden-field-remove if={ state.removing } ref={ ref('removing') } set={ (k, v) => onSet(state.removing, k, v) } get-field={ getField } form={ form } field={ state.removing } />
+    <eden-field-sidebar ref={ ref('sidebar') } loading={ loading } placement={ props.placement } fields={ props.fields } />
   </div>
 
   <script>
     // import base
     import uuid from 'uuid';
     import slug from 'slug';
-    import Base from '../js/base';
     import query from 'query';
-    import Model from '../js/model';
     import dotProp from 'dot-prop';
+
+    // import local
+    import Base from '../js/base';
+    import Model from '../js/model';
 
     // export default
     export default class EdenFields extends Base {
@@ -83,22 +87,22 @@
         // get methods
         this.getId = this.getId.bind(this);
         this.getName = this.getName.bind(this);
-        this.getType = this.getType.bind(this);
+        this.getField = this.getField.bind(this);
         this.getValue = this.getValue.bind(this);
         this.getProps = this.getProps.bind(this);
         this.getClass = this.getClass.bind(this);
         this.getFields = this.getFields.bind(this);
 
-        // set methods
-        this.setFields = this.setFields.bind(this);
-
         // validation methods
         this.shouldRead = this.shouldRead.bind(this);
         this.shouldShow = this.shouldShow.bind(this);
 
+        // action methods
+        this.updateAction = this.updateAction.bind(this);
+        this.removeAction = this.removeAction.bind(this);
+
         // event fields
         this.onCreate = this.onCreate.bind(this);
-        this.onSaveField = this.onSaveField.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onUpdateField = this.onUpdateField.bind(this);
         this.onRemoveField = this.onRemoveField.bind(this);
@@ -142,9 +146,6 @@
       onBeforeUnmount(...args) {
         // on before unmount
         super.onBeforeUnmount(...args);
-
-        // set fields
-        this.form.removeListener('fields', this.setFields);
 
         // sortables
         if (this.sortables) {
@@ -199,12 +200,6 @@
         
         // check placement
         if (this.placement !== this.props.placement || this.form.get('placement') !== this.props.placement) {
-          // check form
-          if (this.form) {
-            // remove listeners
-            this.form.removeListener('fields', this.setFields);
-          }
-
           // set placement
           this.placement = this.props.placement;
 
@@ -224,9 +219,6 @@
 
           // load fields
           if (!(this.form.get('fields') || []).length) await this.init();
-
-          // set fields
-          this.form.on('fields', this.setFields);
 
           // set default positions
           if (this.props.positions && !(this.form.get('fields') || []).length) {
@@ -343,19 +335,6 @@
       /**
        * returns field name
        */
-      getName(name) {
-        // check name
-        if (this.props.getName) {
-          return this.props.getName(name);
-        }
-
-        // return name
-        return name;
-      }
-
-      /**
-       * returns field name
-       */
       getId(id) {
         // check name
         if (this.props.getName) {
@@ -364,6 +343,19 @@
 
         // return name
         return slug(id, { lower : true });
+      }
+
+      /**
+       * returns field name
+       */
+      getName(name) {
+        // check name
+        if (this.props.getName) {
+          return this.props.getName(name);
+        }
+
+        // return name
+        return name;
       }
 
       /**
@@ -388,15 +380,19 @@
       }
 
       /**
-       * get element
-       *
-       * @param  {Object} child
-       *
-       * @return {*}
+       * gets props
        */
-      getType (child) {
-        // return get child
-        return `field-${(child || {}).type}`;
+      getClass(field) {
+        // return class
+        return `${field.col ? 'col' : 'col-12'} ${field.break ? 'break-after' : ''} ${field.class || ''}${this.shouldShow(field) ? '' : ' field-hidden'}`;
+      }
+
+      /**
+       * gets props
+       */
+      getField(field) {
+        // return class
+        return this.props.fields.find((f) => f.type === field.type);
       }
 
       /**
@@ -431,109 +427,118 @@
         return {
           // data
           field,
+
+          // values
           id        : field.uuid,
           form      : this.form,
           class     : this.getClass(field),
+          value     : this.getValue(field),
           fields    : this.getFields(),
           preview   : this.preview,
-          readOnly  : !this.shouldRead(field),
           placement : this.props.placement,
-          dataValue : this.getValue(field),
 
-          // functions
+          // on update/remove
+          updateAction : this.updateAction,
+          removeAction : this.removeAction,
+
+          // get functions
           getId     : this.getId,
-          onSave    : this.onSaveField,
-          getType   : this.getType,
           getName   : this.getName,
-          onCreate  : this.onCreate,
-          onRemove  : this.onRemoveField,
+          getField  : this.getField,
           getProps  : this.getProps,
           getClass  : this.getClass,
-          onUpdate  : this.onUpdateField,
           getFields : this.getFields,
+
+          // should functions
+          shouldRead : this.shouldRead,
+          shouldShow : this.shouldShow,
         };
       }
 
+
+      // ////////////////////////////////////////////////////////////////////////////
+      //
+      // ACTION METHODS
+      //
+      // ////////////////////////////////////////////////////////////////////////////
+
       /**
-       * gets props
+       * update action
        */
-      getClass(field) {
-        // return class
-        return `${field.col ? 'col' : 'col-12'} ${field.break ? 'break-after' : ''} ${field.class || ''}${this.shouldShow(field) ? '' : ' field-hidden'}`;
+      updateAction (e, field) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // update
+        this.update({
+          updating : field,
+        });
+
+        // show modal
+        this.refs.updating.show();
       }
 
       /**
-       * on refresh field
-       *
-       * @param  {Event}  e
-       * @param  {Object} field
+       * update action
        */
-      async onSaveField (field, preventUpdate) {
-        // update view
-        if (!preventUpdate) this.loading(`field.${field.uuid}`, true);
+      removeAction (e, field) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
 
+        // update
+        this.update({
+          removing : field,
+        });
+
+        // show modal
+        this.refs.removing.show();
+      }
+
+      /**
+       * on set
+       */
+      async onSet (field, key, value) {
         // set data
-        const actualField = (this.form.get('fields') || []).find((f) => f.uuid === field.uuid);
+        let actualField = (this.form.get('fields') || []).find((f) => f.uuid === field.uuid);
 
-        // actual field
-        if (actualField) {
-          // set data
-          for (const key in field) {
-            // set value
-            actualField[key] = field[key];
-          }
+        // push field
+        if (!actualField) {
+          // push
+          fields.push(field);
+
+          // set field
+          actualField = field;
         }
 
+        // set
+        dotProp.set(actualField, key, value);
+
         // build meta
-        if (!field._meta) {
+        if (!actualField._meta) {
           // set created
-          field._meta = {
+          actualField._meta = {
             created : new Date(),
           };
         }
 
         // set updated
-        field._meta.updated = new Date();
+        actualField._meta.updated = new Date();
 
         // log data
-        const res = await fetch(`/form/${this.form.get('id')}/field/save`, {
-          body : JSON.stringify({
-            field : field
-          }),
-          method  : 'post',
-          headers : {
-            'Content-Type' : 'application/json'
-          },
-          credentials : 'same-origin'
+        const savedField = await eden.router.post(`/form/${this.form.get('id')}/field/save`, {
+          field : actualField
         });
 
-        // load data
-        const result = await res.json();
-
-        // fields
-        const fields = this.form.get('fields') || [];
-
-        // check found
-        if (!fields.find((f) => f.uuid === field.uuid)) {
-          // add
-          fields.push(field);
-          this.form.set('fields', fields);
-        }
-
         // set logic
-        for (let key in result.result) {
+        for (let key in savedField.result) {
           // clone to form
-          field[key] = result.result[key];
+          actualField[key] = savedField.result[key];
         }
 
-        // update view
-        if (!preventUpdate) {
-          // loading
-          this.loading(`field.${field.uuid}`, false);
-        } else {
-          // update
-          this.update();
-        }
+        // update
+        this.update();
       }
 
       /**
@@ -666,13 +671,6 @@
 
         // set loading
         this.loading('save', false);
-      }
-
-      /**
-       * set fields
-       */
-      setFields() {
-        
       }
 
       /**
@@ -852,7 +850,7 @@
               // save form
               if (addedField) {
                 // added field
-                await this.onSaveField(addedField);
+                await this.onSet(addedField, '_meta.created', new Date());
               }
 
               // save form

@@ -1,0 +1,116 @@
+<field-address-input>
+  <div class={ props.field.group || 'mb-3' }>
+    <label class="form-label" for={ props.getId(`${props.field.uuid}-geo`) }>
+      { props.field.label }
+      <a href="#!" if={ !props.field.label } onclick={ (e) => onUpdate(e) }>
+        <i>Set Label</i>
+      </a>
+    </label>
+    <input type="hidden" name={ props.getName(`${props.field.uuid}[address]`) } value={ JSON.stringify(value) } />
+    <input type="text" name={ props.getName(`${props.field.uuid}[geo]`) } required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ props.getId(`${props.field.uuid}-geo`) } value={ get('value.formatted') || '' } on-change={ onChange }>
+  </div>
+
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldAddress extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+    
+        // set initial value
+        this.value = this.props.value;
+      }
+
+      /**
+       * return field props
+       */
+      fieldProps() {
+        // return opts
+        return {
+          form      : this.props.form,
+          value     : this.value,
+          field     : this.props.field,
+          preview   : this.props.preview,
+          placement : this.props.placement,
+
+          'onSave'   : this.props.onSave,
+          'isInput'  : true,
+          'onRemove' : this.props.onRemove,
+        };
+      }
+
+      /**
+       * on mounted
+       */
+      onMounted() {
+        // on mounted
+        super.onMounted(...arguments);
+
+        // check jQuery
+        if (this.eden.frontend) {
+          // render location
+          this.initialize();
+        }
+      }
+
+      /**
+       * return value
+       *
+       * @return {*}
+       */
+      val() {
+        // get val
+        return this.value;
+      }
+
+      /**
+       * on change
+       *
+       * @param {Event} e
+       */
+      onChange(e) {
+        // set value
+        this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
+      }
+
+      /**
+        * renders location input
+        */
+      initialize () {
+        // let input
+        const input = this.$('[type="text"]');
+        const index = input.getAttribute('data-index');
+
+        // build geocomplete
+        $(input).geocomplete().on('geocode:result', (e, result) => {
+          // set values
+          this.value = {
+            'id'  : result.id,
+            'geo' : {
+              'lat' : result.geometry.location.lat(),
+              'lng' : result.geometry.location.lng()
+            },
+            'formatted'  : result.formatted_address,
+            'components' : result.address_components
+          };
+
+          // update view
+          this.update();
+        });
+      }
+    }
+  </script>
+</field-address-input>

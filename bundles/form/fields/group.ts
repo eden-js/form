@@ -21,6 +21,16 @@ export default class GroupField extends Field {
   }
 
   /**
+   * gets data
+   */
+  get data() {
+    // return data
+    return {
+      tabs : ['Display'],
+    };
+  }
+
+  /**
    * returns field type
    */
   get title() {

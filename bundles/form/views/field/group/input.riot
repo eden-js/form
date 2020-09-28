@@ -1,0 +1,162 @@
+<field-group-input>
+  <div class={ props.field.group || 'mb-3' }>
+    <label if={ props.field.multiple } class="form-label">
+      <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
+        <i>Set Label</i>
+      </a>
+      { props.field.label }
+    </label>
+    <div each={ (item, i) in value } class="card mb-3">
+
+      <div if={ !props.field.multiple } class="card-header">
+        { props.field.label }
+        <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
+          <i>Set Label</i>
+        </a>
+      </div>
+
+      <div class="card-body pb-0">
+      
+        <!-- sub form -->
+        <div class={ `${ classes({ 'empty' : !props.getFields(props.field.uuid).length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-parent={ props.field.uuid }>
+          <span class="eden-dropzone-label" if={ !props.preview }>
+            { props.form.get('title') || props.form.get('placement') }
+          </span>
+
+          <eden-add type="top" onclick={ (e) => props.createAction(e) } if={ !props.preview } />
+
+          <div class="row form-fields">
+            <template each={ (field, i) in props.getFields(props.field.uuid) }>
+              <eden-field-input { ...getProps(field) } />
+              <div if={ field.break } class="w-100" />
+            </template>
+          </div>
+
+          <eden-add type="bottom" onclick={ (e) => props.createAction(e) } if={ !props.preview } />
+
+        </div>
+        <!-- / sub form -->
+      </div>
+
+      <div if={ props.field.multiple } class="card-footer d-flex">
+        <button type="button" class="btn btn-danger ml-auto" onclick={ (e) => onRemove(e, i) }>
+          { `Remove ${props.field.label || 'Item'}` }
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <button if={ props.field.multiple } type="button" class="btn btn-success" onclick={ (e) => createAction(e) }>
+        { `Add ${props.field.label || 'Item'}` }
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // import base
+    import uuid from 'uuid';
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldGroupInput extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+    
+        // set initial value
+        this.value = this.props.value || [];
+
+        // set value
+        if (!this.value.length && (!this.props.field.multiple || !this.props.preview)) this.value = [{}];
+
+        // bind
+        this.getName = this.getName.bind(this);
+      }
+
+      /**
+       * on before mount
+       */
+      onBeforeUpdate() {
+        // run super
+        super.onBeforeUpdate(...arguments);
+
+        // set value
+        if (!this.value.length && (!this.props.field.multiple || !this.props.preview)) this.value = [{}];
+      }
+
+      /**
+       * get props
+       */
+      getProps(field, i) {
+        // get parent
+        const actual = this.props.getProps(field);
+
+        // get name
+        actual.getName = (name) => this.getName(name, i);
+
+        // return actual
+        return actual;
+      }
+
+      /**
+       * on variation
+       *
+       * @param  {Event} e
+       */
+      onCreate (e) {
+        // values
+        if (!this.value) this.value = [];
+
+        // add variation
+        this.value.push({});
+
+        // update view
+        this.update();
+      }
+
+      /**
+       * on variation
+       *
+       * @param  {Event} e
+       */
+      onRemove (e, i) {
+        // add variation
+        this.value.splice(i, 1);
+
+        // update view
+        this.update();
+      }
+
+      /**
+       * get form
+       */
+      getForm(item) {
+        // return form
+        return Object.assign({}, (this.props.field || {}).form, {
+          data : item,
+        });
+      }
+
+      /**
+       * get name
+       */
+      getName(name, i) {
+        // check split
+        const split = name.split('[');
+
+        // return name
+        if (split.length > 1) {
+          // 
+          return `${this.props.field.uuid}[${i}][${split.shift()}][${split.join('[')}`;
+        }
+
+        // return name
+        return `${this.props.field.uuid}[${i}][${name}]`;
+      }
+    }
+    
+  </script>
+</field-group-input>

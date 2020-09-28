@@ -15,6 +15,16 @@ export default class EmailField extends Field {
   }
 
   /**
+   * gets data
+   */
+  get data() {
+    // return data
+    return {
+      tabs : ['Display', 'Validate'],
+    };
+  }
+
+  /**
    * returns field type
    */
   get title() {

@@ -1,0 +1,60 @@
+<field-boolean-input>
+  <div>
+    <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
+      <a href="#!" onclick={ (e) => props.updateAction(e, props.field) }>
+        <i>Set Label</i>
+      </a>
+    </label>
+    <validate type="boolean" read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.value } required={ props.field.required } on-change={ onChange } />
+  </div>
+  
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldBooleanInput extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.value;
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
+      }
+    
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // get val
+        return jQuery(this.$('select')).val() === 'true';
+      }
+    }
+    
+  </script>
+</field-boolean-input>

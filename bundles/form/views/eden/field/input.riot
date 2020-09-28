@@ -1,0 +1,69 @@
+<eden-field-input>
+  <div if={ props.getField(props.field) } class={ classes({ 'eden-field eden-block' : true, 'eden-field-admin eden-block-admin' : !props.preview }) } data-field={ props.field.uuid } id={ `field-${props.field.uuid}` }>
+    <div class="eden-field-hover eden-block-hover" if={ !props.preview }>
+      <div class="d-flex align-items-center">
+        <div class="mr-2">
+          <div class="btn-group"> 
+            <button class="btn btn-sm btn-info" onclick={ (e) => props.updateAction(e, props.field) }>
+              { props.getField(props.field).title } Field
+            </button>
+          </div>
+        </div>
+        <div class="ml-auto">
+          <div class="btn-group"> 
+            <slot name="buttons" />
+            <button class="btn btn-sm btn-primary" onclick={ (e) => props.updateAction(e, props.field) }>
+              <i class="fa fa-pencil-alt" />
+            </button>
+            <button class="btn btn-sm btn-primary" onclick={ (e) => props.removeAction(e,  props.field) }>
+              <i class={ classes({ 'fa fa-times' : true, 'fa-spin' : removing }) } />
+            </button>
+            <span class="btn btn-sm btn-primary move" for={ props.field.uuid }>
+              <i class="fa fa-arrows-alt" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div is={ getBody() } { ...getProps() } />
+  </div>
+
+  <script>
+    // base class
+    import Base from '../../js/base';
+
+    /**
+     * eden field input class
+     */
+    export default class EdenFieldInput extends Base {
+
+      /**
+       * gets body
+       */
+      getBody() {
+        // get actual field
+        const actualField = this.props.getField(this.props.field);
+
+        // return body field
+        return `field-${actualField.view || actualField.type}-input`;
+      }
+
+      /**
+       * gets body
+       */
+      getProps() {
+        // gets props
+        const newProps = { ...(this.props) };
+
+        // delete is and class
+        delete newProps.is;
+        delete newProps.id;
+        delete newProps.class;
+
+        // return body field
+        return newProps;
+      }
+    }
+  </script>
+</eden-field-input>

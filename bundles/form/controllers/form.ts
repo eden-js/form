@@ -127,13 +127,13 @@ export default class FormController extends Controller {
     }
 
     // update
-    const registered = fieldHelper.fields().find(w => w.type === field.type);
+    const registered = await fieldHelper.find(field.type);
 
     // await save
-    if (registered && registered.save) await registered.save(req, field);
+    if (registered && registered.save) await registered.save({ req }, field);
 
     // get rendered
-    const value = await registered.value(req, field);
+    const value = await registered.sanitise({ req }, field);
 
     // set
     form.set('fields', fields);

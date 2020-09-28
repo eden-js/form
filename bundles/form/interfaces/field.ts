@@ -16,6 +16,24 @@ export default class EdenjsField extends Base {
   }
 
   /**
+   * gets data
+   */
+  get data() {
+    // return data
+    return {
+      tabs : ['Display', 'Validate'],
+    };
+  }
+
+  /**
+   * returns field type
+   */
+  get title() {
+    // return field type label
+    return 'Field';
+  }
+
+  /**
    * returns category list to show field in
    */
   get categories() {
@@ -28,7 +46,7 @@ export default class EdenjsField extends Base {
    */
   get description() {
     // return description string
-    return 'Field Descripton';
+    return 'Field Description';
   }
 
   /**

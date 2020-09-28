@@ -1,0 +1,61 @@
+<field-file-input>
+  <div>
+    <label class="form-label" for={ props.getId(props.field.uuid) }>
+      <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
+        <i>Set Label</i>
+      </a>
+      { props.field.label }
+    </label>
+    <upload type="file" name={ props.getName(props.field.uuid) } multi={ props.field.multiple } image={ props.value } col={ props.type === 'grid' ? 'col-12' : props.field.col } show-type={ props.type === 'grid' ? 'input' : props.field.input } on-change={ onChange } />
+  </div>
+
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class FieldFileInput extends Base {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // run super
+        super.onBeforeMount(...arguments);
+
+        // on change
+        this.onChange = this.onChange.bind(this);
+    
+        // set initial value
+        this.value = this.props.value;
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        this.value = this.val();
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
+          this.props.onUpdate();
+        }
+      }
+
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // return non accumulated value
+        return this.$('input').value;
+      }
+    }
+
+  </script>
+</field-file-input>

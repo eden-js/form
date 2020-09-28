@@ -1,0 +1,230 @@
+<eden-field-sidebar>
+  <div class="field-sidebar">
+    <div class={ classes({'eden-blocks-sidebar' : true, 'eden-blocks-sidebar-show' : get('showing')}) } data-form={ props.placement }>
+      <div class="card">
+        <div class="card-header">
+          <div class="w-100">
+            <h5>
+              Select Field
+            </h5>
+            
+            <ul class="nav nav-tabs card-header-tabs w-100">
+              <li class="nav-item" each={ (tab, i) in getTabs() }>
+                <button class={ classes({ 'nav-link' : true, 'active' : isTab(tab) }) } onclick={ (e) => onTab(e, tab) }>
+                  { tab }
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="mb-3">
+            <input class="form-control" placeholder="search" type="Search" onkeyup={ (e) => onSearch(e) } onchange={ (e) => onSearch(e) } ref="search" />
+          </div>
+          
+          <div class="draggable" if={ !props.loading() }>
+            <div each={ (field, i) in getFields() } class={ classes({ 'card card-body mb-2' : true, 'active' : isActive(field) }) } data-type={ field.type } onclick={ (e) => onField(e, field) }>
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">
+                  { field.title }
+                </h5>
+              </div>
+              <p class="m-0">{ field.description }</p>
+            </div>
+          </div>
+          
+        </div>
+        <div class="card-footer">
+          <button type="button" class="btn btn-secondary float-right" onclick={ hide }>Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class={ classes({'eden-blocks-backdrop' : true, 'hidden' : !get('showing')}) } if={ get('showing') } onclick={ hide } />
+  
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // export default
+    export default class EdenFieldSidebar extends Base {
+
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // on before mount
+        super.onBeforeMount(...arguments);
+
+        // set showing
+        this.tab = this.getTabs()[0];
+        this.state = {
+          showing : false,
+        };
+
+        // bind methods
+        this.hide = this.hide.bind(this);
+        this.show = this.show.bind(this);
+
+        // bind
+        this.onTab = this.onTab.bind(this);
+        this.isTab = this.isTab.bind(this);
+        this.getFields = this.getFields.bind(this);
+      }
+
+      /**
+      * Shows sidebar
+      */
+      show() {
+        // set showing
+        this.state.showing = true;
+
+        // update
+        this.update();
+      }
+
+      /**
+      * Shows sidebar
+      */
+      hide() {
+        // set showing
+        this.state.showing = false;
+
+        // remove element
+        const elem = this.$('.eden-blocks-backdrop');
+        elem.parentNode.removeChild(elem);
+
+        // update
+        this.update();
+      }
+      
+      /**
+      * on block
+      *
+      * @param  {Event} e
+      */
+      onTab (e, tab) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // activate block
+        this.tab = tab;
+        
+        // update view
+        this.update();
+      }
+
+      /**
+      * on block
+      *
+      * on search
+      */
+      onSearch(e) {
+        // check search
+        this.search = this.$('[ref="search"]').value;
+        
+        // update view
+        this.update();
+      }
+      
+      /**
+      * on field
+      *
+      * @param  {Event} e
+      */
+      onField (e, field) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // activate field
+        this.type = field.type;
+        
+        // update view
+        this.update();
+      }
+    
+      /**
+      * gets fields
+      *
+      * @return {*}
+      */
+      getFields () {
+        // category
+        const category = this.tab || 'default';
+
+        // return sorted fields
+        let rtn = (this.props.fields || []).sort((a, b) => {
+          // Return sort
+          return ('' + a.title).localeCompare(b.title);
+        });
+        
+        // check default
+        if (category !== 'default') {
+          rtn = rtn.filter((field) => {
+            // set category
+            return (field.categories || []).includes(category);
+          });
+        } else {
+          rtn = rtn.filter((field) => {
+            // check categories
+            return !(field.categories);
+          });
+        }
+
+        // do block search
+        if (this.search && this.search.length) rtn = rtn.filter((field) => {
+          // check search
+          return ('' + field.title).toLowerCase().includes(this.search.toLowerCase());
+        });
+        
+        // return rtn
+        return rtn || [];
+      }
+
+      /**
+      * gets tabs
+      */
+      getTabs() {
+        // return categories
+        return (this.props.fields || []).reduce((accum, field) => {
+          // loop categories
+          (field.categories || []).forEach((category) => {
+            // add category
+            if (!accum.includes(category)) accum.push(category);
+          });
+
+          // return accumulator
+          return accum;
+        }, []);
+      }
+      
+      /**
+      * on is active
+      *
+      * @param  {Object}  block
+      *
+      * @return {Boolean}
+      */
+      isTab (tab) {
+        // return type
+        return this.tab === tab;
+      }
+      
+      /**
+      * on is active
+      *
+      * @param  {Object}  field
+      *
+      * @return {Boolean}
+      */
+      isActive (field) {
+        // return type
+        return this.type === field.type;
+      }
+    }
+  </script>
+</eden-field-sidebar>

@@ -49,6 +49,8 @@ class FieldHelper extends Helper {
       // return sanitised value
       return {
         type        : field.type,
+        view        : field.view,
+        data        : field.data,
         title       : field.title,
         categories  : field.categories,
         description : field.description,
