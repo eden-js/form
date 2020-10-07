@@ -1,8 +1,8 @@
 <eden-select>
-  <input type="hidden" class="d-none" each={ (item, i) in getSelected() } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
+  <input type="hidden" class="d-none" each={ (item, i) in selected } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
   <div class="droppdown">
-    <button class="form-select text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick={ (e) => onShow(e) }>
-      <span each={ (item, i) in getSelected() } class="mr-2 d-inline-flex align-items-center">
+    <button class="form-select text-overflow text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick={ (e) => onShow(e) }>
+      <span each={ (item, i) in selected } class="mr-2 d-inline-flex align-items-center">
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
         </span>
@@ -10,9 +10,9 @@
           { item.title || item.text || item.name }
         </span>
         <raw if={ item.html } data={ { html : item.html } } />
-        { i < (getSelected().length - 1) ? ',' : '' }
+        { i < (selected.length - 1) ? ',' : '' }
       </span>
-      <span if={ props.placeholder && !getSelected().length }>
+      <span if={ props.placeholder && !selected.length }>
         { props.placeholder }
       </span>
     </button>
@@ -20,7 +20,7 @@
       <div class="mb-2 p-2">
         <input class="form-control" placeholder="Search" onkeyup={ (e) => onSearch(e) } />
       </div>
-      <button each={ (item, i) in getItems() } class={ classes({ 'dropdown-item d-flex align-items-center' : true, 'active' : item.selected }) } onclick={ (e) => onToggle(e, item) }>
+      <button each={ (item, i) in getItems() } class={ classes({ 'dropdown-item d-flex align-items-center' : true, 'active' : isSelected(item) }) } onclick={ (e) => onToggle(e, item) }>
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
         </span>
@@ -52,6 +52,9 @@
 
         // set data
         this.data = props.data || [];
+
+        // get selected
+        this.selected = [...(this.data)].filter((item) => item.selected);
       }
 
       /**
@@ -101,7 +104,16 @@
         }
 
         // check selected
-        item.selected = !item.selected;
+        item.selected = !this.isSelected(item);
+
+        // filter by value
+        this.selected = this.selected.filter((i) => i.value !== item.value);
+
+        // get selected
+        if (item.selected) {
+          // push item
+          this.selected.push(item);
+        }
 
         // update
         this.update();
@@ -114,6 +126,14 @@
       }
 
       /**
+       * is selected
+       */
+      isSelected(item) {
+        // check selected
+        return this.selected.find((s) => s.value === item.value);
+      }
+
+      /**
        * get items
        */
       getItems() {
@@ -122,14 +142,6 @@
           // return search
           return !this.state.search || (item.title || item.text || item.name).toLowerCase().includes(this.state.search.toLowerCase())
         });
-      }
-
-      /**
-        * get selected
-        */
-      getSelected() {
-        // filter data
-        return [...(this.data)].filter((item) => item.selected);
       }
 
       /**
@@ -155,7 +167,7 @@
         // set data
         this.data = data.map((item) => {
           // check if selected
-          if (((this.data || []).find((l) => l.value === item.value) || {}).selected) {
+          if (((this.props.data || []).find((l) => l.value === item.value) || {}).selected) {
             item.selected = true;
           }
 
@@ -172,7 +184,7 @@
        */
       val() {
         // return value
-        const value = this.getSelected().map((v) => v.value);
+        const value = this.selected.map((v) => v.value);
 
         // return value
         if (this.props.multiple) return value;
