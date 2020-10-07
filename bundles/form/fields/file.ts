@@ -64,6 +64,9 @@ export default class FileField extends Field {
 
     // return value map
     return await Promise.all(value.filter(val => val).map(async (val, i) => {
+      // item
+      if (val && val.id) val = val.id;
+
       // run try catch
       try {
         // buffer image

@@ -28,24 +28,6 @@
       }
 
       /**
-       * return field props
-       */
-      fieldProps() {
-        // return opts
-        return {
-          form      : this.props.form,
-          value     : this.value,
-          field     : this.props.field,
-          preview   : this.props.preview,
-          placement : this.props.placement,
-
-          'onSave'   : this.props.onSave,
-          'isInput'  : true,
-          'onRemove' : this.props.onRemove,
-        };
-      }
-
-      /**
        * on mounted
        */
       onMounted() {
@@ -81,8 +63,7 @@
         // check form
         if (this.props.form) {
           // update
-          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
-          this.props.onUpdate();
+          this.props.dataAction(this.props.field, this.value);
         }
       }
 

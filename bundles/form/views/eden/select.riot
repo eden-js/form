@@ -1,14 +1,41 @@
 <eden-select>
-  <select class="selectpicker show-tick form-control" name={ props.name } multiple="multiple" />
+  <input type="hidden" class="d-none" each={ (item, i) in getSelected() } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
+  <div class="droppdown">
+    <button class="form-select text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick={ (e) => onShow(e) }>
+      <span each={ (item, i) in getSelected() } class="mr-2 d-inline-flex align-items-center">
+        <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
+          &nbsp;
+        </span>
+        <span if={ !item.html }>
+          { item.title || item.text || item.name }
+        </span>
+        <raw if={ item.html } data={ { html : item.html } } />
+        { i < (getSelected().length - 1) ? ',' : '' }
+      </span>
+      <span if={ props.placeholder && !getSelected().length }>
+        { props.placeholder }
+      </span>
+    </button>
+    <div class="dropdown-menu">
+      <div class="mb-2 p-2">
+        <input class="form-control" placeholder="Search" onkeyup={ (e) => onSearch(e) } />
+      </div>
+      <button each={ (item, i) in getItems() } class={ classes({ 'dropdown-item d-flex align-items-center' : true, 'active' : item.selected }) } onclick={ (e) => onToggle(e, item) }>
+        <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
+          &nbsp;
+        </span>
+        <span if={ !item.html }>
+          { item.title || item.text || item.name }
+        </span>
+        <raw if={ item.html } data={ { html : item.html } } />
+      </button>
+    </div>
+  </div>
+  
 
   <script>
     // import base
     import Base from '../js/base';
-
-    // escpae
-    const escape = (str) => {
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    };
 
     // export default
     export default class EdenSelect extends Base {
@@ -37,125 +64,105 @@
         // initialized
         this.initialized = true;
 
-        // url
-        if (this.props.url) {
-          // await fetch
-          const res = await fetch(this.props.url);
-          const data = (await res.json()).map((item) => {
-            // check if selected
-            if (((this.data || []).find((l) => l.value === item.value) || {}).selected) {
-              item.selected = true;
-            }
-
-            // return item
-            return item;
-          });
-
-          // set data
-          this.data = data;
-        }
-
-        // append
-        if (this.data && this.data.length) {
-          // set data
-          let data = this.data;
-
-          // check sort
-          if (!this.props.noSort) {
-            // sort
-            data = this.data.sort((a, b) => {
-              // return
-              return (a.name || a.text || '').localeCompare(b.name || b.text || '');
-            });
-          }
-
-          // for each
-          data.forEach((item) => {
-            // append
-            $(this.$('select')).append(`<option ${item.content ? `data-content="${escape(item.content)}" ` : ''}value="${item.value}"${item.selected ? ` selected` : ''}>${item.name || item.text}</option>`);
-          });
-        }
-
-        // require logic
-        require('bootstrap-select/js/bootstrap-select.js');
-
-        // opts
-        const opts = {
-          header           : this.props.placeholder,
-          multiple         : true,
-          liveSearch       : true,
-          noneSelectedText : this.props.placeholder,
-        };
-        
-        // multiple
-        if (!this.props.multiple) {
-          // max
-          opts.maxOptions = 1;
-        }
-
-        // do select 2
-        $(this.$('select')).selectpicker(opts).on('change', (e) => {
-          // check value
-          const value = $(this.$('select')).selectpicker('val');
-
-          // on change
-          if (this.props.onChange) this.props.onChange(e, this.props.multiple ? value : value[0]);
-          
-          // render
-          if (this.props.isBlock) $(this.$('select')).selectpicker('show').selectpicker('refresh');
-        });
-
-        // ajax
-        if (this.props.url) {
-          // require ajax
-          require('ajax-bootstrap-select/dist/js/ajax-bootstrap-select.min.js');
-
-          // add ajax logic
-          $(this.$('select')).ajaxSelectPicker({
-            ajax : {
-              url  : this.props.url,
-              type : this.props.type || 'GET',
-              data : () => {
-                // create params
-                const params = {
-                  q : '{{{q}}}',
-
-                  ...(this.props.body || {}),
-                };
-
-                // return params
-                return params;
-              },
-              dataType       : 'json',
-              preprocessData : (data) => {
-                // set data
-                this.data = data;
-
-                // return data
-                return data;
-              }
-            },
-            locale : {
-              emptyTitle : this.props.placeholder
-            },
-            sanitize         : false,
-            minLength        : 0,
-            clearOnEmpty     : true,
-            emptyRequest     : true,
-            preserveSelected : false,
-          });
-        }
-        
-        // render
-        if (this.props.isBlock) $(this.$('select')).selectpicker('show');
+        // load
+        await this.load();
       }
 
       /**
-       * check should update
+       * on show
        */
-      shouldUpdate(newProps, currentProps) {
-        // check initialized
-        return false;
+      onShow(e) {
+        // set width
+        $(this.$('.dropdown-menu')).width($(this.$('.droppdown')).width());
+        $(this.$('.form-control')).focus();
+      }
+
+      /**
+       * on search
+       */
+      onSearch(e) {
+        // update search
+        this.update({
+          search : e.target.value,
+        });
+
+        // load data
+        this.load();
+      }
+
+      /**
+       * toggle value
+       */
+      onToggle(e, item) {
+        // check
+        if (this.props.multiple) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        // check selected
+        item.selected = !item.selected;
+
+        // update
+        this.update();
+
+        // on change
+        if (this.props.onChange) {
+          // value
+          this.props.onChange(e, this.val());
+        }
+      }
+
+      /**
+       * get items
+       */
+      getItems() {
+        // filter items
+        return [...(this.data)].filter((item) => {
+          // return search
+          return !this.state.search || (item.title || item.text || item.name).toLowerCase().includes(this.state.search.toLowerCase())
+        });
+      }
+
+      /**
+        * get selected
+        */
+      getSelected() {
+        // filter data
+        return [...(this.data)].filter((item) => item.selected);
+      }
+
+      /**
+       * loads data
+       */
+      async load() {
+        // set data
+        let data = this.props.data;
+
+        // url
+        if (this.props.url) {
+          // await fetch
+          const res = await fetch(`${this.props.url}?q=${this.state.search || ''}`);
+          data = await res.json();
+        }
+
+        // load
+        if (this.props.load) {
+          // load from function
+          data = await this.props.load(this.state.search || '');
+        }
+
+        // set data
+        this.data = data.map((item) => {
+          // check if selected
+          if (((this.data || []).find((l) => l.value === item.value) || {}).selected) {
+            item.selected = true;
+          }
+
+          // return item
+          return item;
+        });
+        this.update();
       }
     
       /**
@@ -165,7 +172,7 @@
        */
       val() {
         // return value
-        const value = $(this.$('select')).selectpicker('val');
+        const value = this.getSelected().map((v) => v.value);
 
         // return value
         if (this.props.multiple) return value;

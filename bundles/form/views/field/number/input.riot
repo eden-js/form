@@ -40,8 +40,7 @@
         // check form
         if (this.props.form) {
           // update
-          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
-          this.props.onUpdate();
+          this.props.dataAction(this.props.field, this.value);
         }
       }
 

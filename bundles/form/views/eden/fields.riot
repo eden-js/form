@@ -74,7 +74,7 @@
           });
         } else {
           // nothing
-          this.form = this.model('form', this.props.form || {})
+          this.form = this.model('form', this.props.form || {});
         }
 
         // set update
@@ -83,10 +83,12 @@
 
         // build methods
         this.build = this.build.bind(this);
+        this.initSort = this.initSort.bind(this);
 
         // get methods
         this.getId = this.getId.bind(this);
         this.getName = this.getName.bind(this);
+        this.getData = this.getData.bind(this);
         this.getField = this.getField.bind(this);
         this.getValue = this.getValue.bind(this);
         this.getProps = this.getProps.bind(this);
@@ -98,13 +100,13 @@
         this.shouldShow = this.shouldShow.bind(this);
 
         // action methods
+        this.dataAction = this.dataAction.bind(this);
         this.updateAction = this.updateAction.bind(this);
         this.removeAction = this.removeAction.bind(this);
 
         // event fields
         this.onCreate = this.onCreate.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
-        this.onUpdateField = this.onUpdateField.bind(this);
         this.onRemoveField = this.onRemoveField.bind(this);
       }
 
@@ -218,10 +220,10 @@
           }
 
           // load fields
-          if (!(this.form.get('fields') || []).length) await this.init();
+          if (!this.getFields().length) await this.init();
 
           // set default positions
-          if (this.props.positions && !(this.form.get('fields') || []).length) {
+          if (this.props.positions && !this.getFields().length) {
             // set default
             this.form.set('fields', this.props.positions || []);
 
@@ -264,7 +266,7 @@
         // check field
         if (visibility && visibility.length) {
           // get data
-          const data = this.form ? (this.form.get('data') || {}) : {};
+          const data = this.getData();
 
           // create actual data
           const newData = {};
@@ -303,7 +305,7 @@
         // check field
         if (readonly && readonly.length) {
           // get data
-          const data = this.form ? (this.form.get('data') || {}) : {};
+          const data = this.getData();
 
           // create actual data
           const newData = {};
@@ -359,6 +361,14 @@
       }
 
       /**
+       * get data
+       */
+      getData() {
+        // get data
+        return this.props.data || this.form.get('data') || {};
+      }
+
+      /**
        * get field data
        *
        * @param  {Object} field
@@ -370,7 +380,7 @@
         if (!field) return;
 
         // get found
-        const found = this.form.get(`data.${field.name}`) || this.form.get(`data.${field.uuid}`);
+        const found = this.getData()[field.name || field.uuid];
 
         // gets data for field
         if (!found) return null;
@@ -400,9 +410,9 @@
        *
        * @return {Array}
        */
-      getFields (parent) {
+      getFields(parent) {
         // return filtered fields
-        return (this.form.get('fields') || []).filter((f) => f).sort((a, b) => {
+        return (this.props.children || this.form.get('fields') || []).filter((f) => f).sort((a, b) => {
           // set order
           if (!a.order) a.order = 0;
           if (!b.order) b.order = 0;
@@ -415,7 +425,7 @@
           return 0;
         }).filter((f) => {
           // return parent
-          return parent && (f.parent || 'root') === parent;
+          return !parent || (f.parent || 'root') === parent;
         });
       }
 
@@ -434,10 +444,12 @@
           class     : this.getClass(field),
           value     : this.getValue(field),
           fields    : this.getFields(),
+          update    : this.update,
           preview   : this.preview,
           placement : this.props.placement,
 
           // on update/remove
+          dataAction   : this.dataAction,
           updateAction : this.updateAction,
           removeAction : this.removeAction,
 
@@ -500,8 +512,11 @@
        * on set
        */
       async onSet (field, key, value) {
+        // get fields
+        const fields = this.getFields();
+
         // set data
-        let actualField = (this.form.get('fields') || []).find((f) => f.uuid === field.uuid);
+        let actualField = fields.find((f) => f.uuid === field.uuid);
 
         // push field
         if (!actualField) {
@@ -526,6 +541,15 @@
         // set updated
         actualField._meta.updated = new Date();
 
+        // on remove
+        if (this.props.onSet) {
+          // remove
+          await this.props.onSet(actualField);
+
+          // update view
+          return;
+        }
+
         // log data
         const savedField = await eden.router.post(`/form/${this.form.get('id')}/field/save`, {
           field : actualField
@@ -544,7 +568,13 @@
       /**
        * on field update
        */
-      onUpdateField () {
+      dataAction (field, value) {
+        // check data
+        if (this.props.onData) return this.props.onData(field, value);
+
+        // set value
+        this.getData()[field.name || field.uuid] = value;
+
         // safe update
         this.update();
       }
@@ -558,6 +588,15 @@
       async onRemoveField (field, data) {
         // update view
         this.loading(`field.${field.uuid}`, true);
+
+        // on remove
+        if (this.props.onRemove) {
+          // remove
+          await this.props.onRemove(field);
+
+          // update view
+          return this.loading(`field.${field.uuid}`, true);
+        }
 
         // log data
         const res = await fetch(`/form/${this.form.get('id')}/field/remove`, {
@@ -641,6 +680,15 @@
         // set loading
         this.loading('save', true);
 
+        // on remove
+        if (this.props.onSave) {
+          // remove
+          await this.props.onSave(this.form.get('fields') || []);
+
+          // update view
+          return;
+        }
+
         // check type
         if (!this.form.type) this.form.set('type', this.props.type);
 
@@ -683,6 +731,15 @@
       init (opts) {
         // chekc loading
         if (this.initializing) return this.initializing;
+
+        // check on init
+        if (this.props.onInit) {
+          // check init
+          this.initializing = this.props.onInit();
+
+          // return init
+          return this.initializing;
+        }
 
         // loading fields
         this.initializing = new Promise(async (resolve) => {
@@ -791,7 +848,7 @@
               // check position
               if (el.getAttribute('id') && $(target).closest('.eden-blocks-sidebar').length) {
                 // get field
-                const field = (this.form.get('fields') || []).find((fi) => fi.uuid === el.getAttribute('id'));
+                const field = this.getFields().find((fi) => fi.uuid === el.getAttribute('id'));
 
                 // check
                 if (field.uuid) {
@@ -814,8 +871,7 @@
               if (!target || !source || !el || (target && !target.className.includes('form-fields'))) return;
 
               // set fields
-              const fields  = this.form.get('fields') || [];
-              const changed = [];
+              const fields  = this.getFields();
               let addedField = null;
 
               // loop physical fields
@@ -824,7 +880,7 @@
                 if (!f.getAttribute) return;
                 
                 // set get from
-                let fieldItem = (this.form.get('fields') || []).find((fi) => fi.uuid === f.getAttribute('id'));
+                let fieldItem = fields.find((fi) => fi.uuid === f.getAttribute('id'));
 
                 // return on no field
                 if (!fieldItem) {

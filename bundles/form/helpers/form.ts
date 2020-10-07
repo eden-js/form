@@ -103,12 +103,33 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async sanitise(data, form, current) {
-    // sanitised
-    const sanitised = await form.sanitise(data, current);
+  async sanitise({ req, fields, children }, form, current) {
+    // data
+    const result = {};
+    
+    // check fields
+    if (!children) children = form.get('fields') || [];
 
-    // return
-    return sanitised.data;
+    // root fields
+    const rootFields = children.slice(0).filter((f) => (f.parent || 'root') === 'root');
+
+    // req
+    if (current) {
+      // loop fields
+      await Promise.all(rootFields.map(async (field) => {
+        // add to data
+        result[field.name || field.uuid] = await fieldHelper.sanitise({
+          fields : fields || await fieldHelper.fields(req),
+
+          form,
+          current,
+          children,
+        }, field, await current.get(field.name || field.uuid));
+      }));
+    }
+    
+    // return data
+    return result;
   }
 }
 

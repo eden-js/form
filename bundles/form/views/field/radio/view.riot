@@ -1,0 +1,32 @@
+<field-radio-view>
+  <div class="tags">
+    <div each={ (value, i) in getValue(props) } class={ getClass(props, value) }>{ value }</div>
+  </div>
+
+  <script>
+		// export default
+    export default {
+      components : {
+      },
+
+      getValue(props) {
+        // check value
+        let value = props.value || [];
+
+        // check array
+        if (!Array.isArray(value)) value = [value];
+
+        // return joined
+        return value;
+      },
+
+      getClass(props, value) {
+        // get option
+        const option = ((props.field || {}).options || []).find((opt) => opt.value === value) || {};
+
+        // check color
+        return option.color ? `btn btn-sm mr-1 btn-${option.color}` : 'btn btn-sm mr-1 btn-primary';
+      },
+    }
+  </script>
+</field-radio-view>

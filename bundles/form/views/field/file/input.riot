@@ -1,5 +1,5 @@
 <field-file-input>
-  <div>
+  <div class={ props.field.group || 'mb-3' }>
     <label class="form-label" for={ props.getId(props.field.uuid) }>
       <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
         <i>Set Label</i>
@@ -41,8 +41,7 @@
         // check form
         if (this.props.form) {
           // update
-          this.props.form.set(`data.${this.props.field.uuid}`, this.value);
-          this.props.onUpdate();
+          this.props.dataAction(this.props.field, this.value);
         }
       }
 

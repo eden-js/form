@@ -1,0 +1,18 @@
+<field-wysiwyg-view>
+  <div>
+    { getValue(props) }
+  </div>
+
+  <script>
+		// export default
+    export default {
+      components : {
+      },
+
+      getValue(props) {
+        // return joined
+        return (props.value || '').replace(/(<([^>]+)>)/gi, ' ');
+      },
+    }
+  </script>
+</field-wysiwyg-view>

@@ -1,0 +1,19 @@
+<field-date-view>
+  <div>{ getValue(props) }</div>
+
+  <script>
+    // import moment
+    import moment from 'moment';
+
+		// export default
+    export default {
+      components : {
+      },
+
+      getValue(props) {
+        // check value
+        return props.value ? moment(props.value).format(this.props.field.format || 'MMMM DD YYYY, LT') : '';
+      },
+    }
+  </script>
+</field-date-view>

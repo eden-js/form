@@ -1,0 +1,29 @@
+<field-image-view>
+  <div>
+    <img class="img-fluid rounded" each={ (val, i) in getValue(props) } if={ getThumb(val) } src={ getThumb(val) } />
+  </div>
+
+  <script>
+		// export default
+    export default {
+      components : {
+      },
+
+      getValue(props) {
+        // check value
+        let value = props.value || [];
+
+        // check array
+        if (!Array.isArray(value)) value = [value];
+
+        // return joined
+        return value;
+      },
+
+      getThumb(val) {
+        // return thumbs
+        return (((val || {}).thumbs || {})['1x-sq'] || {}).url;
+      }
+    }
+  </script>
+</field-image-view>

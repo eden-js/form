@@ -20,8 +20,6 @@
     "@dashup/eslint-config-dashup": "0.0.1"
   },
   "dependencies": {
-    "ajax-bootstrap-select": "^1.4.5",
-    "bootstrap-select": "^1.13.10",
     "font-awesome-filetypes": "^2.0.1",
     "geocomplete": "^1.7.0",
     "query": "github:protobi/query"
