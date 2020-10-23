@@ -1,3 +1,48 @@
 <field-date-display>
-  <field-display { ...props } />
+  <div>
+    <field-display { ...props } />
+
+    <div class="mb-3">
+      <label class="form-label">
+        Type
+      </label>
+      <select class="form-control" onchange={ (e) => onFormat(e) }>
+        <option value="MMMM DD YYYY, LT" selected={ getFormat() === 'MMMM DD YYYY, LT' }>Date + Time</option>
+        <option value="MMMM DD YYYY" selected={ getFormat() === 'MMMM DD YYYY' }>Date</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">
+        Date Format
+      </label>
+      <input type="text" ref="format" class="form-control" onchange={ (e) => onFormat(e) } value={ getFormat() } />
+    </div>
+  </div>
+
+  <script>
+
+    export default class FieldDateDisplay {
+      
+      /**
+       * on date only
+      *
+      * @param {Event} e
+       */
+      onFormat(e) {
+        // format
+        const format = $(e.target).val();
+  
+        // run opts
+        this.props.set('format', format);
+      }
+
+      /**
+       * on format
+       */
+      getFormat() {
+        // get format
+        return this.props.field.format || 'MMMM DD YYYY, LT';
+      }
+    }
+  </script>
 </field-date-display>

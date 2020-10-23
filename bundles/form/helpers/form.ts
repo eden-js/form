@@ -103,7 +103,7 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async sanitise({ req, fields, children }, form, current) {
+  async sanitise({ req, fields, children, nonce }, form, current) {
     // data
     const result = {};
     
@@ -122,6 +122,7 @@ class FormHelper extends Helper {
           fields : fields || await fieldHelper.fields(req),
 
           form,
+          nonce,
           current,
           children,
         }, field, await current.get(field.name || field.uuid));

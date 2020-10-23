@@ -20,7 +20,7 @@ export default class RadioField extends Field {
   get data() {
     // return data
     return {
-      tabs : ['Display', 'Validate'],
+      tabs : ['Config', 'Display', 'Validate'],
     };
   }
 

@@ -1,0 +1,106 @@
+<field-select-config>
+  <div>
+    <div each={ (option, i) in options } class="mb-3">
+      <label class="form-label">
+        Option #{ i + 1 }
+      </label>
+      <div class="d-flex dropdown">
+        <input type="text" name="option[{ i }]" value={ option.value } class="form-control flex-1" onchange={ (e) => onOptionName(e, option) } />
+        <button class={ `btn btn-${option.color || 'primary'} dropdown-toggle ml-2` } type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-eye-dropper" />
+        </button>
+        <div class="dropdown-menu p-3 pr-2">
+          <button each={ (color, i) in colors } class={ `btn-picker bg-${color} mr-2` } onclick={ (e) => onOptionColor(e, option, color) } />
+        </div>
+        <button class="btn btn-danger ml-2" onclick={ (e) => onRemoveOption(e, i) }>
+          <i class="fa fa-times" />
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-success mr-3" onclick={ (e) => onOption(e) }>
+      Add Option
+    </button>
+  </div>
+
+  <script>
+
+    // export default
+    export default class FieldSelectConfig {
+      /**
+       * on before mount
+       */
+      onBeforeMount() {
+        // set initial value
+        this.colors  = ['primary', 'secondary', 'success', 'info', 'warning', 'danger'];
+        this.options = this.props.field.options || [];
+      }
+
+      /**
+      * on option
+      *
+      * @param {Event} e
+      */
+      onOption(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // add option
+        this.options.push({
+          label : '',
+          value : '',
+          color : '',
+        });
+
+        // run opts
+        this.props.set('options', this.options);
+      }
+
+      /**
+      * on option name
+      *
+      * @param {Event} e
+      */
+      onOptionName(e, option) {
+        // set value
+        option.label = e.target.value;
+        option.value = e.target.value;
+
+        // run opts
+        this.props.set('options', this.options);
+      }
+
+      /**
+       * on option color
+       */
+      onOptionColor(e, option, color) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set value
+        option.color = color;
+
+        // run opts
+        this.props.set('options', this.options);
+      }
+
+      /**
+      * on option
+      *
+      * @param {Event} e
+      */
+      onRemoveOption(e, i) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // remove option
+        this.options.splice(i, 1);
+
+        // run opts
+        this.props.set('options', this.options);
+      }
+    }
+  </script>
+</field-select-config>

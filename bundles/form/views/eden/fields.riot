@@ -7,7 +7,7 @@
           { form.get('title') || form.get('placement') }
         </span>
 
-        <eden-add type="top" onclick={ (e) => onCreate(e) } if={ !props.preview } />
+        <eden-add type="top" onclick={ (e) => createAction(e) } if={ !props.preview } />
 
         <div class="row form-fields">
           <template each={ (field, i) in getFields('root') }>
@@ -16,7 +16,7 @@
           </template>
         </div>
 
-        <eden-add type="bottom" onclick={ (e) => onCreate(e) } if={ !props.preview } />
+        <eden-add type="bottom" onclick={ (e) => createAction(e) } if={ !props.preview } />
 
       </div>
     </div>
@@ -25,8 +25,8 @@
       <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
-    <eden-field-update if={ state.updating } ref={ ref('updating') } set={ (k, v) => onSet(state.updating, k, v) } get-field={ getField } form={ form } field={ state.updating } />
-    <eden-field-remove if={ state.removing } ref={ ref('removing') } set={ (k, v) => onSet(state.removing, k, v) } get-field={ getField } form={ form } field={ state.removing } />
+    <eden-field-update if={ state.updating } ref={ ref('updating') } set={ (k, v) => onSet(state.updating, k, v) } remove={ () => onRemoveField(state.updating) } fields={ getFields() } get-field={ getField } form={ form } field={ state.updating } />
+    <eden-field-remove if={ state.removing } ref={ ref('removing') } set={ (k, v) => onSet(state.removing, k, v) } remove={ () => onRemoveField(state.removing) } fields={ getFields() } get-field={ getField } form={ form } field={ state.removing } />
     <eden-field-sidebar ref={ ref('sidebar') } loading={ loading } placement={ props.placement } fields={ props.fields } />
   </div>
 
@@ -103,9 +103,9 @@
         this.dataAction = this.dataAction.bind(this);
         this.updateAction = this.updateAction.bind(this);
         this.removeAction = this.removeAction.bind(this);
+        this.createAction = this.createAction.bind(this);
 
         // event fields
-        this.onCreate = this.onCreate.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onRemoveField = this.onRemoveField.bind(this);
       }
@@ -440,6 +440,7 @@
 
           // values
           id        : field.uuid,
+          set       : (k, v) => this.onSet(field, k, v),
           form      : this.form,
           class     : this.getClass(field),
           value     : this.getValue(field),
@@ -450,6 +451,7 @@
 
           // on update/remove
           dataAction   : this.dataAction,
+          createAction : this.createAction,
           updateAction : this.updateAction,
           removeAction : this.removeAction,
 
@@ -473,6 +475,20 @@
       // ACTION METHODS
       //
       // ////////////////////////////////////////////////////////////////////////////
+
+      /**
+       * on add block
+       *
+       * @param {Event} e
+       */
+      createAction (e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
+        // show sidebar
+        this.refs.sidebar.show();
+      }
 
       /**
        * update action
@@ -545,6 +561,9 @@
         if (this.props.onSet) {
           // remove
           await this.props.onSet(actualField);
+
+          // update
+          this.update();
 
           // update view
           return;
@@ -655,20 +674,6 @@
           // hide
           this.refs.sidebar.hide();
         }
-      }
-
-      /**
-       * on add block
-       *
-       * @param {Event} e
-       */
-      onCreate (e) {
-        // prevent
-        e.preventDefault();
-        e.stopPropagation();
-
-        // show sidebar
-        this.refs.sidebar.show();
       }
 
       /**

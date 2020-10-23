@@ -1,0 +1,29 @@
+<field-group-view>
+  <div>
+    Grouped Values
+  </div>
+
+  <script>
+		// export default
+    export default {
+      components : {
+      },
+
+      getValue(props) {
+        // check value
+        let value = props.value || [];
+
+        // check array
+        if (!Array.isArray(value)) value = [value];
+
+        // return joined
+        return value;
+      },
+
+      getThumb(val) {
+        // return thumbs
+        return (((val || {}).thumbs || {})['1x-sq'] || {}).url;
+      }
+    }
+  </script>
+</field-group-view>

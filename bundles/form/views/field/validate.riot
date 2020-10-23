@@ -1,7 +1,7 @@
 <field-validate>
   <div class="flex-1">
     <div class="form-check form-switch" if={ props.required }>
-      <input class="form-check-input" id="is-required" type="checkbox" onchange={ (e) => onSwitch(e, 'required') } { ...getProps({ checked : props.field.multiple }) }>
+      <input class="form-check-input" id="is-required" type="checkbox" onchange={ (e) => onSwitch(e, 'required') } { ...getProps({ checked : props.field.required }) }>
       <label class="form-check-label" for="is-required">
         Require field input
       </label>
@@ -19,7 +19,7 @@
         // return get props
         return Object.keys(obj).reduce((accum, key) => {
           // set accum
-          if (obj[key]) accum[key] = true;
+          if (obj[key]) accum[key] = key;
 
           // return accum
           return accum;

@@ -46,7 +46,7 @@
     </div>
 
     <div>
-      <button if={ props.field.multiple } type="button" class="btn btn-success" onclick={ (e) => createAction(e) }>
+      <button if={ props.field.multiple } type="button" class="btn btn-success" onclick={ (e) => onCreate(e) }>
         { `Add ${props.field.label || 'Item'}` }
       </button>
     </div>

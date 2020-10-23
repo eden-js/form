@@ -1,8 +1,4 @@
 
-// import bootstrap select
-@import "~bootstrap-select/sass/bootstrap-select";
-@import "~ajax-bootstrap-select/dist/css/ajax-bootstrap-select.min";
-
 .eden-dropzone {
 
   &.empty {
@@ -28,5 +24,10 @@
     div[slot="body"] {
       opacity : 0.5;
     }
+  }
+
+  .eden-field:hover > div[is] {
+    z-index  : 100;
+    position : relative;
   }
 }

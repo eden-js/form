@@ -20,7 +20,7 @@ export default class SelectField extends Field {
   get data() {
     // return data
     return {
-      tabs : ['Display', 'Validate'],
+      tabs : ['Config', 'Display', 'Validate'],
     };
   }
 

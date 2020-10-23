@@ -47,4 +47,22 @@ export default class AddressField extends Field {
     // return description string
     return 'Address Field';
   }
+
+  /**
+   * submit field value
+   *
+   * @param {*} param0 
+   * @param {*} field 
+   * @param {*} value 
+   */
+  async submit({ req, old }, field, value) {
+    // return database value
+    try {
+      // parse value
+      return JSON.parse(value);
+    } catch (e) {}
+
+    // return value
+    return value;
+  }
 }

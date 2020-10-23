@@ -1,5 +1,5 @@
 <eden-field-input>
-  <div if={ props.getField(props.field) } class={ classes({ 'eden-field eden-block' : true, 'eden-field-admin eden-block-admin' : !props.preview }) } data-field={ props.field.uuid } id={ `field-${props.field.uuid}` }>
+  <div if={ props.getField(props.field) } class={ classes({ 'eden-field eden-block' : true, 'eden-field-admin eden-block-admin' : !props.preview }) } data-field={ props.field.uuid } data-type={ props.field.type } id={ `field-${props.field.uuid}` }>
     <div class="eden-field-hover eden-block-hover" if={ !props.preview }>
       <div class="d-flex align-items-center">
         <div class="mr-2">
@@ -11,9 +11,14 @@
         </div>
         <div class="ml-auto">
           <div class="btn-group"> 
-            <slot name="buttons" />
             <button class="btn btn-sm btn-primary" onclick={ (e) => props.updateAction(e, props.field) }>
               <i class="fa fa-pencil-alt" />
+            </button>
+            <button class="btn btn-sm btn-primary" onclick={ (e) => onToggleCol(e) } data-toggle="tooltip" data-placement="top" data-original-title={ props.field.col ? 'Expand Field' : 'Compress Field' }>
+              <i class={ classes({ 'fa' : true, 'fa-compress-wide' : !props.field.col, 'fa-expand-wide' : props.field.col }) } />
+            </button>
+            <button class="btn btn-sm btn-primary" onclick={ (e) => onToggleBreak(e) } data-toggle="tooltip" data-placement="top" data-original-title={ props.field.col ? 'Break after Field' : 'No Break after Field' }>
+              <i class={ classes({ 'fa' : true, 'fa-file' : !props.field.break, 'fa-page-break' : props.field.break }) } />
             </button>
             <button class="btn btn-sm btn-primary" onclick={ (e) => props.removeAction(e,  props.field) }>
               <i class={ classes({ 'fa fa-times' : true, 'fa-spin' : removing }) } />
@@ -63,6 +68,44 @@
 
         // return body field
         return newProps;
+      }
+
+      /**
+       * on allow multiple
+       *
+       * @param  {Event}  e
+       *
+       * @return {Promise}
+       */
+      onToggleCol (e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set class
+        this.props.field.col = !this.props.field.col;
+
+        // run opts
+        this.props.set('col', this.props.field.col);
+      }
+
+      /**
+       * on allow multiple
+       *
+       * @param  {Event}  e
+       *
+       * @return {Promise}
+       */
+      onToggleBreak (e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set class
+        this.props.field.break = !this.props.field.break;
+
+        // run opts
+        this.props.set('break', this.props.field.break);
       }
     }
   </script>

@@ -1,11 +1,18 @@
 <field-date-input>
-  <div>
-    <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
-      <a href="#!" onclick={ (e) => props.updateAction(e, props.field) }>
+  <div class="mb-3">
+    <label class="form-label" for={ props.getId(props.field.uuid) }>
+      <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
         <i>Set Label</i>
       </a>
+      { props.field.label }
     </label>
-    <validate type="date" read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.value } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+    <div class="input-group" if={ !loading('type') }>
+      <input class="form-control" type="text" ref="date" />
+      <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ val().toISOString() } />
+      <span class="input-group-text">
+        <i class="fa fa-calendar" />
+      </span>
+    </div>
   </div>
 
   <script>
@@ -29,6 +36,34 @@
       }
 
       /**
+       * on before mount
+       */
+      onMounted() {
+        // run super
+        super.onMounted(...arguments);
+        
+        // on change
+        if (!this.eden.frontend) return;
+
+        // init
+        this.init();
+      }
+
+      /**
+       * on before mount
+       */
+      onUpdated() {
+        // run super
+        super.onUpdated(...arguments);
+
+        // on change
+        if (!this.eden.frontend) return;
+
+        // init
+        this.init();
+      }
+
+      /**
       * on change
       *
       * @param {Event} e
@@ -40,18 +75,57 @@
         // check form
         if (this.props.form) {
           // update
-          this.props.dataAction(this.props.field, this.value);
+          this.props.dataAction(this.props.field, this.val());
         }
       }
 
       /**
-      * return value
-      *
-      * @return {*}
-      */
+       * return value
+       *
+       * @return {*}
+       */
       val() {
         // return non accumulated value
-        return this.$('input').value;
+        return this.value ? new Date(this.value) : new Date(this.$('[ref="date"]').value || new Date());
+      }
+
+      /**
+       * init
+       */
+      init() {
+        // Using font-awesome 5 icons
+        $.extend(true, $.fn.datetimepicker.defaults, {
+          icons : {
+            up       : 'fa fa-arrow-up',
+            time     : 'fa fa-clock',
+            date     : 'fa fa-calendar',
+            down     : 'fa fa-arrow-down',
+            next     : 'fa fa-chevron-right',
+            close    : 'fa fa-times-circle',
+            clear    : 'fa fa-trash-alt',
+            today    : 'fa fa-calendar-check',
+            previous : 'fa fa-chevron-left',
+          }
+        });
+        
+        // add datetime picker
+        $(this.$('[ref="date"]')).datetimepicker({
+          format      : this.getFormat(),
+          defaultDate : this.value,
+        }).on('dp.change', ({ date }) => {
+          // set value
+          this.value = date.toDate();
+          // set value
+          $(this.$('[type="hidden"]')).val(this.value.toISOString());
+        });
+      }
+
+      /**
+       * on format
+       */
+      getFormat() {
+        // get format
+        return this.props.field.format || 'MMMM DD YYYY, LT';
       }
     }
 

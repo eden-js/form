@@ -1,7 +1,7 @@
 <eden-select>
-  <input type="hidden" class="d-none" each={ (item, i) in selected } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
-  <div class="droppdown">
-    <button class="form-select text-overflow text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick={ (e) => onShow(e) }>
+  <div class="dropdown">
+    <input type="hidden" class="d-none" each={ (item, i) in selected } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
+    <button if={ props.type !== 'open' } class="form-select text-overflow text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick={ (e) => onShow(e) }>
       <span each={ (item, i) in selected } class="mr-2 d-inline-flex align-items-center">
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
@@ -20,7 +20,7 @@
       <div class="mb-2 p-2">
         <input class="form-control" placeholder="Search" onkeyup={ (e) => onSearch(e) } />
       </div>
-      <button each={ (item, i) in getItems() } class={ classes({ 'dropdown-item d-flex align-items-center' : true, 'active' : isSelected(item) }) } onclick={ (e) => onToggle(e, item) }>
+      <a each={ (item, i) in getItems() } href="#!" class={ classes({ 'dropdown-item d-flex align-items-center' : true, 'active' : isSelected(item) }) } onclick={ (e) => onToggle(e, item) }>
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
         </span>
@@ -28,7 +28,7 @@
           { item.title || item.text || item.name }
         </span>
         <raw if={ item.html } data={ { html : item.html } } />
-      </button>
+      </a>
     </div>
   </div>
   
@@ -55,6 +55,21 @@
 
         // get selected
         this.selected = [...(this.data)].filter((item) => item.selected);
+
+        // check multiple
+        if (!props.multiple) {
+          // set only one
+          this.selected = this.selected[0] ? [this.selected[0]] : [];
+        }
+
+        // bind
+        this.val = this.val.bind(this);
+        this.load = this.load.bind(this);
+        this.onShow = this.onShow.bind(this);
+        this.onSearch = this.onSearch.bind(this);
+        this.getItems = this.getItems.bind(this);
+        this.onToggle = this.onToggle.bind(this);
+        this.isSelected = this.isSelected.bind(this);
       }
 
       /**
@@ -70,14 +85,14 @@
         // load
         await this.load();
       }
-
+      
       /**
        * on show
        */
       onShow(e) {
         // set width
-        $(this.$('.dropdown-menu')).width($(this.$('.droppdown')).width());
-        $(this.$('.form-control')).focus();
+        $(this.$('.dropdown-menu')).width($(this.$('.dropdown')).width());
+        $(this.$('.dropdown-menu .form-control')).focus();
       }
 
       /**
@@ -97,14 +112,21 @@
        * toggle value
        */
       onToggle(e, item) {
-        // check
-        if (this.props.multiple) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
 
         // check selected
         item.selected = !this.isSelected(item);
+
+        // check selected
+        if (!this.props.multiple) {
+          // selected
+          this.selected = [];
+          
+          // toggle dropdown
+          $(this.$('.dropdown')).dropdown('hide');
+        }
 
         // filter by value
         this.selected = this.selected.filter((i) => i.value !== item.value);
@@ -167,7 +189,7 @@
         // set data
         this.data = data.map((item) => {
           // check if selected
-          if (((this.props.data || []).find((l) => l.value === item.value) || {}).selected) {
+          if ((this.selected.find((l) => l.value === item.value) || {}).selected) {
             item.selected = true;
           }
 
@@ -182,9 +204,9 @@
        *
        * @return {*}
        */
-      val() {
+      val(tld) {
         // return value
-        const value = this.selected.map((v) => v.value);
+        const value = this.selected.map((v) => v[tld || 'value']);
 
         // return value
         if (this.props.multiple) return value;
