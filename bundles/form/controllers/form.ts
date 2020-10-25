@@ -232,7 +232,9 @@ export default class FormController extends Controller {
     if (req.body.fields) form.set('fields', req.body.fields);
 
     // save placement
-    await form.save(req.user);
+    await form.save({
+      user : req.user,
+    });
 
     // send alert
     req.alert('success', `Successfully ${create ? 'Created' : 'Updated'} form!`);

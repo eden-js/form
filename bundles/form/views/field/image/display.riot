@@ -1,3 +1,49 @@
 <field-image-display>
-  <field-display multiple={ true } { ...props } />
+  <div>
+    <div class="mb-3">
+      <label class="form-label">
+        Input Type
+      </label>
+      <eden-select on-change={ (e, val) => onInput(val) } ref={ ref('input') } placeholder="Select Input Type" data={ getInput() } />
+    </div>
+    <field-display multiple={ true } { ...props } />
+  </div>
+
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // display
+    export default class FieldImageDisplay extends Base {
+
+      /**
+       * on type
+       */
+      onInput(val) {
+        // get value
+        if (!val) val = this.refs.input.val();
+
+        // model
+        if (!val || !val.length) return;
+
+        // set model
+        this.props.set('input', val);
+      }
+
+      /**
+       * get value
+       */
+      getInput() {
+        // return value
+        return [['Boxed', 'boxed'], ['Input', 'input']].map(([name, value]) => {
+          // return type
+          return {
+            name,
+            value,
+            selected : value === (this.props.field.input || 'boxed'),
+          };
+        });
+      }
+    }
+  </script>
 </field-image-display>

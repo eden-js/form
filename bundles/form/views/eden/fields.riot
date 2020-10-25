@@ -59,7 +59,7 @@
       onBeforeMount(...args) {
         // super on before mount
         super.onBeforeMount(...args);
-
+        
         // do mixin
         Model(this);
 
@@ -106,6 +106,7 @@
         this.createAction = this.createAction.bind(this);
 
         // event fields
+        this.onSet = this.onSet.bind(this);
         this.onMouseMoved = this.onMouseMoved.bind(this);
         this.onRemoveField = this.onRemoveField.bind(this);
       }
@@ -614,7 +615,7 @@
           await this.props.onRemove(field);
 
           // update view
-          return this.loading(`field.${field.uuid}`, true);
+          return this.loading(`field.${field.uuid}`, false);
         }
 
         // log data
@@ -691,7 +692,7 @@
           await this.props.onSave(this.form.get('fields') || []);
 
           // update view
-          return;
+          return this.loading('save', false);
         }
 
         // check type
@@ -883,6 +884,9 @@
               target.childNodes.forEach((f, i) => {
                 // check placement
                 if (!f.getAttribute) return;
+
+                // check is br
+                if (f.tagName === 'BR') return;
                 
                 // set get from
                 let fieldItem = fields.find((fi) => fi.uuid === f.getAttribute('id'));

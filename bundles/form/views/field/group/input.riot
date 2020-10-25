@@ -26,8 +26,8 @@
           <eden-add type="top" onclick={ (e) => props.createAction(e) } if={ !props.preview } />
 
           <div class="row form-fields">
-            <template each={ (field, i) in props.getFields(props.field.uuid) }>
-              <eden-field-input { ...getProps(field) } />
+            <template each={ (field, a) in props.getFields(props.field.uuid) }>
+              <eden-field-input { ...getProps(field, i) } />
               <div if={ field.break } class="w-100" />
             </template>
           </div>
@@ -96,6 +96,7 @@
 
         // get name
         actual.getName = (name) => this.getName(name, i);
+        actual.value = (this.value[i] || {})[field.name || field.uuid];
 
         // return actual
         return actual;

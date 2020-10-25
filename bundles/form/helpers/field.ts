@@ -43,11 +43,11 @@ class FieldHelper extends Helper {
    *
    * @param req 
    */
-  async list(data = {}) {
+  async list(data = {}, actual = false) {
     // done
     return (data.fields || await this.fields(data)).map((field) => {
       // return sanitised value
-      return {
+      return actual ? field : {
         type        : field.type,
         view        : field.view,
         data        : field.data,
@@ -91,6 +91,21 @@ class FieldHelper extends Helper {
 
     // check found
     this.__fields.push(fieldInterface);
+  }
+
+  /**
+   * sanitise field
+   *
+   * @param data 
+   * @param field 
+   * @param value 
+   */
+  async submit(data, field, value, old) {
+    // get registered
+    const registered = await this.find(field.type, data);
+
+    // get value
+    return registered && await registered.submit(data, field, value, old);
   }
 
   /**

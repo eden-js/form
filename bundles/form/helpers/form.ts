@@ -55,43 +55,39 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async submit({ req, allowEmpty, fields }, form, current) {
+  async submit({ req, fields, children, nonce, allowEmpty }, form, current) {
     // get fields
-    if (!fields) fields = (await form.get('fields') || []);
+    if (!children) children = form.get('fields') || [];
+
+    // root fields
+    const rootFields = [...children].filter((f) => (f.parent || 'root') === 'root');
 
     // return
-    const returnFields = (await Promise.all(fields.map(async (field) => {
-      // get from register
-      const registered = await fieldHelper.find(field.type);
-
-      // check registered
-      if (!registered) return;
-
+    await Promise.all(rootFields.map(async (field) => {
       // get submitted value
       const submitted = field.name && req.body[field.name] ? req.body[field.name] : req.body[field.uuid];
 
       // check empty
       if (typeof submitted === 'undefined' && !allowEmpty) return;
 
-      // get data
-      const data = await registered.submit({
+      // add to data
+      const result = await fieldHelper.submit({
+        fields : fields || await fieldHelper.fields(req),
+
         req,
         form,
+        nonce,
         current,
-      }, field, submitted, current ? await current.get(field.name || field.uuid) : null);
-
-      // for extra fields
-      field.value = data;
+        children,
+        allowEmpty,
+      }, field, submitted, await current.get(field.name || field.uuid));
 
       // set uuid
-      current.set(field.name || field.uuid, data);
+      current.set(field.name || field.uuid, result);
+    }));
 
-      // return render
-      return field;
-    }))).filter(f => f);
-
-    // return fields
-    return returnFields;
+    // return current
+    return current;
   }
 
   /**
@@ -103,7 +99,7 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async sanitise({ req, fields, children, nonce }, form, current) {
+  async sanitise({ req, fields, children, nonce, allowEmpty }, form, current) {
     // data
     const result = {};
     
@@ -111,7 +107,7 @@ class FormHelper extends Helper {
     if (!children) children = form.get('fields') || [];
 
     // root fields
-    const rootFields = children.slice(0).filter((f) => (f.parent || 'root') === 'root');
+    const rootFields = [...children].filter((f) => (f.parent || 'root') === 'root');
 
     // req
     if (current) {
@@ -121,10 +117,12 @@ class FormHelper extends Helper {
         result[field.name || field.uuid] = await fieldHelper.sanitise({
           fields : fields || await fieldHelper.fields(req),
 
+          req,
           form,
           nonce,
           current,
           children,
+          allowEmpty,
         }, field, await current.get(field.name || field.uuid));
       }));
     }

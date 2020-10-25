@@ -3,7 +3,7 @@
 import Field from 'field';
 
 // import helpers
-const formHelper = helper('form');
+const fieldHelper = helper('form/field');
 
 // model
 const Unsave = model('unsaveable');
@@ -61,27 +61,56 @@ export default class GroupField extends Field {
    * @param {*} field 
    * @param {*} value 
    */
-  submit({ req, form, old }, field, value) {
+  async submit({ req, form, fields, nonce, children, allowEmpty, current }, field, value, old) {
     // ensure
     if (!value) value = [];
     if (!Array.isArray(value)) value = [value];
 
+    // ensure
+    if (!old) old = [];
+    if (!Array.isArray(old)) old = [old];
+
     // return value
-    return Promise.all(value.map(async (body, i) => {
+    const result = (await Promise.all(value.map(async (item, i) => {
+      // check item
+      if (!item) return;
+
       // unsave
-      const unsave = new Unsave((old || [])[i] || {});
+      const unsave = new Unsave(old[i] || {});
 
-      // digest into form
-      await formHelper.submit({
-        req : Object.assign({}, req, {
-          body,
-        }),
-        fields : (form.get('fields') || []).slice(0).filter((f) => f.parent === field.uuid),
-      }, form, unsave);
-
+      // root fields
+      const groupFields = [...children].filter((f) => (f.parent || 'root') === field.uuid);
+  
       // return
+      await Promise.all(groupFields.map(async (subField) => {
+        // get submitted value
+        const submitted = subField.name && item[subField.name] ? item[subField.name] : item[subField.uuid];
+  
+        // check empty
+        if (typeof submitted === 'undefined' && !allowEmpty) return;
+  
+        // add to data
+        const result = await fieldHelper.submit({
+          fields : fields || await fieldHelper.fields(req),
+  
+          req,
+          form,
+          nonce,
+          current : unsave,
+          children,
+          allowEmpty,
+        }, subField, submitted, await unsave.get(subField.name || subField.uuid));
+  
+        // set uuid
+        unsave.set(subField.name || subField.uuid, result);
+      }));
+
+      // get
       return unsave.get();
-    }));
+    }))).filter((v) => v);
+    
+    // result
+    return result;
   }
 
   /**
@@ -91,7 +120,7 @@ export default class GroupField extends Field {
    * @param {*} field 
    * @param {*} value 
    */
-  async sanitise({ req, form }, field, value) {
+  async sanitise({ req, form, fields, nonce, children }, field, value) {
     // set value
     if (value && !Array.isArray(value)) value = [value];
 
@@ -100,14 +129,30 @@ export default class GroupField extends Field {
       // unsave
       const unsave = new Unsave(item);
 
-      // digest into form
-      const render = await formHelper.render({
-        req,
-        fields : (form.get('fields') || []).slice(0).filter((f) => f.parent === field.uuid),
-      }, form, unsave);
+      // data
+      const result = {};
+      
+      // check fields
+      if (!children) children = form.get('fields') || [];
+  
+      // root fields
+      const groupFields = [...children].filter((f) => (f.parent || 'root') === field.uuid);
 
+      // loop fields
+      await Promise.all(groupFields.map(async (subField) => {
+        // add to data
+        result[subField.name || subField.uuid] = await fieldHelper.sanitise({
+          fields : fields || await fieldHelper.fields(req),
+
+          form,
+          nonce,
+          current : unsave,
+          children,
+        }, subField, await unsave.get(subField.name || subField.uuid));
+      }));
+      
       // return data
-      return render.data;
+      return result;
     }));
 
     // return value
