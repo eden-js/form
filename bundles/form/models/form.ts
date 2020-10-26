@@ -19,28 +19,27 @@ export default class Form extends Model {
     const result = {};
     
     // check fields
-    const fields = (data.fields || this.get('fields') || []).slice(0).filter((f) => (f.parent || 'root') === 'root');
+    const rootFields = (data.children || this.get('fields') || []).slice(0).filter((f) => (f.parent || 'root') === 'root');
 
     // req
     if (current) {
       // loop fields
-      await Promise.all(fields.map(async (field) => {
+      await Promise.all(rootFields.map(async (field) => {
         // add to data
         result[field.name || field.uuid] = await fieldHelper.sanitise({
           ...data,
           current,
           form   : this,
-          fields : await fieldHelper.fields(data.req),
+          fields : data.fields || await fieldHelper.fields(data.req),
         }, field, await current.get(field.name || field.uuid));
       }));
     }
 
     // return placement
     return {
-      fields,
-      
       id        : this.get('_id') ? this.get('_id').toString() : null,
       data      : result,
+      fields    : data.children || this.get('fields') || [],
       placement : this.get('placement'),
     };
   }

@@ -222,15 +222,6 @@
 
           // load fields
           if (!this.getFields().length) await this.init();
-
-          // set default positions
-          if (this.props.positions && !this.getFields().length) {
-            // set default
-            this.form.set('fields', this.props.positions || []);
-
-            // save fields
-            this.saveForm();
-          }
         }
 
         // set position

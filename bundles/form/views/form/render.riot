@@ -3,12 +3,12 @@
 
     <form if={ !loading('form') && props.action && !props.noForm } method={ props.method || 'post' } action={ props.action || getForm().action || '/form/submit' } onsubmit={ (e) => onSubmit(e) } class={ getClass() }>
       <slot name="prepend" />
-      <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ props.fields || getFields() } children={ props.form.fields || props.positions } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } />
+      <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ props.fields || getFields() } children={ (props.form.fields && props.form.fields.length) ? props.form.fields : props.positions } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } />
       <slot name="append" />
     </form>
 
     <div if={ !loading('form') && (!props.action || props.noForm) }>
-      <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ props.fields || getFields() } children={ props.form.fields || props.positions } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } />
+      <eden-fields class="form-render-fields" ref={ ref('fields') } get-id={ props.getId } get-name={ props.getName } data-form={ props.placement } fields={ props.fields || getFields() } children={ (props.form.fields && props.form.fields.length) ? props.form.fields : props.positions } preview={ props.preview } form={ getForm() } on-save={ onSave } placement={ props.placement } />
     </div>
 
     <div if={ loading('form') } class="text-center">

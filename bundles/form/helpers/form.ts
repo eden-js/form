@@ -38,9 +38,9 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async render({ req, fields }, form, current) {
+  async render({ req, fields, children }, form, current) {
     // sanitised
-    const sanitised = await form.sanitise({ req, fields }, current);
+    const sanitised = await form.sanitise({ req, fields, children }, current);
 
     // return
     return sanitised;
