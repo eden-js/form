@@ -875,12 +875,12 @@
               target.childNodes.forEach((f, i) => {
                 // check placement
                 if (!f.getAttribute) return;
-
-                // check is br
-                if (f.tagName === 'BR') return;
                 
                 // set get from
                 let fieldItem = fields.find((fi) => fi.uuid === f.getAttribute('id'));
+
+                // check added but no item
+                if (!fieldItem && !f.getAttribute('data-type')) return;
 
                 // return on no field
                 if (!fieldItem) {

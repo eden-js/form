@@ -9,7 +9,7 @@
     <span if={ !get('field.options', []).length }>
       Add Options
     </span>
-    <validate type="radio" read-only={ !props.shouldRead(props.field) } each={ (option, i) in get('field.options', []) } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}[${option.label}]`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ value.includes(option.label) } />
+    <validate type="radio" read-only={ !props.shouldRead(props.field) } each={ (option, i) in get('field.options', []) } group-class={ props.field.group || '' } name={ props.getName(`${props.field.uuid}`) } label={ option.label } data-value={ option.value } required={ props.field.required } on-change={ onChange } checked={ value.includes(option.label) } />
   </div>
 
   <script>
