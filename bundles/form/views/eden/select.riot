@@ -18,7 +18,7 @@
     </button>
     <div class="dropdown-menu">
       <div class="mb-2 p-2">
-        <input class="form-control" placeholder="Search" onkeyup={ (e) => onSearch(e) } />
+        <input class="form-control" placeholder="Search" onkeyup={ (e) => onSearch(e) } onclick={ (e) => onInside(e) } />
       </div>
       <a each={ (item, i) in getItems() } href="#!" class={ classes({ 'dropdown-item d-flex align-items-center' : true, 'active' : isSelected(item) }) } onclick={ (e) => onToggle(e, item) }>
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
@@ -92,7 +92,21 @@
       onShow(e) {
         // set width
         $(this.$('.dropdown-menu')).width($(this.$('.dropdown')).width());
-        $(this.$('.dropdown-menu .form-control')).focus();
+        $('.form-control', this.$('.dropdown-menu')).focus();
+
+        // timeout focus
+        setTimeout(() => {
+          // set width
+          $('.form-control', this.$('.dropdown-menu')).focus();
+        }, 10);
+      }
+
+      /**
+       * on inside
+       */
+      onInside(e) {
+        // prevent default
+        e.stopPropagation();
       }
 
       /**
