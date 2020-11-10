@@ -1,10 +1,24 @@
 <field-validate>
   <div class="flex-1">
-    <div class="form-check form-switch" if={ props.required }>
-      <input class="form-check-input" id="is-required" type="checkbox" onchange={ (e) => onSwitch(e, 'required') } { ...getProps({ checked : props.field.required }) }>
-      <label class="form-check-label" for="is-required">
-        Require field input
+    <div class="mb-3">
+      <div class="form-check form-switch" if={ props.required }>
+        <input class="form-check-input" id="is-required" type="checkbox" onchange={ (e) => onSwitch(e, 'required') } { ...getProps({ checked : props.field.required }) }>
+        <label class="form-check-label" for="is-required">
+          Require field input
+        </label>
+      </div>
+    </div>
+    <div class="mb-3" if={ props.minLength }>
+      <label class="form-label">
+        Min Length
       </label>
+      <input type="number" step="1" name="minLength" value={ props.field.minLength } class="form-control" onchange={ (e) => onNumberValue(e, 'minLength') } />
+    </div>
+    <div class="mb-3" if={ props.maxLength }>
+      <label class="form-label">
+        Max Length
+      </label>
+      <input type="number" step="1" name="maxLength" value={ props.field.maxLength } class="form-control" onchange={ (e) => onNumberValue(e, 'maxLength') } />
     </div>
   </div>
 
@@ -32,6 +46,14 @@
       onSwitch(e, name) {
         // set
         this.props.set(name, jQuery(e.target).is(':checked'));
+      }
+
+      /**
+       * on switch
+       */
+      onNumberValue(e, name) {
+        // set
+        this.props.set(name, parseInt(e.target.value));
       }
     }
   </script>

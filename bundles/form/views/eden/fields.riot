@@ -25,8 +25,8 @@
       <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
-    <eden-field-update if={ state.updating } ref={ ref('updating') } set={ (k, v) => onSet(state.updating, k, v) } remove={ () => onRemoveField(state.updating) } fields={ getFields() } get-field={ getField } form={ form } field={ state.updating } />
-    <eden-field-remove if={ state.removing } ref={ ref('removing') } set={ (k, v) => onSet(state.removing, k, v) } remove={ () => onRemoveField(state.removing) } fields={ getFields() } get-field={ getField } form={ form } field={ state.removing } />
+    <eden-field-update if={ state.updating } ref={ ref('updating') } set={ (k, v) => onSet(state.updating, k, v) } remove={ () => onRemoveField(state.updating) } fields={ getFields() } get-field={ getField } on-close={ (e) => this.updateAction(e) } form={ form } field={ state.updating } />
+    <eden-field-remove if={ state.removing } ref={ ref('removing') } set={ (k, v) => onSet(state.removing, k, v) } remove={ () => onRemoveField(state.removing) } fields={ getFields() } get-field={ getField } on-close={ (e) => this.updateAction(e) } form={ form } field={ state.removing } />
     <eden-field-sidebar ref={ ref('sidebar') } loading={ loading } placement={ props.placement } fields={ props.fields } />
   </div>
 
@@ -487,8 +487,10 @@
        */
       updateAction (e, field) {
         // prevent default
-        e.preventDefault();
-        e.stopPropagation();
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
 
         // update
         this.update({
@@ -496,7 +498,7 @@
         });
 
         // show modal
-        this.refs.updating.show();
+        if (field) this.refs.updating.show();
       }
 
       /**
@@ -504,8 +506,10 @@
        */
       removeAction (e, field) {
         // prevent default
-        e.preventDefault();
-        e.stopPropagation();
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
 
         // update
         this.update({
@@ -513,7 +517,7 @@
         });
 
         // show modal
-        this.refs.removing.show();
+        if (field) this.refs.removing.show();
       }
 
       /**
@@ -535,8 +539,19 @@
           actualField = field;
         }
 
-        // set
-        dotProp.set(actualField, key, value);
+        // check key
+        if (typeof key === 'object') {
+          // loop
+          Object.keys(key).forEach((k) => {
+            // set value
+            dotProp.set(field, k, key[k]);
+            dotProp.set(actualField, k, key[k]);
+          });
+        } else {
+          // set value
+          dotProp.set(field, key, value);
+          dotProp.set(actualField, key, value);
+        }
 
         // build meta
         if (!actualField._meta) {

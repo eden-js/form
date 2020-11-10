@@ -6,7 +6,7 @@
       </a>
       { props.field.label }
     </label>
-    <eden-select ref={ ref('select') } data={ getData() } placeholder={ props.field.label } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } required={ props.field.required } on-change={ onChange } />
+    <eden-select ref={ ref('select') } data={ getData() } load={ () => getData() } placeholder={ props.field.label } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } required={ props.field.required } on-change={ onChange } />
   </div>
 
   <script>
@@ -23,6 +23,7 @@
         super.onBeforeMount(...arguments);
 
         // on change
+        this.getData = this.getData.bind(this);
         this.onChange = this.onChange.bind(this);
     
         // set initial value
