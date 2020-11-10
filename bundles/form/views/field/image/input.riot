@@ -34,9 +34,9 @@
       *
       * @param {Event} e
       */
-      onChange(e) {
+      onChange(val) {
         // set value
-        this.value = this.val();
+        this.value = val;
 
         // check form
         if (this.props.form) {
@@ -52,7 +52,7 @@
       */
       val() {
         // return non accumulated value
-        return this.$('input').value;
+        return this.value;
       }
     }
 
