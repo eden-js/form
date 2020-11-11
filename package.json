@@ -22,6 +22,7 @@
   "dependencies": {
     "font-awesome-filetypes": "^2.0.1",
     "geocomplete": "^1.7.0",
+    "libphonenumber-js": "^1.9.2",
     "query": "github:protobi/query"
   }
 }

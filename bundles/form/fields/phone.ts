@@ -2,6 +2,9 @@
 // import field interface
 import Field from 'field';
 
+// lib phone
+import parsePhoneNumber from 'libphonenumber-js';
+
 /**
  * build address helper
  */
@@ -46,5 +49,20 @@ export default class PhoneField extends Field {
   get description() {
     // return description string
     return 'Phone Field';
+  }
+
+  /**
+   * submit field value
+   *
+   * @param {*} param0 
+   * @param {*} field 
+   * @param {*} value 
+   */
+  async submit({ req, old }, field, value) {
+    // check value
+    if (!value) return value;
+
+    // parse number
+    return (parsePhoneNumber(value, 'US') || {}).number || value;
   }
 }
