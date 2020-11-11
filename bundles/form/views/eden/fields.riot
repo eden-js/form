@@ -1,6 +1,6 @@
 <eden-fields>
   <div>
-    <div class="eden-fields eden-blocks" if={ !state.reorder }>
+    <div class="eden-fields eden-blocks">
 
       <div class={ `${ classes({ 'empty' : !getFields('root').length, 'eden-dropzone' : !props.preview }) }` } data-form={ props.placement } data-placement="">
         <span class="eden-dropzone-label" if={ !props.preview }>
@@ -19,10 +19,6 @@
         <eden-add type="bottom" onclick={ (e) => createAction(e) } if={ !props.preview } />
 
       </div>
-    </div>
-
-    <div if={ state.reorder } class="text-center">
-      <i class="h1 my-5 fa fa-spinner fa-spin" />
     </div>
 
     <eden-field-update if={ state.updating } ref={ ref('updating') } set={ (k, v) => onSet(state.updating, k, v) } remove={ () => onRemoveField(state.updating) } fields={ getFields() } get-field={ getField } on-close={ (e) => this.updateAction(e) } form={ form } field={ state.updating } />
@@ -817,6 +813,10 @@
           // sometimes can be missing
           if (!item) return;
 
+          // old index
+          let oldPrev = null;
+          let oldIndex = 0;
+
           // push
           this.sortables.push(new Sortable(item, {
             group : {
@@ -830,6 +830,33 @@
             onStart : (e) => {
               // add class
               this.dragging = true;
+
+              // old index
+              oldPrev = null;
+              oldIndex = 0;
+
+              // prev
+              let prev = null;
+
+              // loop physical fields
+              let i = 0;
+              e.from.childNodes.forEach((f) => {
+                // check placement
+                if (!f.getAttribute) return;
+
+                // old index
+                if ($(f).is(e.item)) {
+                  // set prev
+                  oldIndex = i;
+                  oldPrev = prev;
+                }
+
+                // set prev
+                prev = f;
+
+                // amend i
+                i++;
+              });
 
               // add listener
               $(document).on('drag', this.onMouseMoved);
@@ -852,13 +879,22 @@
               const source = e.from;
 
               // check target
-              if (!target) return;
+              if (!target || !el || !source) return;
 
               // parent
               const parent = $(target).closest('[data-parent]').length ? $(target).closest('[data-parent]').attr('data-parent') : 'root';
 
               // check position
               if (el.getAttribute('id') && $(target).closest('.eden-blocks-sidebar').length) {
+                // move back
+                if (oldIndex === 0) {
+                  // prepend to
+                  $(el).prependTo($(source));
+                } else {
+                  // find previous
+                  $(el).after(oldPrev);
+                }
+                
                 // get field
                 const field = this.getFields().find((fi) => fi.uuid === el.getAttribute('id'));
 
@@ -866,30 +902,24 @@
                 if (field.uuid) {
                   // on remove
                   await this.onRemoveField(field, {});
-
-                  // update
-                  this.safeUpdate({
-                    reorder : true,
-                  });
-
-                  // update
-                  return setTimeout(() => this.safeUpdate({
-                    reorder : false,
-                  }), 10);
                 }
-              }
 
-              // check target
-              if (!target || !source || !el || (target && !target.className.includes('form-fields'))) return;
+                // return
+                return;
+              }
 
               // set fields
               const fields  = this.getFields();
               let addedField = null;
 
               // loop physical fields
-              target.childNodes.forEach((f, i) => {
+              let i = -1;
+              target.childNodes.forEach((f) => {
                 // check placement
                 if (!f.getAttribute) return;
+
+                // add to i
+                i++;
                 
                 // set get from
                 let fieldItem = fields.find((fi) => fi.uuid === f.getAttribute('id'));
@@ -915,6 +945,18 @@
                 fieldItem.parent = parent;
               });
 
+              // move back
+              if (addedField) {
+                // remove
+                $(el).remove();
+              } else if (oldIndex === 0) {
+                // prepend to
+                $(el).prependTo(source);
+              } else {
+                // find previous
+                $(oldPrev).after(el);
+              }
+
               // update form
               this.form.set('fields', fields);
 
@@ -926,16 +968,6 @@
 
               // save form
               await this.saveForm(true);
-
-              // update
-              this.safeUpdate({
-                reorder : true,
-              });
-
-              // update
-              setTimeout(() => this.safeUpdate({
-                reorder : false,
-              }), 10);
             }
           }));
         });
