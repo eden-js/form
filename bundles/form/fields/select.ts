@@ -61,7 +61,7 @@ export default class SelectField extends Field {
     if (!Array.isArray(value)) value = [value];
 
     // filter
-    value = value.filter((v) => v).filter((v) => field.options.find((o) => o.value === v));
+    value = value.filter((v) => v && ((field || {}).options || []).find((o) => o.value === v));
 
     // return database value
     return value;

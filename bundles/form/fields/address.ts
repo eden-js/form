@@ -1,6 +1,9 @@
 
 // import field interface
+import tz from 'geo-tz';
+import fetch from 'node-fetch';
 import Field from 'field';
+import config from 'config';
 
 /**
  * build address helper
@@ -61,6 +64,39 @@ export default class AddressField extends Field {
       // parse value
       return JSON.parse(value);
     } catch (e) {}
+
+    // probably a string address
+    if (typeof value === 'string' && config.get('google.maps')) {
+      // try/catch
+      try {
+        // load data
+        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(value)}&key=${config.get('google.maps')}`);
+        const data = await res.json();
+
+        // check results
+        if (data.results && data.results[0]) {
+          // get result
+          const [result] = data.results;
+
+          // set values
+          value = {
+            'id'  : result.id,
+            'geo' : {
+              'lat' : result.geometry.location.lat,
+              'lng' : result.geometry.location.lng
+            },
+            'formatted'  : result.formatted_address,
+            'components' : result.address_components
+          };
+        }
+      } catch (e) { console.log(e) }
+    }
+
+    // check timezone
+    if (value && value.geo && !value.timezone) {
+      // set value
+      [value.timezone] = tz(value.geo.lat, value.geo.lng);
+    }
 
     // return value
     return value;

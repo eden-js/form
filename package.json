@@ -21,8 +21,10 @@
   },
   "dependencies": {
     "font-awesome-filetypes": "^2.0.1",
+    "geo-tz": "^6.0.1",
     "geocomplete": "^1.7.0",
     "libphonenumber-js": "^1.9.2",
+    "node-fetch": "^2.6.1",
     "query": "github:protobi/query"
   }
 }
