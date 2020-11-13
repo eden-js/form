@@ -1,0 +1,25 @@
+<field-file-view>
+  <div>
+    <a each={ (val, i) in getValue(props) } href={ val.url } target="_blank">{ val.name }</a>
+  </div>
+
+  <script>
+		// export default
+    export default {
+      components : {
+      },
+
+      getValue(props) {
+        console.log(props.value);
+        // check value
+        let value = props.value || [];
+
+        // check array
+        if (!Array.isArray(value)) value = [value];
+
+        // return joined
+        return value;
+      },
+    }
+  </script>
+</field-file-view>

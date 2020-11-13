@@ -79,13 +79,13 @@
         $(input).geocomplete().on('geocode:result', (e, result) => {
           // set values
           this.value = {
-            'id'  : result.id,
-            'geo' : {
-              'lat' : result.geometry.location.lat(),
-              'lng' : result.geometry.location.lng()
+            id  : result.id,
+            geo : {
+              lat : result.geometry.location.lat(),
+              lng : result.geometry.location.lng()
             },
-            'formatted'  : result.formatted_address,
-            'components' : result.address_components
+            formatted  : result.formatted_address,
+            components : result.address_components
           };
 
           // update view
