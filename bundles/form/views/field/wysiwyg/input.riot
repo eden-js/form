@@ -5,7 +5,7 @@
         <i>Set Label</i>
       </a>
     </label>
-    <editor ref={ ref('wysiwyg') } show-toolbar={ true } name={ props.getName(props.field.uuid) } label={ props.field.label } content={ get(`value.${eden.get('i18n.lng')}`, get('value', '')) } required={ props.field.required } on-change={ onChange } />
+    <editor ref={ ref('wysiwyg') } show-toolbar={ true } name={ props.getName(props.field.uuid) } label={ props.field.label } placeholder={ props.field.placeholder } content={ get(`value.${eden.get('i18n.lng')}`, get('value', '')) } required={ props.field.required } on-change={ onChange } />
   </div>
   
   <script>

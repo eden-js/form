@@ -5,7 +5,7 @@
         <i>Set Label</i>
       </a>
     </label>
-    <validate type="textarea" read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.value } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
+    <validate type="textarea" help={ props.field.help } read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } placeholder={ props.field.placeholder } data-value={ props.value } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange } />
   </div>
 
   <script>

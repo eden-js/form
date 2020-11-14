@@ -1,11 +1,11 @@
 <field-money-input>
-  <div>
+  <div class={ props.field.group || 'mb-3' }>
     <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
       <a href="#!" onclick={ (e) => props.updateAction(e, props.field) }>
         <i>Set Label</i>
       </a>
     </label>
-    <validate type="number" read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } data-value={ props.value } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
+    <validate type="number" help={ props.field.help } read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } placeholder={ props.field.placeholder } data-value={ props.value } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
       <div slot="prepend" class="input-group-prepend">
         <span class="input-group-text">
           $

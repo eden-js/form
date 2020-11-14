@@ -1,6 +1,9 @@
 <field-file-view>
   <div>
     <a each={ (val, i) in getValue(props) } href={ val.url } target="_blank">{ val.name }</a>
+    <div if={ props.field.help && props.field.help.length } class="form-text">
+      { props.field.help }
+    </div>
   </div>
 
   <script>
@@ -10,7 +13,6 @@
       },
 
       getValue(props) {
-        console.log(props.value);
         // check value
         let value = props.value || [];
 

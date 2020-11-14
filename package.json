@@ -20,6 +20,7 @@
     "@dashup/eslint-config-dashup": "0.0.1"
   },
   "dependencies": {
+    "country-codes-list": "^1.6.8",
     "font-awesome-filetypes": "^2.0.1",
     "geo-tz": "^6.0.1",
     "geocomplete": "^1.7.0",

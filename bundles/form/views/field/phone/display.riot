@@ -1,3 +1,48 @@
 <field-phone-display>
-  <field-display { ...props } />
+  <div>
+    <field-display { ...props } />
+
+    <div class="mb-3">
+      <label class="form-label">
+        Default Country
+      </label>
+      <eden-select on-change={ (e, val) => onCountry(val) } placeholder="Select Country" data={ getCountries() } />
+    </div>
+  </div>
+
+  <script>
+    // codes
+    import codes from 'country-codes-list';
+
+    // field phone
+    export default class FieldPhoneDisplay {
+      
+      /**
+       * on date only
+      *
+      * @param {Event} e
+       */
+      onCountry(val) {
+        // run opts
+        this.props.set('country', val);
+      }
+
+      /**
+       * get countries
+       */
+      getCountries() {
+        // list
+        const list = codes.customList('countryCode', '[{countryCode}] {countryNameEn}: +{countryCallingCode}');
+
+        // return values
+        return Object.keys(list).map((key) => {
+          return {
+            name     : list[key],
+            value    : key,
+            selected : this.props.field.country === key,
+          };
+        });
+      }
+    }
+  </script>
 </field-phone-display>

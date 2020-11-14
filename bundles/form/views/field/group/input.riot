@@ -50,6 +50,9 @@
         { `Add ${props.field.label || 'Item'}` }
       </button>
     </div>
+    <div if={ props.field.help && props.field.help.length } class="form-text">
+      { props.field.help }
+    </div>
   </div>
   
   <script>

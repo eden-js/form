@@ -8,6 +8,9 @@
     </label>
     <input type="hidden" name={ props.getName(`${props.field.uuid}`) } value={ JSON.stringify(value) } />
     <input type="text" required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ props.getId(`${props.field.uuid}-geo`) } value={ get('value.formatted') || '' } autocomplete="nofill" on-change={ onChange }>
+    <div if={ props.field.help && props.field.help.length } class="form-text">
+      { props.field.help }
+    </div>
   </div>
 
   <script>

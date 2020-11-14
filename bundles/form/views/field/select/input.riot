@@ -6,7 +6,10 @@
       </a>
       { props.field.label }
     </label>
-    <eden-select ref={ ref('select') } data={ getData() } load={ () => getData() } placeholder={ props.field.label } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } required={ props.field.required } on-change={ onChange } />
+    <eden-select ref={ ref('select') } data={ getData() } load={ () => getData() } placeholder={ props.field.placeholder || props.field.label } multiple={ props.field.multiple } name={ props.getName(props.field.uuid) } required={ props.field.required } on-change={ onChange } />
+    <div if={ props.field.help && props.field.help.length } class="form-text">
+      { props.field.help }
+    </div>
   </div>
 
   <script>

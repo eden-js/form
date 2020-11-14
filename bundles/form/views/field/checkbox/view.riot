@@ -1,6 +1,9 @@
 <field-checkbox-view>
   <div class="tags">
     <div each={ (value, i) in getValue(props) } class={ getClass(props, value) }>{ value }</div>
+    <div if={ props.field.help && props.field.help.length } class="form-text">
+      { props.field.help }
+    </div>
   </div>
 
   <script>
