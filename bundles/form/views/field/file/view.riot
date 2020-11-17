@@ -1,6 +1,15 @@
 <field-file-view>
   <div>
-    <a each={ (val, i) in getValue(props) } href={ val.url } target="_blank">{ val.name }</a>
+    <span each={ (val, i) in getValue(props) }>
+      <button if={ val.url && val.url.includes('.wav') } class="btn btn-sm btn-info mr-2" onclick={ (e) => state.playing ? onPause(e) : onPlay(e) }>
+        <i class={ `fa fa-${state.playing ? 'pause' : 'play'}` } />
+      </button>
+      <a href={ val.url } target="_blank">{ val.name }</a>
+      <audio class="d-none" if={ state.playing && val.url && val.url.includes('.wav') }>
+        <source src={ val.url } type="audio/x-wav">
+        Your browser does not support the audio element.
+      </audio>
+    </span>
     <div if={ props.field.help && props.field.help.length } class="form-text">
       { props.field.help }
     </div>
@@ -22,6 +31,30 @@
         // return joined
         return value;
       },
+
+      onPlay(e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
+        // play audio
+        this.update({
+          playing : true,
+        });
+        this.$('audio').play();
+      },
+
+      onPause(e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
+        // play audio
+        this.update({
+          playing : false,
+        });
+        this.$('audio').pause();
+      }
     }
   </script>
 </field-file-view>
