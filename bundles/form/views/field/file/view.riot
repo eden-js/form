@@ -50,10 +50,10 @@
         e.stopPropagation();
 
         // play audio
+        this.$('audio').pause();
         this.update({
           playing : false,
         });
-        this.$('audio').pause();
       }
     }
   </script>
