@@ -4,6 +4,7 @@ import tz from 'geo-tz';
 import fetch from 'node-fetch';
 import Field from 'field';
 import config from 'config';
+import moment from 'moment-timezone';
 
 /**
  * build address helper
@@ -62,7 +63,7 @@ export default class AddressField extends Field {
     // return database value
     try {
       // parse value
-      return JSON.parse(value);
+      value = JSON.parse(value);
     } catch (e) {}
 
     // probably a string address
@@ -96,6 +97,7 @@ export default class AddressField extends Field {
     if (value && value.geo && !value.timezone) {
       // set value
       [value.timezone] = tz(value.geo.lat, value.geo.lng);
+      value.tz = moment().tz(value.timezone).format('z');
     }
 
     // return value
