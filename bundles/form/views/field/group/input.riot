@@ -149,16 +149,16 @@
        */
       getName(name, i) {
         // check split
-        const split = name.split('[');
+        let dotName = this.props.getName(this.props.field.uuid).split('[').join('.').split(']').join('');
 
-        // return name
-        if (split.length > 1) {
-          // 
-          return `${this.props.field.uuid}[${i}][${split.shift()}][${split.join('[')}`;
-        }
+        // return 0
+        dotName = `${dotName}.${i}.${name}`;
+        
+        // create path
+        const dots = dotName.split('.');
 
-        // return name
-        return `${this.props.field.uuid}[${i}][${name}]`;
+        // check dots
+        return `${dots[0]}${dots.slice(1).map((val) => `[${val}]`).join('')}`;
       }
     }
     
