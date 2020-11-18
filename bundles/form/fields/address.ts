@@ -94,7 +94,7 @@ export default class AddressField extends Field {
     }
 
     // check timezone
-    if (value && value.geo && !value.timezone) {
+    if (value && value.geo && (!value.timezone || !value.tz)) {
       // set value
       [value.timezone] = tz(value.geo.lat, value.geo.lng);
       value.tz = moment().tz(value.timezone).format('z');
