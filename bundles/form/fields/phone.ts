@@ -1,6 +1,8 @@
 
 // import field interface
 import Field from 'field';
+import fetch from 'node-fetch';
+import config from 'config';
 
 // lib phone
 import parsePhoneNumber from 'libphonenumber-js';
@@ -62,7 +64,59 @@ export default class PhoneField extends Field {
     // check value
     if (!value) return value;
 
+    // check value
+    const data = typeof value === 'string' ? {
+      code   : parsePhoneNumber(value, field.country || 'US').countryCallingCode,
+      local  : parsePhoneNumber(value, field.country || 'US').nationalNumber,
+      number : parsePhoneNumber(value, field.country || 'US').number,
+    } : value;
+
+    // check validation
+    if (data.validation !== data.number && config.get('phone.verify')) {
+      // parse
+      try {
+        // check data
+        const res = await fetch(`http://apilayer.net/api/validate?access_key=${config.get('phone.verify')}&number=${data.number}&country_code=&format=1`);
+        const validated = await res.json();
+
+        // add data
+        data.type = validated.line_type;
+        data.valid = validated.valid;
+        data.carrier = validated.carrier;
+        data.location = validated.location;
+        data.validation = data.number;
+      } catch (e) {}
+    }
+
+    // return data
+    return data;
+  }
+
+  /**
+   * submit field value
+   *
+   * @param {*} param0 
+   * @param {*} field 
+   * @param {*} value 
+   */
+  async sanitise({ req, old }, field, value) {
+    // check value
+    if (!value) return value;
+
+    // check value
+    if (typeof value === 'string') {
+      // parse it
+      const parsed = parsePhoneNumber(value, field.country || 'US');
+
+      // set value
+      return {
+        code   : parsed.countryCallingCode,
+        local  : parsed.nationalNumber,
+        number : parsed.number,
+      };
+    }
+
     // parse number
-    return (parsePhoneNumber(value, 'US') || {}).number || value;
+    return value;
   }
 }
