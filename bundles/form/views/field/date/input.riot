@@ -8,10 +8,13 @@
     </label>
     <div class="input-group" if={ !loading('type') }>
       <input class="form-control" type="text" ref="date" />
-      <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ val().toISOString() } />
+      <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ val() ? val().toISOString() : '' } />
       <span class="input-group-text">
         <i class="fa fa-calendar" />
       </span>
+      <button if={ value } class="btn btn-danger" onclick={ (e) => onClear(e) }>
+        <i class="fa fa-times" />
+      </button>
     </div>
     <div if={ props.field.help && props.field.help.length } class="form-text">
       { props.field.help }
@@ -71,6 +74,27 @@
       *
       * @param {Event} e
       */
+      onClear(e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set value
+        this.value = null;
+        this.$('[ref="date"]').value = '';
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.dataAction(this.props.field, this.value);
+        }
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
       onChange(e) {
         // set value
         this.value = this.val();
@@ -89,7 +113,7 @@
        */
       val() {
         // return non accumulated value
-        return this.value ? new Date(this.value) : new Date(this.$('[ref="date"]').value || new Date());
+        return this.value ? new Date(this.value) : this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null;
       }
 
       /**
@@ -117,9 +141,10 @@
           defaultDate : this.value,
         }).on('dp.change', ({ date }) => {
           // set value
-          this.value = date.toDate();
+          this.value = date && date.toDate();
+
           // set value
-          $(this.$('[type="hidden"]')).val(this.value.toISOString());
+          $(this.$('[type="hidden"]')).val(this.value ? this.value.toISOString() : '');
         });
       }
 

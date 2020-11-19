@@ -56,6 +56,9 @@ export default class DateField extends Field {
    * @param {*} value 
    */
   async submit({ req, old }, field, value) {
+    // check value
+    if (!value) return;
+
     // try catch
     try {
       // let date
