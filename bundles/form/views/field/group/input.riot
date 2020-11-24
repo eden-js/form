@@ -111,6 +111,10 @@
        * @param  {Event} e
        */
       onCreate (e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
         // values
         if (!this.value) this.value = [];
 
@@ -127,6 +131,10 @@
        * @param  {Event} e
        */
       onRemove (e, i) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
         // add variation
         this.value.splice(i, 1);
 
