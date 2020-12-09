@@ -6,7 +6,7 @@
       </a>
       { props.field.label }
     </label>
-    <div each={ (item, i) in value } class="card mb-3">
+    <div each={ (item, i) in value } class={ `card mb-3 ${props.field.color && props.field.color !== 'transparent' ? `bg-${props.field.color}-transparent` : ''}` }>
 
       <div if={ !props.field.multiple } class="card-header">
         { props.field.label }
