@@ -24,7 +24,7 @@
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
         </span>
-        <span if={ !item.html }>
+        <span if={ !item.html } class="text-overflow">
           { item.title || item.text || item.name }
         </span>
         <raw if={ item.html } data={ { html : item.html } } />
@@ -214,6 +214,9 @@
           return item;
         });
         this.update();
+          
+        // toggle dropdown
+        $(this.$('.dropdown')).dropdown('update');
       }
     
       /**
