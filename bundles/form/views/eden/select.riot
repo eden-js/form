@@ -90,6 +90,27 @@
        * on show
        */
       onShow(e) {
+        // close
+        const dd = $(e.target).closest('.dropdown, .dropleft');
+
+        // check
+        const check = (ea) => {
+          // check contains
+          if (dd && dd.length) {
+            // check
+            if ($(ea.target).closest('.dropdown, .dropleft') && $(ea.target).closest('.dropdown, .dropleft').is(dd)) return;
+
+            // hide
+            dd.dropdown('hide');
+
+            // once
+            $(document).off('mouseup', check);
+          }
+        };
+
+        // once
+        $(document).on('mouseup', check);
+
         // set width
         $(this.$('.dropdown-menu')).width($(this.$('.dropdown')).width());
         $('.form-control', this.$('.dropdown-menu')).focus();

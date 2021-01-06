@@ -64,11 +64,14 @@ export default class PhoneField extends Field {
     // check value
     if (!value) return value;
 
+    // parsed
+    const parsed = parsePhoneNumber(value, field.country || 'US') || {};
+
     // check value
     const data = typeof value === 'string' ? {
-      code   : parsePhoneNumber(value, field.country || 'US').countryCallingCode,
-      local  : parsePhoneNumber(value, field.country || 'US').nationalNumber,
-      number : parsePhoneNumber(value, field.country || 'US').number,
+      code   : parsed.countryCallingCode,
+      local  : parsed.nationalNumber,
+      number : parsed.number,
     } : value;
 
     // check validation
