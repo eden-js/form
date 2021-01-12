@@ -1,6 +1,7 @@
 
 // import field interface
 import Field from 'field';
+import isURL from 'is-url';
 
 // require models
 const File = model('file');
@@ -66,6 +67,30 @@ export default class FileField extends Field {
     return await Promise.all(value.filter(val => val).map(async (val, i) => {
       // item
       if (val && val.id) val = val.id;
+
+      // val is not an id
+      if (!`${val}`.match(/^[0-9a-fA-F]{24}$/) && isURL(val)) {
+        // run try catch
+        try {
+          // create new upload
+          const file = new File();
+
+          // upload
+          await file.fromURL(val);
+      
+          // set user
+          file.set('user', req.user);
+
+          // return sanitised
+          return {
+            id    : file.get('_id'),
+            model : 'file',
+          };
+        } catch (e) {
+          // return old
+          return old[i];
+        }
+      }
 
       // run try catch
       try {
