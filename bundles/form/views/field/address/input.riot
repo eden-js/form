@@ -7,7 +7,50 @@
       </a>
     </label>
     <input type="hidden" name={ props.getName(`${props.field.uuid}`) } value={ JSON.stringify(value) } />
-    <input type="text" required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ props.getId(`${props.field.uuid}-geo`) } value={ get('value.formatted') || '' } autocomplete="nofill" on-change={ onChange }>
+
+    <div class="input-group">
+      <input type="text" ref="formatted" required={ props.field.required } class={ `${props.field.field || 'form-control'}` } id={ props.getId(`${props.field.uuid}-geo`) } value={ get('value.formatted') || '' } autocomplete="nofill" on-change={ onChange }>
+      <button class={ `btn btn-${value.custom ? 'primary' : 'secondary'}` } onclick={ (e) => onCustom(e) }>
+        <i class="fa fa-pencil" />
+      </button>
+      <button class={ `btn btn-${value.map ? 'primary' : 'secondary'}` } onclick={ (e) => onMap(e) }>
+        <i class="fa fa-map" />
+      </button>
+    </div>
+
+    <div if={ value.custom } class="row mt-3">
+      <div class="col-4 mb-3">
+        <label class="form-label" for={ props.getId(`${props.field.uuid}-number`) }>
+          Street Number
+        </label>
+        <input class="form-control" placeholder="Street Number" value={ getComponent('number') } onchange={ (e) => onComponent(e, 'number') } id={ props.getId(`${props.field.uuid}-number`) } />
+      </div>
+      <div class="col-8 mb-3">
+        <label class="form-label" for={ props.getId(`${props.field.uuid}-street`) }>
+          Street Name
+        </label>
+        <input class="form-control" placeholder="Street Name" value={ getComponent('street') } onchange={ (e) => onComponent(e, 'street') } id={ props.getId(`${props.field.uuid}-street`) } />
+      </div>
+      <div class="col-4">
+        <label class="form-label" for={ props.getId(`${props.field.uuid}-city`) }>
+          City
+        </label>
+        <input class="form-control" placeholder="City" value={ getComponent('city') } onchange={ (e) => onComponent(e, 'city') } id={ props.getId(`${props.field.uuid}-city`) } />
+      </div>
+      <div class="col-4">
+        <label class="form-label" for={ props.getId(`${props.field.uuid}-state`) }>
+          State
+        </label>
+        <input class="form-control" placeholder="State" value={ getComponent('state') } onchange={ (e) => onComponent(e, 'state') } id={ props.getId(`${props.field.uuid}-state`) } />
+      </div>
+      <div class="col-4">
+        <label class="form-label" for={ props.getId(`${props.field.uuid}-postcode`) }>
+          Postcode
+        </label>
+        <input class="form-control" placeholder="Postcode" value={ getComponent('postcode') } onchange={ (e) => onComponent(e, 'postcode') } id={ props.getId(`${props.field.uuid}-postcode`) } />
+      </div>
+    </div>
+
     <div if={ props.field.help && props.field.help.length } class="form-text">
       { props.field.help }
     </div>
@@ -27,7 +70,7 @@
         super.onBeforeMount(...arguments);
     
         // set initial value
-        this.value = this.props.value;
+        this.value = this.props.value || {};
       }
 
       /**
@@ -55,6 +98,50 @@
       }
 
       /**
+       * on custom
+       */
+      onCustom(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set custom
+        this.value.custom = !this.value.custom;
+        this.update();
+      }
+
+      /**
+       * on custom
+       */
+      onComponent(e, key) {
+        // check json
+        if (!this.value.json) this.value.json = {};
+
+        // set value
+        this.value.json[key] = e.target.value;
+
+        // set formatted
+        this.value.formatted = `${this.value.json.number || ''} ${this.value.json.street || ''}, ${this.value.json.city || ''} ${this.value.json.state || ''}, ${this.value.json.country || ''}`;
+        this.$('[ref="formatted"]').value = this.value.formatted;
+        
+        // update
+        this.update();
+      }
+
+      /**
+       * on custom
+       */
+      onMap(e) {
+        // prevent default
+        e.preventDefault();
+        e.stopPropagation();
+
+        // set custom
+        this.value.map = !this.value.map;
+        this.update();
+      }
+
+      /**
        * on change
        *
        * @param {Event} e
@@ -68,6 +155,14 @@
           // update
           this.props.dataAction(this.props.field, this.value);
         }
+      }
+
+      /**
+       * get component
+       */
+      getComponent(key) {
+        // get component
+        return (this.value.json || {})[key] || null;
       }
 
       /**
@@ -87,7 +182,15 @@
               lat : result.geometry.location.lat(),
               lng : result.geometry.location.lng()
             },
-            formatted  : result.formatted_address,
+            json : {
+              city     : (result.address_components.find((c) => c.types.includes('locality')) || {}).short_name,
+              state    : (result.address_components.find((c) => c.types.includes('administrative_area_level_1')) || {}).short_name,
+              street   : (result.address_components.find((c) => c.types.includes('route')) || {}).long_name,
+              number   : (result.address_components.find((c) => c.types.includes('street_number')) || {}).long_name,
+              country  : (result.address_components.find((c) => c.types.includes('country')) || {}).long_name,
+              postcode : (result.address_components.find((c) => c.types.includes('postal_code')) || {}).long_name,
+            },
+            formatted  : this.$('[ref="formatted"]').value,
             components : result.address_components
           };
 
