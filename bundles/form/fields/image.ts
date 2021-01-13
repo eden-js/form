@@ -81,13 +81,13 @@ export default class ImageField extends Field {
           // images
           const images = [
             (await image.thumb('1x')).resize(400, 400, {
-              fit : 'contain',
+              fit : 'inside',
             }).png().save(),
             (await image.thumb('2x')).resize(800, 800, {
-              fit : 'contain',
+              fit : 'inside',
             }).png().save(),
             (await image.thumb('3x')).resize(1200, 1200, {
-              fit : 'contain',
+              fit : 'inside',
             }).png().save(),
             (await image.thumb('sm-sq')).resize(400, 400, {
               fit        : 'contain',
