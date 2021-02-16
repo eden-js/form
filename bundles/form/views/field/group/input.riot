@@ -70,10 +70,10 @@
         super.onBeforeMount(...arguments);
     
         // set initial value
-        this.value = this.props.value || [];
+        this.value = this.props.value || null;
 
         // set value
-        if (!this.value.length && (!this.props.field.multiple || !this.props.preview)) this.value = [{}];
+        if (!this.value) this.value = [{}];
 
         // bind
         this.getName = this.getName.bind(this);
@@ -87,7 +87,7 @@
         super.onBeforeUpdate(...arguments);
 
         // set value
-        if (!this.value.length && (!this.props.field.multiple || !this.props.preview)) this.value = [{}];
+        if (!this.value.length && !this.props.preview) this.value = [{}];
       }
 
       /**
