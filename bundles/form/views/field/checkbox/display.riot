@@ -1,3 +1,39 @@
 <field-checkbox-display>
-  <field-display { ...props } />
+  <div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" id="hide-completed" type="checkbox" onchange={ (e) => onSwitch(e, 'hideCompleted') } { ...getProps({ checked : props.field.hideCompleted }) }>
+      <label class="form-check-label" for="hide-completed">
+        Hide Completed
+      </label>
+    </div>
+    <field-display { ...props } />
+  </div>
+
+  <script>
+    // export default
+    export default class FieldCheckboxDisplay {
+
+      /**
+       * on switch
+       */
+      onSwitch(e, name) {
+        // set
+        this.props.set(name, jQuery(e.target).is(':checked'));
+      }
+
+      /**
+       * get props
+       */
+      getProps(obj) {
+        // return get props
+        return Object.keys(obj).reduce((accum, key) => {
+          // set accum
+          if (obj[key]) accum[key] = true;
+
+          // return accum
+          return accum;
+        }, {});
+      }
+    }
+  </script>
 </field-checkbox-display>
