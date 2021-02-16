@@ -139,12 +139,15 @@
         $(this.$('[ref="date"]')).datetimepicker({
           format      : this.getFormat(),
           defaultDate : this.value,
-        }).on('dp.change', ({ date }) => {
+        }).on('dp.change', (e) => {
           // set value
-          this.value = date && date.toDate();
+          this.value = e.date && e.date.toDate();
 
           // set value
           $(this.$('[type="hidden"]')).val(this.value ? this.value.toISOString() : '');
+
+          // on change
+          this.onChange(e);
         });
       }
 

@@ -31,6 +31,7 @@
     import slug from 'slug';
     import query from 'query';
     import dotProp from 'dot-prop';
+    import handlebars from 'handlebars';
     import { v4 as uuid } from 'uuid';
 
     // import local
@@ -58,6 +59,10 @@
         
         // do mixin
         Model(this);
+
+        // data
+        this.data = null;
+        this.tmpls = {};
 
         // set form
         if (this.props.model) {
@@ -90,6 +95,7 @@
         this.getProps = this.getProps.bind(this);
         this.getClass = this.getClass.bind(this);
         this.getFields = this.getFields.bind(this);
+        this.getDefault = this.getDefault.bind(this);
 
         // validation methods
         this.shouldRead = this.shouldRead.bind(this);
@@ -353,7 +359,10 @@
        */
       getData() {
         // get data
-        return this.props.data || this.form.get('data') || {};
+        this.data = this.props.data || this.form.get('data') || {};
+
+        // return data
+        return this.data;
       }
 
       /**
@@ -375,6 +384,27 @@
 
         // return found
         return found;
+      }
+
+      /**
+       * get field data
+       *
+       * @param  {Object} field
+       *
+       * @return {*}
+       */
+      getDefault (field) {
+        // return on no field
+        if (!field || !field.default) return;
+
+        // compile field default
+        this.tmpls[field.default] = this.tmpls[field.default] || handlebars.compile(field.default);
+
+        // get found
+        return this.tmpls[field.default]({
+          field,
+          ...(this.getData()),
+        });
       }
 
       /**
@@ -430,11 +460,13 @@
           id        : field.uuid,
           set       : (k, v) => this.onSet(field, k, v),
           form      : this.form,
+          data      : this.getData(),
           class     : this.getClass(field),
           value     : this.getValue(field),
           fields    : this.getFields(),
           update    : this.update,
           preview   : this.preview,
+          default   : this.getDefault(field),
           placement : this.props.placement,
 
           // on update/remove
@@ -444,12 +476,13 @@
           removeAction : this.removeAction,
 
           // get functions
-          getId     : this.getId,
-          getName   : this.getName,
-          getField  : this.getField,
-          getProps  : this.getProps,
-          getClass  : this.getClass,
-          getFields : this.getFields,
+          getId      : this.getId,
+          getName    : this.getName,
+          getField   : this.getField,
+          getProps   : this.getProps,
+          getClass   : this.getClass,
+          getFields  : this.getFields,
+          getDefault : this.getDefault,
 
           // should functions
           shouldRead : this.shouldRead,
@@ -591,11 +624,11 @@
        * on field update
        */
       dataAction (field, value) {
-        // check data
-        if (this.props.onData) return this.props.onData(field, value);
-
         // set value
         this.getData()[field.name || field.uuid] = value;
+
+        // check data
+        if (this.props.onData) return this.props.onData(field, value);
 
         // safe update
         this.update();

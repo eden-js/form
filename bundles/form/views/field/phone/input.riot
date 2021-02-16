@@ -33,6 +33,23 @@
       }
 
       /**
+       * on before mount
+       */
+      onUpdated(...args) {
+        // run super
+        super.onUpdated(...args);
+        
+        // check value
+        if (this.props.default && (this.default || (!this.value || this.value.length === ''))) {
+          // set default
+          this.default = true;
+          
+          // set default
+          this.$('input').value = this.props.default;
+        }
+      }
+
+      /**
       * on change
       *
       * @param {Event} e
@@ -44,6 +61,7 @@
 
           number : this.$('input').value,
         };
+        this.default = false;
 
         // check form
         if (this.props.form) {

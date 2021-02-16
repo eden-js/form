@@ -17,15 +17,32 @@
       /**
        * on before mount
        */
-      onBeforeMount() {
+      onBeforeMount(...args) {
         // run super
-        super.onBeforeMount(...arguments);
+        super.onBeforeMount(...args);
 
         // on change
         this.onChange = this.onChange.bind(this);
     
         // set initial value
         this.value = this.props.value;
+      }
+
+      /**
+       * on before mount
+       */
+      onUpdated(...args) {
+        // run super
+        super.onUpdated(...args);
+        
+        // check value
+        if (this.props.default && (this.default || (!this.value || this.value.length === ''))) {
+          // set default
+          this.default = true;
+          
+          // set default
+          this.$('input').value = this.props.default;
+        }
       }
 
       /**
@@ -36,6 +53,7 @@
       onChange(e) {
         // set value
         this.value = this.val();
+        this.default = false;
 
         // check form
         if (this.props.form) {
