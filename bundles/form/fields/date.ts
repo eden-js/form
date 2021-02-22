@@ -59,8 +59,21 @@ export default class DateField extends Field {
     // check value
     if (!value) return;
 
+    // get value
+    value = JSON.parse(value);
+
     // try catch
     try {
+      // check date
+      if (value && value.repeat) {
+        // start/end
+        value.end = value.end && new Date(value.end);
+        value.start = value.start && new Date(value.start);
+
+        // return value
+        return value;
+      }
+
       // let date
       let date = new Date(value);
 

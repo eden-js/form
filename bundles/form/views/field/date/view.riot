@@ -11,6 +11,11 @@
       },
 
       getValue(props) {
+        // repeated
+        if (props.value.repeat || props.value.ends) {
+          return `From: ${moment(props.value.start).format(this.props.field.format || 'MMMM DD YYYY, LT')}, Every: ${props.value.repeat}${props.value.ends ? ` Until: ${moment(props.value.end).format(this.props.field.format || 'MMMM DD YYYY, LT')}` : ''}`;
+        }
+        
         // check value
         return props.value ? moment(props.value).format(this.props.field.format || 'MMMM DD YYYY, LT') : '';
       },

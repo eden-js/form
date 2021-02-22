@@ -1,7 +1,7 @@
 <eden-select>
   <div class="dropdown">
     <input type="hidden" class="d-none" each={ (item, i) in selected } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
-    <button if={ props.type !== 'open' } class="form-select text-overflow text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick={ (e) => onShow(e) }>
+    <button if={ props.type !== 'open' } class="form-select text-overflow text-left" onclick={ (e) => onShow(e) }>
       <span each={ (item, i) in selected } class="mr-2 d-inline-flex align-items-center">
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
@@ -90,8 +90,15 @@
        * on show
        */
       onShow(e) {
+        // prevent
+        e.preventDefault();
+        e.stopPropagation();
+
         // close
         const dd = $(e.target).closest('.dropdown, .dropleft');
+  
+        // hide
+        $(this.$('.dropdown-menu')).addClass('show');
 
         // check
         const check = (ea) => {
@@ -101,7 +108,7 @@
             if ($(ea.target).closest('.dropdown, .dropleft') && $(ea.target).closest('.dropdown, .dropleft').is(dd)) return;
 
             // hide
-            dd.dropdown('hide');
+            $(this.$('.dropdown-menu')).removeClass('show');
 
             // once
             $(document).off('mouseup', check);
@@ -112,7 +119,7 @@
         $(document).on('mouseup', check);
 
         // set width
-        $(this.$('.dropdown-menu')).width($(this.$('.dropdown')).width());
+        $(this.$('.dropdown-menu')).width(dd.width());
         $('.form-control', this.$('.dropdown-menu')).focus();
 
         // timeout focus

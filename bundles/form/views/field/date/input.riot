@@ -8,12 +8,37 @@
     </label>
     <div class="input-group" if={ !loading('type') }>
       <input class="form-control" type="text" ref="date" />
-      <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ val() ? val().toISOString() : '' } />
-      <span class="input-group-text">
-        <i class="fa fa-calendar" />
+      <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ JSON.stringify(val()) } />
+      <span class="input-group-text" if={ isRepeat() }>
+        Every:&nbsp;
+        <b>{ value.period || 1 } { value.repeat || 'day' }</b>
+        &nbsp;
+        <span if={ isEnds() }>
+          Until:&nbsp;
+          <b>{ moment(value.end || new Date()).format(getFormat()) } { '' }</b>
+        </span>
       </span>
+      <span class="input-group-text">
+        <i class="fa fa-fw fa-calendar" />
+      </span>
+      <button class={ `btn btn-${isRepeat() ? 'info' : 'secondary'} dropdown-toggle` } data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-fw fa-repeat" />
+      </button>
+
+      <div class="dropdown-menu dropdown-menu-right p-2">
+        <div class="d-flex align-items-center flex-row">
+          Repeat Every&nbsp;
+          <input class="d-inline-flex mx-1 flex-1 form-control" type="number" value={ value && value.period ? value.period : 1 } />
+          <eden-select class="d-inline-flex flex-1 mx-1" on-change={ (e, r) => onRepeat(r) } placeholder="Select Repeat" data={ getRepeat() } />
+          <eden-select class="d-inline-flex flex-1 me-1" on-change={ (e, r) => onEnds(r) } placeholder="Select Ends" data={ getEnds() } />
+        </div>
+        <div if={ isEnds() } class="mt-3">
+          <input class="form-control" type="text" ref="end" />
+        </div>
+      </div>
+
       <button if={ value } class="btn btn-danger" onclick={ (e) => onClear(e) }>
-        <i class="fa fa-times" />
+        <i class="fa fa-fw fa-times" />
       </button>
     </div>
     <div if={ props.field.help && props.field.help.length } class="form-text">
@@ -24,6 +49,7 @@
   <script>
     // import base
     import Base from '../../js/base';
+    import moment from 'moment';
 
     // export default
     export default class FieldDateInput extends Base {
@@ -39,6 +65,7 @@
     
         // set initial value
         this.value = this.props.value;
+        this.moment = moment;
       }
 
       /**
@@ -91,6 +118,47 @@
       }
 
       /**
+       * on repeat
+       */
+      onEnds(v) {
+        // set value
+        this.value = {
+          end    : (this.val() || {}).end,
+          ends   : v,
+          start  : this.$('[ref="date"]') && this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null,
+          repeat : (this.val() || {}).repeat,
+        };
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.dataAction(this.props.field, this.val());
+        }
+      }
+
+      /**
+       * on repeat
+       */
+      onRepeat(v) {
+        console.log(this.val() || {});
+        // set value
+        this.value = {
+          end    : (this.val() || {}).end,
+          ends   : (this.val() || {}).ends,
+          start  : this.$('[ref="date"]') && this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null,
+          repeat : v,
+        };
+
+        console.log(this.value);
+
+        // check form
+        if (this.props.form) {
+          // update
+          this.props.dataAction(this.props.field, this.val());
+        }
+      }
+
+      /**
       * on change
       *
       * @param {Event} e
@@ -112,6 +180,17 @@
        * @return {*}
        */
       val() {
+        // check value
+        if (this.isRepeat()) {
+          // return repeated
+          return {
+            end    : this.$('[ref="end"]') && this.$('[ref="end"]').value ? new Date(this.$('[ref="end"]').value) : null,
+            ends   : this.value.ends,
+            start  : this.$('[ref="date"]') && this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null,
+            repeat : this.value.repeat,
+          };
+        }
+
         // return non accumulated value
         return this.value ? new Date(this.value) : this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null;
       }
@@ -136,19 +215,84 @@
         });
         
         // add datetime picker
-        $(this.$('[ref="date"]')).datetimepicker({
+        if (this.$('[ref="end"]')) $(this.$('[ref="end"]')).datetimepicker({
           format      : this.getFormat(),
-          defaultDate : this.value,
+          defaultDate : (this.val() || {}).end || new Date(),
         }).on('dp.change', (e) => {
           // set value
-          this.value = e.date && e.date.toDate();
+          this.value.end = e.date && e.date.toDate();
 
           // set value
-          $(this.$('[type="hidden"]')).val(this.value ? this.value.toISOString() : '');
+          $(this.$('[type="hidden"]')).val(JSON.stringify(this.value));
 
           // on change
           this.onChange(e);
         });
+        
+        // add datetime picker
+        $(this.$('[ref="date"]')).datetimepicker({
+          format      : this.getFormat(),
+          defaultDate : (this.val() || {}).start || this.val(),
+        }).on('dp.change', (e) => {
+          // set value
+          if (this.isRepeat()) {
+            this.value.start = e.date && e.date.toDate();
+          } else {
+            this.value = e.date && e.date.toDate();
+          }
+
+          // set value
+          $(this.$('[type="hidden"]')).val(JSON.stringify(this.value));
+
+          // on change
+          this.onChange(e);
+        });
+      }
+
+      /**
+       * get ends
+       */
+      getEnds() {
+        // return triggers
+        return ['Forever', 'Until'].map((ends) => {
+          // return object
+          return {
+            name     : ends,
+            value    : ends.toLowerCase(),
+            selected : (this.val() || {}).ends === ends.toLowerCase(),
+          };
+        });
+      }
+
+      /**
+       * get value
+       */
+      getRepeat() {
+        // return triggers
+        return ['Day', 'Week', 'Month', 'Year'].map((repeat) => {
+          // return object
+          return {
+            name     : repeat,
+            value    : repeat.toLowerCase(),
+            selected : (this.val() || {}).repeat === repeat.toLowerCase(),
+          };
+        });
+      }
+
+      /**
+       * repeat
+       */
+      isEnds() {
+        // repeat date
+        return (this.value || {}).ends === 'until';
+      }
+
+      /**
+       * repeat
+       */
+      isRepeat() {
+        // repeat date
+        return (this.value || {}).start && ((this.value || {}).repeat || (this.value || {}).ends);
       }
 
       /**
