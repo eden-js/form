@@ -43,6 +43,8 @@
     
         // set initial value
         this.value = this.props.value || [];
+
+        console.log(this.value);
       }
 
       /**
@@ -52,7 +54,9 @@
       */
       val() {
         // return non accumulated value
-        return this.$$('input:checked').map((item) => jQuery(item).val());
+        return (this.get('field.options', []) || []).filter((opt) => {
+          return $(`input[value="${opt.value}"]`).is(':checked');
+        }).map((opt) => opt.value);
       }
 
       /**
@@ -63,6 +67,8 @@
       onChange(e) {
         // set value
         this.value = this.val();
+
+        console.log(this.value);
 
         // check form
         if (this.props.form) {

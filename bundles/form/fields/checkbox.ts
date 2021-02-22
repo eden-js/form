@@ -57,7 +57,7 @@ export default class CheckboxField extends Field {
    */
   async submit({ req, old }, field, value) {
     // check object
-    if (typeof value === 'object' && value !== null) {
+    if (!Array.isArray(value) && typeof value === 'object' && value !== null) {
       // set value
       value = Object.keys(value);
     }
