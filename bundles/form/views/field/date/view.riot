@@ -1,7 +1,7 @@
 <field-date-view>
   <div>
     <raw data={ { html : getValue(props) } } />
-    <i if={ props.value.repeat } data-toggle="tooltip" title={ getRepeat(props) } class="fa fa-fw fa-redo ml-2" />
+    <i if={ props.value && props.value.repeat === true } data-toggle="tooltip" title={ getRepeat(props) } class="fa fa-fw fa-redo ml-2" />
   </div>
 
   <script>
@@ -19,6 +19,9 @@
       },
 
       getValue(props) {
+        // check value
+        if (!props.value) return '';
+
         // get date
         const check = new Date(props.value);
 
@@ -29,7 +32,7 @@
         }
 
         // check value
-        let { end, start, duration, until, repeat = false } = props.value;
+        let { end, start, duration, until, repeat = false } = props.value || {};
 
         // parse dates
         start = isNaN(new Date(start).getTime()) ? null : new Date(start);
