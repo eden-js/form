@@ -1,7 +1,7 @@
 <field-date-view>
   <div>
     <raw data={ { html : getValue(props) } } />
-    <i if={ props.value && props.value.repeat === true } data-toggle="tooltip" title={ getRepeat(props) } class="fa fa-fw fa-redo ml-2" />
+    <i if={ props.value && props.value.repeat === true && props.field.repeat } data-toggle="tooltip" title={ getRepeat(props) } class="fa fa-fw fa-redo ml-2" />
   </div>
 
   <script>
@@ -42,7 +42,7 @@
         let str = `<b>${moment(props.value.start).format(this.props.field.format || 'MMMM DD YYYY, LT')}</b>`;
 
         // duration
-        if (duration) {
+        if (duration && props.field.duration) {
           // str
           str = `${str} lasting <b>${pretty(duration)}</b>`;
         }
