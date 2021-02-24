@@ -1,45 +1,63 @@
 <field-date-input>
   <div class="mb-3">
+    <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ JSON.stringify(val()) } />
     <label class="form-label" for={ props.getId(props.field.uuid) }>
       <a href="#!" if={ !props.field.label } onclick={ (e) => props.updateAction(e, props.field) }>
         <i>Set Label</i>
       </a>
       { props.field.label }
     </label>
-    <div class="input-group" if={ !loading('type') }>
-      <input class="form-control" type="text" ref="date" />
-      <input class="d-none" type="hidden" name={ props.getName(props.field.uuid) } id={ props.getId(props.field.uuid) } value={ JSON.stringify(val()) } />
-      <span class="input-group-text" if={ isRepeat() }>
-        Every:&nbsp;
-        <b>{ value.period || 1 } { value.repeat || 'day' }</b>
-        &nbsp;
-        <span if={ isEnds() }>
-          Until:&nbsp;
-          <b>{ moment(value.end || new Date()).format(getFormat()) } { '' }</b>
+    <div class="d-flex flex-row">
+      <div class="input-group flex-1">
+        <input class="form-control" type="text" ref="date" />
+        <span class="input-group-text">
+          <i class="fa fa-fw fa-calendar" />
         </span>
-      </span>
-      <span class="input-group-text">
-        <i class="fa fa-fw fa-calendar" />
-      </span>
-      <button class={ `btn btn-${isRepeat() ? 'info' : 'secondary'} dropdown-toggle` } data-toggle="dropdown" aria-expanded="false">
-        <i class="fa fa-fw fa-repeat" />
-      </button>
-
-      <div class="dropdown-menu dropdown-menu-right p-2">
-        <div class="d-flex align-items-center flex-row">
-          Repeat Every&nbsp;
-          <input class="d-inline-flex mx-1 flex-1 form-control" type="number" value={ value && value.period ? value.period : 1 } />
-          <eden-select class="d-inline-flex flex-1 mx-1" on-change={ (e, r) => onRepeat(r) } placeholder="Select Repeat" data={ getRepeat() } />
-          <eden-select class="d-inline-flex flex-1 me-1" on-change={ (e, r) => onEnds(r) } placeholder="Select Ends" data={ getEnds() } />
+        <button if={ value } class="btn btn-danger" onclick={ (e) => onClear(e) }>
+          <i class="fa fa-fw fa-times" />
+        </button>
+      </div>
+      <div if={ props.field.duration } class={ `ml-2 w-50 d-flex flex-row${value && value.dur && value.dur.type === 'until' ? ' flex-1' : ''}` }>
+        <div class={ `input-group${value && value.dur && value.dur.type === 'lasting' ? ' w-25' : ''}` }>
+          <select class="form-control" onchange={ (e) => onType(e, 'dur') }>
+            <option>Select Duration</option>
+            <option value="until" { ...getProps({ selected : value && value.dur && value.dur.type === 'until' }) }>
+              Until
+            </option>
+            <option value="lasting" { ...getProps({ selected : value && value.dur && value.dur.type === 'lasting' }) }>
+              Lasting
+            </option>
+          </select>
+          
+          <input class="form-control w-75" type="text" ref="duration" if={ value && value.dur && value.dur.type === 'until' } />
+          <span class="input-group-text" if={ value && value.dur && value.dur.type === 'until' }>
+            <i class="fa fa-fw fa-calendar" />
+          </span>
         </div>
-        <div if={ isEnds() } class="mt-3">
-          <input class="form-control" type="text" ref="end" />
+        <div class="ml-2 d-flex flex-row flex-1" if={ value && value.dur && value.dur.type === 'lasting' }>
+          <input class="flex-1 form-control" placeholder="Duration Amount" type="number" value={ value && value.dur && value.dur.amount } onchange={ (e) => onAmount(e, 'dur') } />
+          <eden-select class="ml-2 flex-1" on-change={ (e, r) => onPeriod(r, 'dur') } placeholder="Select Period" data={ getPeriod('dur') } />
         </div>
       </div>
-
-      <button if={ value } class="btn btn-danger" onclick={ (e) => onClear(e) }>
-        <i class="fa fa-fw fa-times" />
-      </button>
+    </div>
+    <div if={ props.field.repeat } class="mt-2">
+      <div class="form-check form-switch">
+        <input class="form-check-input" id="repeat" type="checkbox" onchange={ (e) => onRepeat(e) } { ...getProps({ checked : value && value.repeat }) }>
+        <label class="form-check-label" for="repeat">
+          Repeat
+        </label>
+      </div>
+    </div>
+    <div class="mt-2 d-flex align-items-center flex-row" if={ value && value.repeat }>
+      <input class="d-inline-flex mr-1 flex-1 form-control" placeholder="Repeat Every" type="number" value={ value && value.rep && value.rep.amount } onchange={ (e) => onAmount(e, 'rep') } />
+      <eden-select class="mx-1 flex-1" on-change={ (e, r) => onPeriod(r, 'rep') } placeholder="Select Period" data={ getPeriod('rep') } />
+      <eden-select class="ml-1 flex-1" on-change={ (e, r) => onEnds(r, 'rep') } placeholder="Select Ends" data={ getEnds('rep') } />
+      <div if={ value && value.rep && value.rep.ends === 'until' } class="input-group d-inline-flex ml-2 w-50">
+        <input class="form-control" type="text" ref="end" />
+        <span class="input-group-text">
+          <i class="fa fa-fw fa-calendar" />
+        </span>
+      </div>
     </div>
     <div if={ props.field.help && props.field.help.length } class="form-text">
       { props.field.help }
@@ -62,9 +80,35 @@
 
         // on change
         this.onChange = this.onChange.bind(this);
+
+        // get start
+        const check = new Date(this.props.value || {});
     
         // set initial value
-        this.value = this.props.value;
+        this.value = isNaN(check.getTime()) ? (this.props.value || {}) : {
+          start,
+        };
+
+        // get values
+        let { end, start, until } = this.value;
+
+        // parse dates
+        this.value.end = isNaN(new Date(end).getTime()) ? null : new Date(end);
+        this.value.start = isNaN(new Date(start).getTime()) ? null : new Date(start);
+        this.value.until = isNaN(new Date(until).getTime()) ? null : new Date(until);
+
+        // alter value
+        if (!this.value.dur && this.props.field.dur) {
+          // set duration
+          this.value.dur = {
+            type   : 'lasting',
+            amount : this.props.field.dur.amount || 1,
+            period : this.props.field.dur.period || 'minute',
+          };
+          this.value.duration = this.props.field.dur.duration;
+        }
+        
+        // set moment
         this.moment = moment;
       }
 
@@ -107,55 +151,130 @@
         e.stopPropagation();
 
         // set value
-        this.value = null;
+        this.value = {};
         this.$('[ref="date"]').value = '';
-
-        // check form
-        if (this.props.form) {
-          // update
-          this.props.dataAction(this.props.field, this.value);
-        }
+        
+        // update
+        this.onChange();
       }
 
       /**
        * on repeat
        */
-      onEnds(v) {
+      onRepeat(e) {
         // set value
-        this.value = {
-          end    : (this.val() || {}).end,
-          ends   : v,
-          start  : this.$('[ref="date"]') && this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null,
-          repeat : (this.val() || {}).repeat,
-        };
-
-        // check form
-        if (this.props.form) {
-          // update
-          this.props.dataAction(this.props.field, this.val());
+        if (this.value instanceof Date) {
+          // objectify value
+          this.value = {
+            date : this.value,
+          };
         }
+
+        // set duration
+        this.value.repeat = $(e.target).is(':checked');
+        
+        // update
+        this.onChange();
       }
 
       /**
        * on repeat
        */
-      onRepeat(v) {
-        console.log(this.val() || {});
+      onType(e, type) {
         // set value
-        this.value = {
-          end    : (this.val() || {}).end,
-          ends   : (this.val() || {}).ends,
-          start  : this.$('[ref="date"]') && this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null,
-          repeat : v,
-        };
-
-        console.log(this.value);
-
-        // check form
-        if (this.props.form) {
-          // update
-          this.props.dataAction(this.props.field, this.val());
+        if (this.value instanceof Date) {
+          // objectify value
+          this.value = {
+            date : this.value,
+          };
         }
+
+        // type
+        if (!this.value[type]) this.value[type] = {};
+
+        // set duration
+        this.value[type].type = $(e.target).val();
+
+        // update
+        this.onChange();
+      }
+
+      /**
+       * on repeat
+       */
+      onAmount(e, type) {
+        // set value
+        if (this.value instanceof Date) {
+          // objectify value
+          this.value = {
+            date : this.value,
+          };
+        }
+
+        // type
+        if (!this.value[type]) this.value[type] = {};
+
+        // set period
+        this.value[type].amount = parseInt(e.target.value);
+
+        // duration
+        if (type === 'dur') {
+          // duration
+          this.value.duration = moment(this.value.date || new Date()).add(this.value.dur.amount, this.value.dur.period || 'minute').toDate().getTime() - (this.value.date || new Date()).getTime();
+        }
+        
+        // update
+        this.onChange();
+      }
+
+      /**
+       * on repeat
+       */
+      onPeriod(v, type) {
+        // set value
+        if (this.value instanceof Date) {
+          // objectify value
+          this.value = {
+            date : this.value,
+          };
+        }
+
+        // type
+        if (!this.value[type]) this.value[type] = {};
+
+        // set period
+        this.value[type].period = v;
+
+        // duration
+        if (type === 'dur') {
+          // duration
+          this.value.duration = moment(this.value.date || new Date()).add(this.value.dur.amount, this.value.dur.period || 'minute').toDate().getTime() - (this.value.date || new Date()).getTime();
+        }
+
+        // update
+        this.onChange();
+      }
+
+      /**
+       * on repeat
+       */
+      onEnds(v, type) {
+        // set value
+        if (this.value instanceof Date) {
+          // objectify value
+          this.value = {
+            date : this.value,
+          };
+        }
+
+        // type
+        if (!this.value[type]) this.value[type] = {};
+
+        // set period
+        this.value[type].ends = v;
+
+        // update
+        this.onChange();
       }
 
       /**
@@ -163,10 +282,7 @@
       *
       * @param {Event} e
       */
-      onChange(e) {
-        // set value
-        this.value = this.val();
-
+      onChange() {
         // check form
         if (this.props.form) {
           // update
@@ -180,19 +296,8 @@
        * @return {*}
        */
       val() {
-        // check value
-        if (this.isRepeat()) {
-          // return repeated
-          return {
-            end    : this.$('[ref="end"]') && this.$('[ref="end"]').value ? new Date(this.$('[ref="end"]').value) : null,
-            ends   : this.value.ends,
-            start  : this.$('[ref="date"]') && this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null,
-            repeat : this.value.repeat,
-          };
-        }
-
-        // return non accumulated value
-        return this.value ? new Date(this.value) : this.$('[ref="date"]').value ? new Date(this.$('[ref="date"]').value) : null;
+        // return value
+        return this.value;
       }
 
       /**
@@ -213,14 +318,49 @@
             previous : 'fa fa-chevron-left',
           }
         });
+
+        // duration
+        let duration = (this.value || {}).duration || 0;
+
+        // set date
+        let start = (this.value || {}).start || null;
+        let until = (this.value || {}).until || null;
+
+        // set end
+        let end = start && new Date(start.getTime() + duration);
+
+        // set values
+        this.value.end = end;
+        this.value.start = start;
+        this.value.until = until;
         
         // add datetime picker
         if (this.$('[ref="end"]')) $(this.$('[ref="end"]')).datetimepicker({
           format      : this.getFormat(),
-          defaultDate : (this.val() || {}).end || new Date(),
+          defaultDate : until,
+        }).on('dp.change', (e) => {
+          // set ends
+          until = e.date && e.date.toDate();
+
+          // set value
+          this.value.until = until;
+
+          // set value
+          $(this.$('[type="hidden"]')).val(JSON.stringify(this.value));
+
+          // on change
+          this.onChange(e);
+        });
+        
+        // add datetime picker
+        if (this.$('[ref="duration"]')) $(this.$('[ref="duration"]')).datetimepicker({
+          format      : this.getFormat(),
+          defaultDate : end || start || new Date(),
         }).on('dp.change', (e) => {
           // set value
           this.value.end = e.date && e.date.toDate();
+          this.value.start = start;
+          this.value.duration = (e.date && e.date.toDate()).getTime() - start.getTime();
 
           // set value
           $(this.$('[type="hidden"]')).val(JSON.stringify(this.value));
@@ -232,13 +372,17 @@
         // add datetime picker
         $(this.$('[ref="date"]')).datetimepicker({
           format      : this.getFormat(),
-          defaultDate : (this.val() || {}).start || this.val(),
+          defaultDate : start || new Date(),
         }).on('dp.change', (e) => {
+          // get date
+          start = e.date && e.date.toDate();
+          end = new Date(start.getTime() + duration);
+
           // set value
-          if (this.isRepeat()) {
-            this.value.start = e.date && e.date.toDate();
+          if (this.value instanceof Date) {
+            this.value = start;
           } else {
-            this.value = e.date && e.date.toDate();
+            this.value.start = start;
           }
 
           // set value
@@ -250,49 +394,36 @@
       }
 
       /**
+       * get value
+       */
+      getPeriod(type) {
+        // durs
+        const durs = ['Day', 'Week', 'Month', 'Year'];
+
+        // return triggers
+        return (type === 'dur' ? ['Minute', 'Hour', ...durs] : durs).map((repeat) => {
+          // return object
+          return {
+            name     : `${repeat}(s)`,
+            value    : repeat.toLowerCase(),
+            selected : this.value && this.value[type] && this.value[type].period === repeat.toLowerCase(),
+          };
+        });
+      }
+
+      /**
        * get ends
        */
-      getEnds() {
+      getEnds(type) {
         // return triggers
         return ['Forever', 'Until'].map((ends) => {
           // return object
           return {
             name     : ends,
             value    : ends.toLowerCase(),
-            selected : (this.val() || {}).ends === ends.toLowerCase(),
+            selected : this.value && this.value[type] && this.value[type].ends === ends.toLowerCase(),
           };
         });
-      }
-
-      /**
-       * get value
-       */
-      getRepeat() {
-        // return triggers
-        return ['Day', 'Week', 'Month', 'Year'].map((repeat) => {
-          // return object
-          return {
-            name     : repeat,
-            value    : repeat.toLowerCase(),
-            selected : (this.val() || {}).repeat === repeat.toLowerCase(),
-          };
-        });
-      }
-
-      /**
-       * repeat
-       */
-      isEnds() {
-        // repeat date
-        return (this.value || {}).ends === 'until';
-      }
-
-      /**
-       * repeat
-       */
-      isRepeat() {
-        // repeat date
-        return (this.value || {}).start && ((this.value || {}).repeat || (this.value || {}).ends);
       }
 
       /**
@@ -301,6 +432,20 @@
       getFormat() {
         // get format
         return this.props.field.format || 'MMMM DD YYYY, LT';
+      }
+
+      /**
+       * get props
+       */
+      getProps(obj) {
+        // return get props
+        return Object.keys(obj).reduce((accum, key) => {
+          // set accum
+          if (obj[key]) accum[key] = true;
+
+          // return accum
+          return accum;
+        }, {});
       }
     }
 

@@ -1,14 +1,15 @@
 <field-date-display>
   <div>
-    <field-display { ...props } />
 
     <div class="mb-3">
       <label class="form-label">
-        Type
+        Preset
       </label>
-      <select class="form-control" onchange={ (e) => onFormat(e) }>
-        <option value="MMMM DD YYYY, LT" selected={ getFormat() === 'MMMM DD YYYY, LT' }>Date + Time</option>
-        <option value="MMMM DD YYYY" selected={ getFormat() === 'MMMM DD YYYY' }>Date</option>
+      <select class="form-control" onchange={ (e) => onPreset(e) }>
+        <option value="datetime" selected={ props.field.preset === 'datetime' }>Date + Time</option>
+        <option value="date" selected={ props.field.preset === 'date' }>Date</option>
+        <option value="time" selected={ props.field.preset === 'time' }>Time</option>
+        <option value="calendar" selected={ props.field.preset === 'calendar' }>Calendar Event</option>
       </select>
     </div>
     <div class="mb-3">
@@ -17,11 +18,117 @@
       </label>
       <input type="text" ref="format" class="form-control" onchange={ (e) => onFormat(e) } value={ getFormat() } />
     </div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" id="can-duration" type="checkbox" onchange={ (e) => onSwitch(e, 'duration') } { ...getProps({ checked : props.field.duration }) }>
+      <label class="form-check-label" for="can-duration">
+        Allow Duration
+      </label>
+    </div>
+    <div if={ props.field.duration } class="mb-3">
+      <label class="form-label">
+        Default Duration
+      </label>
+      <div class="d-flex flex-row">
+        <input class="flex-1 form-control" placeholder="Duration Amount" type="number" value={ props.field && props.field.dur && props.field.dur.amount } onchange={ (e) => onAmount(e) } />
+        <eden-select class="ml-2 flex-1" on-change={ (e, r) => onPeriod(r) } placeholder="Select Period" data={ getPeriod() } />
+      </div>
+    </div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" id="can-repeat" type="checkbox" onchange={ (e) => onSwitch(e, 'repeat') } { ...getProps({ checked : props.field.repeat }) }>
+      <label class="form-check-label" for="can-repeat">
+        Allow Repeat
+      </label>
+    </div>
+
+    <field-display { ...props } />
   </div>
 
   <script>
 
     export default class FieldDateDisplay {
+      
+      /**
+       * on date only
+      *
+      * @param {Event} e
+       */
+      onPreset(e) {
+        // format
+        const preset = $(e.target).val();
+
+        // formats
+        const formats = {
+          time     : 'LT',
+          date     : 'MMMM DD YYYY',
+          calendar : 'MMMM DD YYYY, LT',
+          datetime : 'MMMM DD YYYY, LT',
+        };
+
+        // set value
+        this.$('[ref="format"]').value = formats[preset];
+  
+        // data
+        const data = {
+          preset,
+          format : formats[preset],
+        };
+
+        // check preset
+        if (preset === 'calendar') {
+          data.repeat = true;
+          data.duration = true;
+
+          // prop
+          $(this.$('[id="can-repeat"]')).prop('checked', data.repeat);
+          $(this.$('[id="can-duration"]')).prop('checked', data.duration);
+        } else if (this.props.field.preset === 'calendar') {
+          data.repeat = false;
+          data.duration = false;
+
+          // prop
+          $(this.$('[id="can-repeat"]')).prop('checked', data.repeat);
+          $(this.$('[id="can-duration"]')).prop('checked', data.duration);
+        }
+
+        // run opts
+        this.props.set(data);
+      }
+
+      /**
+       * on switch
+       */
+      onSwitch(e, name) {
+        // set
+        this.props.set(name, jQuery(e.target).is(':checked'));
+      }
+
+      /**
+       * on amount
+       */
+      onAmount(e) {
+        // set duration
+        this.props.set({
+          dur : {
+            amount   : parseInt(e.target.value),
+            period   : this.props.field.dur && this.props.field.dur.period,
+            duration : moment().add(parseInt(e.target.value), (this.props.field.dur && this.props.field.dur.period) || 'minute').toDate().getTime() - new Date().getTime(),
+          },
+        });
+      }
+
+      /**
+       * on amount
+       */
+      onPeriod(v) {
+        // set duration
+        this.props.set({
+          dur : {
+            period   : v,
+            amount   : this.props.field.dur && this.props.field.dur.amount,
+            duration : moment().add((this.props.field.dur && this.props.field.dur.amount) || 1, v).toDate().getTime() - new Date().getTime(),
+          },
+        });
+      }
       
       /**
        * on date only
@@ -42,6 +149,35 @@
       getFormat() {
         // get format
         return this.props.field.format || 'MMMM DD YYYY, LT';
+      }
+
+      /**
+       * get value
+       */
+      getPeriod() {
+        // return triggers
+        return ['Minute', 'Hour', 'Day', 'Week', 'Month', 'Year'].map((repeat) => {
+          // return object
+          return {
+            name     : `${repeat}(s)`,
+            value    : repeat.toLowerCase(),
+            selected : (this.props.field && this.props.field.dur && this.props.field.dur.period) === repeat.toLowerCase(),
+          };
+        });
+      }
+
+      /**
+       * get props
+       */
+      getProps(obj) {
+        // return get props
+        return Object.keys(obj).reduce((accum, key) => {
+          // set accum
+          if (obj[key]) accum[key] = true;
+
+          // return accum
+          return accum;
+        }, {});
       }
     }
   </script>

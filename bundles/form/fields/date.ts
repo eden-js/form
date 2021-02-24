@@ -21,6 +21,33 @@ export default class DateField extends Field {
     // return data
     return {
       tabs : ['Display', 'Validate'],
+      subs : [
+        {
+          key   : 'duration',
+          type  : 'number',
+          title : 'duration',
+        },
+        {
+          key   : 'start',
+          type  : 'date',
+          title : 'Start',
+        },
+        {
+          key   : 'end',
+          type  : 'date',
+          title : 'End',
+        },
+        {
+          key   : 'until',
+          type  : 'date',
+          title : 'Until',
+        },
+        {
+          key   : 'repeat',
+          type  : 'boolean',
+          title : 'Repeat',
+        },
+      ],
     };
   }
 
@@ -29,7 +56,7 @@ export default class DateField extends Field {
    */
   get title() {
     // return field type label
-    return 'Date';
+    return 'Date / Time';
   }
 
   /**
@@ -45,7 +72,7 @@ export default class DateField extends Field {
    */
   get description() {
     // return description string
-    return 'Date Field';
+    return 'Date Time Field';
   }
 
   /**
@@ -59,30 +86,53 @@ export default class DateField extends Field {
     // check value
     if (!value) return;
 
-    // get value
-    value = JSON.parse(value);
+    // try/catch
+    try {
+      // get value
+      value = JSON.parse(value);
+    } catch (e) {}
+
+    // check value is date
+    const checkDate = new Date(value);
+
+    // return value
+    if (!isNaN(checkDate.getTime())) {
+      // return parsed
+      return {
+        start : checkDate,
+      };
+    }
 
     // try catch
     try {
-      // check date
-      if (value && value.repeat) {
-        // start/end
-        value.end = value.end && new Date(value.end);
-        value.start = value.start && new Date(value.start);
+      // get values
+      let { rep = {}, dur = {}, end, start, duration, until, repeat = false } = value;
 
-        // return value
-        return value;
+      // parse dates
+      end = !end || isNaN(new Date(end).getTime()) ? null : new Date(end);
+      start = !start || isNaN(new Date(start).getTime()) ? null : new Date(start);
+      until = !until || isNaN(new Date(until).getTime()) ? null : new Date(until);
+
+      // duration
+      if (start && duration && !end) {
+        // set end
+        end = new Date(start.getTime() + duration);
+      }
+      if (start && !duration && end) {
+        // get duration
+        duration = end.getTime() - start.getTime();
       }
 
-      // let date
-      let date = new Date(value);
-
-      // check isNan
-      // eslint-disable-next-line no-restricted-globals
-      if (isNaN(date.getTime())) date = null;
-
-      // return date
-      return date;
+      // return parsed
+      return {
+        rep,
+        dur,
+        end,
+        start,
+        until,
+        repeat,
+        duration,
+      };
     } catch (e) {
       // return null
       return old;

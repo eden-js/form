@@ -1,23 +1,51 @@
 <field-date-view>
-  <div>{ getValue(props) }</div>
+  <div>
+    <raw data={ { html : getValue(props) } } />
+    <i if={ props.value.repeat } data-toggle="tooltip" title={ getRepeat(props) } class="fa fa-fw fa-redo ml-2" />
+  </div>
 
   <script>
     // import moment
     import moment from 'moment';
+    import pretty from 'pretty-ms';
 
 		// export default
     export default {
       components : {
       },
 
+      getRepeat(props) {
+        return `Every ${((props.value.rep || {}).amount || 1) > 1 ? ` ${(props.value.rep || {}).amount}` : ''}${(props.value.rep || {}).period || 'minute'}${((props.value.rep || {}).amount || 1) > 1 ? 's' : ''}`;
+      },
+
       getValue(props) {
-        // repeated
-        if ((props.value || {}).repeat || (props.value || {}).ends) {
-          return `From: ${moment(props.value.start).format(this.props.field.format || 'MMMM DD YYYY, LT')}, Every: ${props.value.repeat}${props.value.ends ? ` Until: ${moment(props.value.end).format(this.props.field.format || 'MMMM DD YYYY, LT')}` : ''}`;
+        // get date
+        const check = new Date(props.value);
+
+        // if date
+        if (!isNaN(check.getTime())) {
+          // return date
+          return moment(props.value).format(this.props.field.format || 'MMMM DD YYYY, LT');
         }
-        
+
         // check value
-        return props.value ? moment(props.value).format(this.props.field.format || 'MMMM DD YYYY, LT') : '';
+        let { end, start, duration, until, repeat = false } = props.value;
+
+        // parse dates
+        start = isNaN(new Date(start).getTime()) ? null : new Date(start);
+        until = isNaN(new Date(until).getTime()) ? null : new Date(until);
+
+        // str
+        let str = `<b>${moment(props.value.start).format(this.props.field.format || 'MMMM DD YYYY, LT')}</b>`;
+
+        // duration
+        if (duration) {
+          // str
+          str = `${str} lasting <b>${pretty(duration)}</b>`;
+        }
+
+        // return string
+        return str;
       },
     }
   </script>
