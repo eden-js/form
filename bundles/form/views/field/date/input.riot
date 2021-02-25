@@ -69,6 +69,9 @@
     import Base from '../../js/base';
     import moment from 'moment';
 
+    // global let
+    let end, start, until, duration;
+
     // export default
     export default class FieldDateInput extends Base {
       /**
@@ -320,14 +323,14 @@
         });
 
         // duration
-        let duration = (this.value || {}).duration || 0;
+        duration = (this.value || {}).duration || 0;
 
         // set date
-        let start = (this.value || {}).start || null;
-        let until = (this.value || {}).until || null;
+        start = (this.value || {}).start || null;
+        until = (this.value || {}).until || null;
 
         // set end
-        let end = start && new Date(start.getTime() + duration);
+        end = start && new Date(start.getTime() + duration);
 
         // set values
         this.value.end = end;
@@ -335,7 +338,7 @@
         this.value.until = until;
         
         // add datetime picker
-        if (this.$('[ref="end"]')) $(this.$('[ref="end"]')).datetimepicker({
+        if (this.$('[ref="end"]') && !$(this.$('[ref="end"]')).data().DateTimePicker) $(this.$('[ref="end"]')).datetimepicker({
           format      : this.getFormat(),
           defaultDate : until,
         }).on('dp.change', (e) => {
@@ -353,7 +356,7 @@
         });
         
         // add datetime picker
-        if (this.$('[ref="duration"]')) $(this.$('[ref="duration"]')).datetimepicker({
+        if (this.$('[ref="duration"]') && !$(this.$('[ref="duration"]')).data().DateTimePicker) $(this.$('[ref="duration"]')).datetimepicker({
           format      : this.getFormat(),
           defaultDate : end || start || new Date(),
         }).on('dp.change', (e) => {
@@ -370,7 +373,7 @@
         });
         
         // add datetime picker
-        $(this.$('[ref="date"]')).datetimepicker({
+        if (!$(this.$('[ref="date"]')).data().DateTimePicker) $(this.$('[ref="date"]')).datetimepicker({
           format      : this.getFormat(),
           defaultDate : start || new Date(),
         }).on('dp.change', (e) => {
