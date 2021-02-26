@@ -918,23 +918,26 @@
               const parent = $(target).closest('[data-parent]').length ? $(target).closest('[data-parent]').attr('data-parent') : 'root';
 
               // check position
-              if (el.getAttribute('id') && $(target).closest('.eden-blocks-sidebar').length) {
-                // move back
-                if (oldIndex === 0) {
-                  // prepend to
-                  $(el).prependTo($(source));
-                } else {
-                  // find previous
-                  $(el).after(oldPrev);
-                }
-                
-                // get field
-                const field = this.getFields().find((fi) => fi.uuid === el.getAttribute('id'));
+              if ($(target).closest('.eden-blocks-sidebar').length) {
+                // has idd
+                if (el.getAttribute('id')) {
+                  // move back
+                  if (oldIndex === 0) {
+                    // prepend to
+                    $(el).prependTo($(source));
+                  } else {
+                    // find previous
+                    $(el).after(oldPrev);
+                  }
+                  
+                  // get field
+                  const field = this.getFields().find((fi) => fi.uuid === el.getAttribute('id'));
 
-                // check
-                if (field.uuid) {
-                  // on remove
-                  await this.onRemoveField(field, {});
+                  // check
+                  if (field.uuid) {
+                    // on remove
+                    await this.onRemoveField(field, {});
+                  }
                 }
 
                 // return
