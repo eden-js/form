@@ -26,6 +26,33 @@ export default class PhoneField extends Field {
     // return data
     return {
       tabs : ['Display', 'Validate'],
+      subs : [
+        {
+          key   : 'number',
+          type  : 'number',
+          title : 'Number',
+        },
+        {
+          key   : 'code',
+          type  : 'number',
+          title : 'Code',
+        },
+        {
+          key   : 'valid',
+          type  : 'boolean',
+          title : 'Valid',
+        },
+        {
+          key   : 'carrier',
+          type  : 'text',
+          title : 'Carrier',
+        },
+        {
+          key   : 'location',
+          type  : 'text',
+          title : 'Location',
+        },
+      ],
     };
   }
 

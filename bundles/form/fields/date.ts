@@ -25,7 +25,7 @@ export default class DateField extends Field {
         {
           key   : 'duration',
           type  : 'number',
-          title : 'duration',
+          title : 'Duration',
         },
         {
           key   : 'start',

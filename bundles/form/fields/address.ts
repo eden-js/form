@@ -25,6 +25,23 @@ export default class AddressField extends Field {
     // return data
     return {
       tabs : ['Display', 'Validate'],
+      subs : [
+        {
+          key   : 'formatted',
+          type  : 'text',
+          title : 'Formatted',
+        },
+        {
+          key   : 'geo.lat',
+          type  : 'number',
+          title : 'Latitude',
+        },
+        {
+          key   : 'geo.lng',
+          type  : 'number',
+          title : 'Longitude',
+        },
+      ],
     };
   }
 
