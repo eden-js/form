@@ -96,11 +96,9 @@ export default class DateField extends Field {
     const checkDate = new Date(value);
 
     // return value
-    if (!isNaN(checkDate.getTime())) {
-      // return parsed
-      return {
-        start : checkDate,
-      };
+    if (checkDate.getTime() && !isNaN(checkDate.getTime())) {
+      // return no date
+      return {};
     }
 
     // try catch
