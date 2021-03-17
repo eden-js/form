@@ -41,7 +41,7 @@
           this.default = true;
           
           // set default
-          this.$('input').value = this.props.default;
+          $(this.$('textarea')).val(this.props.default);
         }
       }
 
@@ -69,7 +69,7 @@
       */
       val() {
         // return non accumulated value
-        return this.$('input').value;
+        return $(this.$('textarea')).val();
       }
     }
 
