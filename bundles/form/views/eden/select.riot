@@ -1,7 +1,7 @@
 <eden-select>
   <div class="dropdown">
     <input type="hidden" class="d-none" each={ (item, i) in selected } name={ props.multiple ? `${props.name}[${i}]` : props.name } value={ item.value } />
-    <button if={ props.type !== 'open' } class="form-select text-overflow text-left" onclick={ (e) => onShow(e) }>
+    <button if={ props.type !== 'open' } class={ props.type === 'button' ? `btn btn-${props.btn || 'primary'}` : `form-select text-overflow text-left` } onclick={ (e) => onShow(e) }>
       <span each={ (item, i) in selected } class="mr-2 d-inline-flex align-items-center">
         <span if={ item.color } class={ `badge bg-${item.color} mr-2` }>
           &nbsp;
@@ -14,6 +14,9 @@
       </span>
       <span if={ props.placeholder && !selected.length }>
         { props.placeholder }
+      </span>
+      <span if={ props.type === 'button' } class="ml-2">
+        <i class="fa fa-chevron-down" />
       </span>
     </button>
     <div class="dropdown-menu">
@@ -188,7 +191,7 @@
         // on change
         if (this.props.onChange) {
           // value
-          this.props.onChange(e, this.val());
+          this.props.onChange(e, this.val(), item.data);
         }
       }
 
