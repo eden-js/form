@@ -5,7 +5,7 @@
         <i>Set Label</i>
       </a>
     </label>
-    <validate type="tel" help={ props.field.help } country={ props.field.country } read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } placeholder={ props.field.placeholder } data-value={ value && value.number ? value.number : null } on-change={ props.onChange } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
+    <validate type="tel" help={ props.field.help } country={ props.field.country } read-only={ !props.shouldRead(props.field) } group-class={ props.field.group || 'mb-3' } name={ props.getName(props.field.uuid) } label={ props.field.label } placeholder={ props.field.placeholder } data-value={ value && value.number ? value.number : null } required={ props.field.required } min-length={ get('field.validateLength.min', 0) } max-length={ get('field.validateLength.max', 1000) } on-change={ onChange }>
       <span slot="append" class="input-group-text" data-toggle="tooltip" title="Validated" if={ value && value.valid }>
         <i class="fa fa-check" />
       </span>
@@ -45,7 +45,7 @@
           this.default = true;
           
           // set default
-          this.$('input').value = this.props.default;
+          this.$('input[type="hidden"]').value = this.props.default;
         }
       }
 
@@ -59,7 +59,7 @@
         this.value = {
           ...(this.value),
 
-          number : this.$('input').value,
+          number : this.$('input[type="hidden"]').value,
         };
         this.default = false;
 

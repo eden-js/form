@@ -92,7 +92,7 @@ export default class PhoneField extends Field {
     if (!value) return value;
 
     // parsed
-    const parsed = typeof value === 'string' ? parsePhoneNumber(value, field.country || 'US') || {} : value;
+    const parsed = typeof value === 'string' ? parsePhoneNumber(value, field.country || 'US') : parsePhoneNumber(value.number);
 
     // check value
     const data = typeof value === 'string' ? {
