@@ -359,7 +359,7 @@
        */
       getData() {
         // get data
-        this.data = this.props.data || this.form.get('data') || {};
+        this.data = this.props.data || (this.form && this.form.get ? this.form.get('data') : {}) || {};
 
         // return data
         return this.data;
