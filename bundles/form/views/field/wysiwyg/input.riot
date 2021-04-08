@@ -1,11 +1,14 @@
 <field-wysiwyg-input>
-  <div>
+  <div if={ props.field.input !== 'display' }>
     <label class="form-label" if={ !props.field.label } for={ props.getId(props.field.uuid) }>
       <a href="#!" onclick={ (e) => props.updateAction(e, props.field) }>
         <i>Set Label</i>
       </a>
     </label>
     <editor ref={ ref('wysiwyg') } show-toolbar={ true } name={ props.getName(props.field.uuid) } label={ props.field.label } placeholder={ props.field.placeholder } content={ get(`value.${eden.get('i18n.lng')}`, get('value', '')) } required={ props.field.required } on-change={ onChange } />
+  </div>
+  <div if={ props.field.input === 'display' } class={ !props.field.display || !props.field.display.length ? 'pb-4' : 'mb-3' }>
+    <editor-render content={ props.field.display } />
   </div>
   
   <script>

@@ -1,3 +1,74 @@
 <field-wysiwyg-display>
-  <field-display { ...props } />
+  <div>
+    <div class="mb-3">
+      <label class="form-label">
+        WYSIWYG Display
+      </label>
+      <eden-select class="ml-2 flex-1" on-change={ (e, r) => onInput(r) } placeholder="WYSIWYG Display" data={ getInput() } />
+    </div>
+    <div if={ props.field.input === 'display' }>
+      <label class="form-label">
+        Field Display
+      </label>
+      <editor ref={ ref('wysiwyg') } show-toolbar={ true } name="display" placeholder="Field Display" content={ props.field.display } on-change={ (e) => onChange(e) } />
+    </div>
+
+    <field-display { ...props } />
+  </div>
+
+  <script>
+    // import base
+    import Base from '../../js/base';
+
+    // field wysiwyg
+    export default class FieldWysiwygDisplay extends Base {
+    
+      /**
+      * return value
+      *
+      * @return {*}
+      */
+      val() {
+        // return non accumulated value
+        return this.refs.wysiwyg ? this.refs.wysiwyg.val() : $('textarea', this.root).val();
+      }
+
+      /**
+       * on amount
+       */
+      onInput(v) {
+        // set duration
+        this.props.set('input', v);
+      }
+
+      /**
+       * get value
+       */
+      getInput() {
+        // return triggers
+        return ['Display', 'Input'].map((display) => {
+          console.log(this.props.field.input);
+          // return object
+          return {
+            name     : `WYSIWYG ${display}`,
+            value    : display.toLowerCase(),
+            selected : (this.props.field.input || 'input') === display.toLowerCase(),
+          };
+        });
+      }
+
+      /**
+      * on change
+      *
+      * @param {Event} e
+      */
+      onChange(e) {
+        // set value
+        const val = (this.val() || '').replace('<p><br></p>', '').trim();
+
+        // check form
+        this.props.set('display', val);
+      }
+    }
+  </script>
 </field-wysiwyg-display>
