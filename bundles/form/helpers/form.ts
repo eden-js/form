@@ -99,7 +99,7 @@ class FormHelper extends Helper {
    *
    * @return {*}
    */
-  async sanitise({ req, fields, children, nonce, allowEmpty, trail = [] }, form, current) {
+  async sanitise({ req, fields, children, nonce, allowEmpty, trail = [], cache = {} }, form, current) {
     // data
     const result = {};
     
@@ -120,6 +120,7 @@ class FormHelper extends Helper {
           req,
           form,
           nonce,
+          cache,
           trail,
           current,
           children,
