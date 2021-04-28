@@ -1,0 +1,36 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "17:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: libphonenumber-js
+    versions:
+    - 1.9.10
+    - 1.9.11
+    - 1.9.12
+    - 1.9.13
+    - 1.9.14
+    - 1.9.15
+    - 1.9.8
+    - 1.9.9
+  - dependency-name: highlight.js
+    versions:
+    - 10.5.0
+    - 10.6.0
+    - 10.7.1
+  - dependency-name: marked
+    versions:
+    - 1.2.8
+    - 1.2.9
+    - 2.0.0
+    - 2.0.1
+  - dependency-name: moment-timezone
+    versions:
+    - 0.5.33
+  - dependency-name: font-awesome-filetypes
+    versions:
+    - 2.1.0
