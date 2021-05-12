@@ -21,6 +21,7 @@
       getValue(props) {
         // check value
         if (!props.value) return '';
+        if (!props.value.start) return '';
 
         // get date
         const check = new Date(props.value);
