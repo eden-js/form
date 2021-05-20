@@ -57,6 +57,6 @@ export default class BooleanField extends Field {
    */
   async submit({ req, old }, field, value) {
     // return database value
-    return value === true || value === 'true';
+    return value === true || (typeof value === 'string' && value.toLowerCase() === 'true');
   }
 }
