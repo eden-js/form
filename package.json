@@ -27,7 +27,7 @@
     "is-url": "^1.2.4",
     "libphonenumber-js": "^1.9.17",
     "moment-timezone": "^0.5.33",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "query": "github:protobi/query"
   }
 }
